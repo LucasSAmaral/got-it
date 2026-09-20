@@ -53,7 +53,7 @@ export function CollectionPage() {
 
       <Stack spacing={1.5}>
         {data?.map((item) => (
-          <CollectionItemCard key={item.copy_id} item={item} />
+          <CollectionItemCard key={item.copy_id} item={item} showDelete />
         ))}
       </Stack>
 

@@ -47,3 +47,8 @@ export async function fetchCollection(query: string): Promise<CollectionItem[]> 
       acquired_at: row.acquired_at,
     }))
 }
+
+export async function deleteCopy(copyId: string): Promise<void> {
+  const { error } = await supabase.from('copies').delete().eq('id', copyId)
+  if (error) throw error
+}

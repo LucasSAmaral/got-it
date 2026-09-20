@@ -1,6 +1,21 @@
-import { Box, Card, Stack, Typography } from '@mui/material'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlineOutlined'
+import {
+  Box,
+  Button,
+  Card,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  Stack,
+  Typography,
+} from '@mui/material'
+import { useState } from 'react'
 import { tokens } from '../../theme'
 import type { CollectionItem } from '../../types/catalog'
+import { useDeleteCopy } from './useDeleteCopy'
 
 function initials(title: string) {
   return title
@@ -11,7 +26,10 @@ function initials(title: string) {
     .join('')
 }
 
-export function CollectionItemCard({ item }: { item: CollectionItem }) {
+export function CollectionItemCard({ item, showDelete = false }: { item: CollectionItem; showDelete?: boolean }) {
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const deleteCopy = useDeleteCopy()
+
   return (
     <Card variant="outlined" sx={{ display: 'flex', gap: 1.5, alignItems: 'center', p: 1.5, borderColor: 'divider' }}>
       <Box
@@ -49,6 +67,42 @@ export function CollectionItemCard({ item }: { item: CollectionItem }) {
           </Typography>
         )}
       </Stack>
+
+      {showDelete && (
+        <>
+          <IconButton
+            aria-label="Remover exemplar da coleção"
+            size="small"
+            onClick={() => setConfirmOpen(true)}
+            sx={{ alignSelf: 'flex-start', color: 'text.secondary' }}
+          >
+            <DeleteOutlineIcon fontSize="small" />
+          </IconButton>
+
+          <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+            <DialogTitle>Remover exemplar?</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                "{item.title}" sai da sua coleção. A edição continua no catálogo pra outras pessoas.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setConfirmOpen(false)} color="inherit">
+                Cancelar
+              </Button>
+              <Button
+                color="error"
+                disabled={deleteCopy.isPending}
+                onClick={() => {
+                  deleteCopy.mutate(item.copy_id, { onSuccess: () => setConfirmOpen(false) })
+                }}
+              >
+                {deleteCopy.isPending ? 'Removendo…' : 'Remover'}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+      )}
     </Card>
   )
 }
