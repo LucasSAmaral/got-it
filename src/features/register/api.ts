@@ -16,6 +16,21 @@ export interface NewEditionInput {
   volume: string
   format: string
   year: string
+  coverUrl: string
+}
+
+export async function uploadCoverImage(file: File, isbn13: string): Promise<string> {
+  const extension = file.name.split('.').pop() || 'jpg'
+  const path = `${isbn13}-${Date.now()}.${extension}`
+
+  const { error } = await supabase.storage.from('covers').upload(path, file, {
+    cacheControl: '3600',
+    upsert: false,
+  })
+  if (error) throw error
+
+  const { data } = supabase.storage.from('covers').getPublicUrl(path)
+  return data.publicUrl
 }
 
 function toCopyRow(editionId: string, form: CopyFormInput) {
@@ -57,6 +72,7 @@ export async function createEditionAndCopy(edition: NewEditionInput, form: CopyF
       volume: edition.volume || null,
       format: edition.format || null,
       year: edition.year ? Number(edition.year) : null,
+      cover_url: edition.coverUrl || null,
     })
     .select('id')
     .single()

@@ -1,4 +1,6 @@
+import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import CloseIcon from '@mui/icons-material/Close'
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined'
 import {
   Alert,
@@ -13,7 +15,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { isValidIsbn, normalizeIsbn, toIsbn13 } from '../../lib/isbn'
 import { tokens } from '../../theme'
@@ -23,6 +25,7 @@ import {
   createEditionAndCopy,
   fetchEditionByIsbn,
   fetchMyCopyCount,
+  uploadCoverImage,
   type CopyFormInput,
   type NewEditionInput,
 } from './api'
@@ -41,6 +44,19 @@ export function RegisterByIsbnPage() {
 
   const [copyForm, setCopyForm] = useState<CopyFormInput>({ condition: '', acquiredAt: '', pricePaid: '' })
   const [manualEdition, setManualEdition] = useState({ title: '', publisher: '', volume: '', format: '', year: '' })
+  const [coverFile, setCoverFile] = useState<File | null>(null)
+  const [coverPreview, setCoverPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!coverFile) {
+      setCoverPreview(null)
+      return
+    }
+    const url = URL.createObjectURL(coverFile)
+    setCoverPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [coverFile])
 
   const normalized = normalizeIsbn(isbnInput)
   const isbnIsValid = normalized.length > 0 && isValidIsbn(normalized)
@@ -87,8 +103,9 @@ export function RegisterByIsbnPage() {
     if (!isbn13) return
     setSubmitting(true)
     setSubmitError('')
-    const newEdition: NewEditionInput = { isbn13, ...manualEdition }
     try {
+      const coverUrl = coverFile ? await uploadCoverImage(coverFile, isbn13) : ''
+      const newEdition: NewEditionInput = { isbn13, coverUrl, ...manualEdition }
       await createEditionAndCopy(newEdition, copyForm)
       navigate('/')
     } catch (error) {
@@ -261,6 +278,52 @@ export function RegisterByIsbnPage() {
                   value={manualEdition.year}
                   onChange={(event) => setManualEdition({ ...manualEdition, year: event.target.value })}
                 />
+              </Stack>
+
+              <Stack spacing={0.75}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                  Foto da capa (opcional)
+                </Typography>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(event) => setCoverFile(event.target.files?.[0] ?? null)}
+                />
+                {coverPreview ? (
+                  <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+                    <Box
+                      component="img"
+                      src={coverPreview}
+                      alt="Prévia da capa"
+                      sx={{ width: 64, height: 88, objectFit: 'cover', borderRadius: `${tokens.radius.sm}px`, border: 1, borderColor: 'divider' }}
+                    />
+                    <Button
+                      type="button"
+                      size="small"
+                      color="inherit"
+                      startIcon={<CloseIcon fontSize="small" />}
+                      onClick={() => {
+                        setCoverFile(null)
+                        if (fileInputRef.current) fileInputRef.current.value = ''
+                      }}
+                    >
+                      Remover
+                    </Button>
+                  </Stack>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    color="inherit"
+                    startIcon={<AddPhotoAlternateOutlinedIcon />}
+                    onClick={() => fileInputRef.current?.click()}
+                    sx={{ alignSelf: 'flex-start' }}
+                  >
+                    Adicionar foto da capa
+                  </Button>
+                )}
               </Stack>
 
               <Typography variant="h4" sx={{ mt: 1 }}>

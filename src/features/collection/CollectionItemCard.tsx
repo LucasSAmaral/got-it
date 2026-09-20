@@ -44,11 +44,16 @@ export function CollectionItemCard({ item, showDelete = false }: { item: Collect
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          overflow: 'hidden',
         }}
       >
-        <Typography variant="h4" color="text.secondary" sx={{ fontSize: 16 }}>
-          {initials(item.title)}
-        </Typography>
+        {item.cover_url ? (
+          <Box component="img" src={item.cover_url} alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <Typography variant="h4" color="text.secondary" sx={{ fontSize: 16 }}>
+            {initials(item.title)}
+          </Typography>
+        )}
       </Box>
       <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
         <Typography variant="h4" noWrap>
