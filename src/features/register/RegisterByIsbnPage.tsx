@@ -28,6 +28,7 @@ import {
 } from './api'
 
 const CONDITIONS = ['Ótimo', 'Bom', 'Regular']
+const FORMATS = ['Banca', 'Encadernado', 'Tankôbon', 'Especial']
 
 export function RegisterByIsbnPage() {
   const [searchParams] = useSearchParams()
@@ -241,12 +242,18 @@ export function RegisterByIsbnPage() {
 
               <Stack direction="row" sx={{ display: 'flex', gap: 2 }}>
                 <TextField
+                  select
                   label="Formato"
                   fullWidth
-                  placeholder="Ex.: Banca"
                   value={manualEdition.format}
                   onChange={(event) => setManualEdition({ ...manualEdition, format: event.target.value })}
-                />
+                >
+                  {FORMATS.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
                 <TextField
                   label="Ano"
                   fullWidth
