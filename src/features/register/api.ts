@@ -1,3 +1,4 @@
+import { shrinkCover } from '../../lib/image'
 import { supabase } from '../../lib/supabase'
 import type { Edition } from '../../types/catalog'
 
@@ -20,10 +21,11 @@ export interface NewEditionInput {
 }
 
 export async function uploadCoverImage(file: File, isbn13: string): Promise<string> {
-  const extension = file.name.split('.').pop() || 'jpg'
-  const path = `${isbn13}-${Date.now()}.${extension}`
+  const cover = await shrinkCover(file)
+  const path = `${isbn13}-${Date.now()}.jpg`
 
-  const { error } = await supabase.storage.from('covers').upload(path, file, {
+  const { error } = await supabase.storage.from('covers').upload(path, cover, {
+    contentType: 'image/jpeg',
     cacheControl: '3600',
     upsert: false,
   })
