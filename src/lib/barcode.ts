@@ -55,3 +55,26 @@ export function describeScan(result: AcceptedScan): string {
       return 'Código lido'
   }
 }
+
+/**
+ * Reflexo e curvatura do plástico às vezes produzem um código errado que passa no dígito verificador.
+ * Um erro assim raramente se repete, então só aceitamos um código lido `required` vezes seguidas,
+ * sem outro código no meio e com no máximo `maxGapMs` entre uma leitura e a próxima.
+ * Frames sem leitura não contam: não zeram nem somam.
+ */
+export function createScanConfirmer(required = 2, maxGapMs = 2000) {
+  let lastCode = ''
+  let count = 0
+  let lastReadAt = 0
+
+  return (code: string, now = Date.now()): boolean => {
+    if (code === lastCode && now - lastReadAt <= maxGapMs) {
+      count += 1
+    } else {
+      lastCode = code
+      count = 1
+    }
+    lastReadAt = now
+    return count >= required
+  }
+}

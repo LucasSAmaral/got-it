@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { describeScan, interpretBarcode } from './barcode'
+import { createScanConfirmer, describeScan, interpretBarcode } from './barcode'
 
 describe('interpretBarcode', () => {
   it('aceita ISBN-13 lido da capa', () => {
@@ -71,5 +71,58 @@ describe('describeScan', () => {
     expect(describeScan({ kind: 'ean', code: '7891234567895', prefix: 'ean-brasil' })).toBe(
       'Código EAN brasileiro',
     )
+  })
+})
+
+describe('createScanConfirmer', () => {
+  const A = '9788535914849'
+  const B = '9786555124194'
+
+  it('não aceita na primeira leitura e aceita na segunda igual', () => {
+    const confirm = createScanConfirmer(2)
+    expect(confirm(A, 0)).toBe(false)
+    expect(confirm(A, 200)).toBe(true)
+  })
+
+  it('descarta um código errado lido uma única vez no meio das leituras certas', () => {
+    const confirm = createScanConfirmer(2)
+    expect(confirm(B, 0)).toBe(false) // reflexo: código válido, mas errado
+    expect(confirm(A, 200)).toBe(false) // volta ao certo: recomeça a contagem
+    expect(confirm(A, 400)).toBe(true)
+  })
+
+  it('alternar entre dois códigos nunca confirma nenhum', () => {
+    const confirm = createScanConfirmer(2)
+    const results = [A, B, A, B, A, B].map((code, i) => confirm(code, i * 200))
+    expect(results.every((confirmed) => !confirmed)).toBe(true)
+  })
+
+  it('não conta frames sem leitura: só as leituras, dentro do intervalo máximo', () => {
+    const confirm = createScanConfirmer(2, 2000)
+    expect(confirm(A, 0)).toBe(false)
+    expect(confirm(A, 1500)).toBe(true) // houve frames sem código no meio, e tudo bem
+  })
+
+  it('zera a contagem quando a leitura anterior ficou velha demais', () => {
+    const confirm = createScanConfirmer(2, 2000)
+    expect(confirm(A, 0)).toBe(false)
+    expect(confirm(A, 5000)).toBe(false)
+    expect(confirm(A, 5300)).toBe(true)
+  })
+
+  it('respeita um número maior de confirmações', () => {
+    const confirm = createScanConfirmer(3)
+    expect([0, 200, 400].map((t) => confirm(A, t))).toEqual([false, false, true])
+  })
+
+  it('com 1 confirmação aceita na hora', () => {
+    expect(createScanConfirmer(1)(A, 0)).toBe(true)
+  })
+
+  it('mantém confirmado se o mesmo código continuar sendo lido', () => {
+    const confirm = createScanConfirmer(2)
+    confirm(A, 0)
+    expect(confirm(A, 200)).toBe(true)
+    expect(confirm(A, 400)).toBe(true)
   })
 })

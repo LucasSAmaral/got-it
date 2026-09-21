@@ -1,13 +1,19 @@
 import { BrowserMultiFormatOneDReader, type IScannerControls } from '@zxing/browser'
 import { BarcodeFormat, ChecksumException, DecodeHintType, FormatException, NotFoundException } from '@zxing/library'
 import { useEffect, useRef, useState } from 'react'
-import { interpretBarcode, type AcceptedScan } from '../../lib/barcode'
+import { createScanConfirmer, interpretBarcode, type AcceptedScan } from '../../lib/barcode'
 
 export type ScannerStatus = 'iniciando' | 'lendo' | 'erro'
 
 // Sem TRY_HARDER de propósito: no @zxing/browser 0.2.1 ele gira a imagem com um canvas temporário
 // que nunca é criado, o leitor lança erro no primeiro frame sem código e para de ler.
 const HINTS = new Map<DecodeHintType, unknown>([[DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.EAN_13]]])
+
+/** Leituras iguais seguidas para aceitar um código (reflexo do plástico gera leituras erradas isoladas). */
+const CONFIRMATIONS = 2
+
+// O intervalo padrão de 500 ms depois de uma leitura faria a confirmação custar meio segundo a mais.
+const READER_OPTIONS = { delayBetweenScanSuccess: 120 }
 
 /** Frame sem código legível: o esperado enquanto a pessoa ainda está enquadrando. */
 function isExpectedMiss(error: unknown): boolean {
@@ -71,7 +77,8 @@ export function useBarcodeScanner(active: boolean, onDetected: (result: Accepted
     let cancelled = false
     let handled = false
 
-    const reader = new BrowserMultiFormatOneDReader(HINTS)
+    const reader = new BrowserMultiFormatOneDReader(HINTS, READER_OPTIONS)
+    const confirmScan = createScanConfirmer(CONFIRMATIONS)
 
     reader
       .decodeFromConstraints(
@@ -92,6 +99,7 @@ export function useBarcodeScanner(active: boolean, onDetected: (result: Accepted
             setWarning(scan.reason)
             return
           }
+          if (!confirmScan(scan.code)) return
           handled = true
           setWarning('')
           scanControls.stop()
