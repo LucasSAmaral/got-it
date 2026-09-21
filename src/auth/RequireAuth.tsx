@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from './useAuth'
 
 export function RequireAuth() {
-  const { session, loading } = useAuth()
+  const { session, loading, offlineAccess } = useAuth()
 
   if (loading) {
     return (
@@ -13,7 +13,7 @@ export function RequireAuth() {
     )
   }
 
-  if (!session) {
+  if (!session && !offlineAccess) {
     return <Navigate to="/login" replace />
   }
 

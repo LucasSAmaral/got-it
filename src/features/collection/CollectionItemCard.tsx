@@ -28,6 +28,7 @@ function initials(title: string) {
 
 export function CollectionItemCard({ item, showDelete = false }: { item: CollectionItem; showDelete?: boolean }) {
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [coverFailed, setCoverFailed] = useState(false)
   const deleteCopy = useDeleteCopy()
 
   return (
@@ -47,8 +48,14 @@ export function CollectionItemCard({ item, showDelete = false }: { item: Collect
           overflow: 'hidden',
         }}
       >
-        {item.cover_url ? (
-          <Box component="img" src={item.cover_url} alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {item.cover_url && !coverFailed ? (
+          <Box
+            component="img"
+            src={item.cover_url}
+            alt=""
+            onError={() => setCoverFailed(true)}
+            sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
         ) : (
           <Typography variant="h4" color="text.secondary" sx={{ fontSize: 16 }}>
             {initials(item.title)}

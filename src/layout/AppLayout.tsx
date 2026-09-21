@@ -2,11 +2,15 @@ import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined'
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined'
 import { Box, BottomNavigation, BottomNavigationAction, Paper } from '@mui/material'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useCollection } from '../features/collection/useCollection'
 
 export function AppLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const value = location.pathname === '/eu-tenho' ? '/eu-tenho' : '/'
+
+  // Carrega a lista completa em qualquer aba do app: é ela que atualiza a cópia usada offline.
+  useCollection('')
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

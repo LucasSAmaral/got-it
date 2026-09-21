@@ -1,5 +1,5 @@
 import { CssBaseline, ThemeProvider } from '@mui/material'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
@@ -8,7 +8,13 @@ import { AuthProvider } from './auth/AuthProvider.tsx'
 import './index.css'
 import { theme } from './theme.ts'
 
-const queryClient = new QueryClient()
+// O TanStack presume estar online ao iniciar; se o app abrir sem rede, o evento 'online' seguinte
+// só é notado se ele já souber que estava offline.
+onlineManager.setOnline(navigator.onLine)
+
+// networkMode 'always': sem rede o TanStack pausaria as consultas por padrão, e a busca offline
+// (fallback na própria função de busca) nem chegaria a rodar.
+const queryClient = new QueryClient({ defaultOptions: { queries: { networkMode: 'always' } } })
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

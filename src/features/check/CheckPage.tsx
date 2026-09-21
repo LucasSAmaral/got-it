@@ -1,19 +1,20 @@
 import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined'
-import { Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CollectionItemCard } from '../collection/CollectionItemCard'
+import { OfflineNotice } from '../collection/OfflineNotice'
 import { LazyScannerDialog } from '../scanner/LazyScannerDialog'
 import { useCheck } from './useCheck'
 
 export function CheckPage() {
   const [term, setTerm] = useState('')
   const [scannerOpen, setScannerOpen] = useState(false)
-  const { data, isFetching, debouncedTerm } = useCheck(term)
+  const { data, isFetching, isError, debouncedTerm } = useCheck(term)
   const navigate = useNavigate()
 
   const hasSearched = debouncedTerm.length > 0
-  const found = (data?.length ?? 0) > 0
+  const found = (data?.items.length ?? 0) > 0
 
   return (
     <Box sx={{ px: 3, py: 5 }}>
@@ -55,6 +56,8 @@ export function CheckPage() {
         }}
       />
 
+      {data?.fromMirror && <OfflineNotice savedAt={data.savedAt} />}
+
       {isFetching && (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
           <CircularProgress size={24} />
@@ -66,13 +69,17 @@ export function CheckPage() {
           <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 700 }}>
             Você já tem
           </Typography>
-          {data.map((item) => (
+          {data.items.map((item) => (
             <CollectionItemCard key={item.copy_id} item={item} />
           ))}
         </Stack>
       )}
 
-      {!isFetching && hasSearched && !found && (
+      {!isFetching && hasSearched && isError && (
+        <Alert severity="error">Não deu para consultar agora. Tente de novo em instantes.</Alert>
+      )}
+
+      {!isFetching && hasSearched && !isError && !found && (
         <Stack
           spacing={1.5}
           sx={{ bgcolor: 'background.paper', borderRadius: 3, p: 2.5, border: 1, borderColor: 'divider', borderStyle: 'dashed' }}
