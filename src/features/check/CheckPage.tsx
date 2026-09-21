@@ -1,11 +1,14 @@
+import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined'
 import { Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CollectionItemCard } from '../collection/CollectionItemCard'
+import { LazyScannerDialog } from '../scanner/LazyScannerDialog'
 import { useCheck } from './useCheck'
 
 export function CheckPage() {
   const [term, setTerm] = useState('')
+  const [scannerOpen, setScannerOpen] = useState(false)
   const { data, isFetching, debouncedTerm } = useCheck(term)
   const navigate = useNavigate()
 
@@ -29,6 +32,26 @@ export function CheckPage() {
           mb: 4,
           '& .MuiOutlinedInput-root': { borderRadius: 999, borderColor: 'primary.main' },
           '& .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main', borderWidth: 2 },
+        }}
+      />
+
+      <Button
+        fullWidth
+        variant="outlined"
+        color="inherit"
+        startIcon={<PhotoCameraOutlinedIcon />}
+        onClick={() => setScannerOpen(true)}
+        sx={{ mb: 4, mt: -2, borderRadius: 999 }}
+      >
+        Escanear código de barras
+      </Button>
+
+      <LazyScannerDialog
+        open={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onDetected={(scan) => {
+          setTerm(scan.code)
+          setScannerOpen(false)
         }}
       />
 

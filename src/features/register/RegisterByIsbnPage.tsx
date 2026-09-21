@@ -1,6 +1,7 @@
 import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CloseIcon from '@mui/icons-material/Close'
+import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined'
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined'
 import {
   Alert,
@@ -9,6 +10,7 @@ import {
   Chip,
   CircularProgress,
   IconButton,
+  InputAdornment,
   MenuItem,
   Stack,
   TextField,
@@ -17,8 +19,10 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { describeScan } from '../../lib/barcode'
 import { isValidIsbn, normalizeIsbn, toIsbn13 } from '../../lib/isbn'
 import { tokens } from '../../theme'
+import { LazyScannerDialog } from '../scanner/LazyScannerDialog'
 import {
   DuplicateIsbnError,
   addCopyToExistingEdition,
@@ -41,6 +45,8 @@ export function RegisterByIsbnPage() {
   const [isbnInput, setIsbnInput] = useState(searchParams.get('isbn') ?? '')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [scannerOpen, setScannerOpen] = useState(false)
+  const [scanLabel, setScanLabel] = useState('')
 
   const [copyForm, setCopyForm] = useState<CopyFormInput>({ condition: '', acquiredAt: '', pricePaid: '' })
   const [manualEdition, setManualEdition] = useState({ title: '', publisher: '', volume: '', format: '', year: '' })
@@ -138,12 +144,38 @@ export function RegisterByIsbnPage() {
             fullWidth
             placeholder="978…"
             value={isbnInput}
-            onChange={(event) => setIsbnInput(event.target.value)}
+            onChange={(event) => {
+              setIsbnInput(event.target.value)
+              setScanLabel('')
+            }}
             error={isbnInput.length > 0 && !isbnIsValid}
-            helperText={isbnInput.length > 0 && !isbnIsValid ? 'ISBN inválido' : ' '}
-            slotProps={{ htmlInput: { style: { fontFamily: tokens.font.mono } } }}
+            helperText={
+              isbnInput.length > 0 && !isbnIsValid ? 'ISBN inválido' : scanLabel ? `Lido pela câmera · ${scanLabel}` : ' '
+            }
+            slotProps={{
+              htmlInput: { style: { fontFamily: tokens.font.mono } },
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton aria-label="Escanear código de barras" edge="end" onClick={() => setScannerOpen(true)}>
+                      <PhotoCameraOutlinedIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
           />
         </Stack>
+
+        <LazyScannerDialog
+          open={scannerOpen}
+          onClose={() => setScannerOpen(false)}
+          onDetected={(scan) => {
+            setIsbnInput(scan.code)
+            setScanLabel(describeScan(scan))
+            setScannerOpen(false)
+          }}
+        />
 
         {isbn13 && editionQuery.isLoading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>

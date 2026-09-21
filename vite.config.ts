@@ -4,6 +4,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    // Permite abrir o dev server pelo túnel (npm run tunnel) para testar a câmera no celular.
+    allowedHosts: ['.trycloudflare.com'],
+  },
   plugins: [
     react(),
     VitePWA({
