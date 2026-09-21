@@ -14,7 +14,7 @@ export function CollectionPage() {
   const navigate = useNavigate()
 
   return (
-    <Box sx={{ px: 2.5, py: 4 }}>
+    <Box sx={{ px: { xs: 2.5, md: 5 }, py: { xs: 4, md: 5 } }}>
       <Stack spacing={0.5} sx={{ mb: 2.5 }}>
         <Typography variant="h2">Sua coleção</Typography>
         <Typography variant="caption" color="text.secondary">
@@ -29,7 +29,7 @@ export function CollectionPage() {
         placeholder="Buscar por título, editora ou ISBN"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        sx={{ mb: 2.5, '& .MuiOutlinedInput-root': { borderRadius: 999 } }}
+        sx={{ mb: 2.5, maxWidth: { md: 560 }, '& .MuiOutlinedInput-root': { borderRadius: 999 } }}
         slotProps={{
           input: {
             startAdornment: (
@@ -55,17 +55,17 @@ export function CollectionPage() {
         </Typography>
       )}
 
-      <Stack spacing={1.5}>
+      <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', md: 'repeat(auto-fill, minmax(320px, 1fr))' } }}>
         {items?.map((item) => (
           <CollectionItemCard key={item.copy_id} item={item} showDelete={!data?.fromMirror} />
         ))}
-      </Stack>
+      </Box>
 
       <Fab
         color="primary"
         aria-label="Cadastrar novo exemplar"
         onClick={() => navigate('/cadastro')}
-        sx={{ position: 'fixed', right: 20, bottom: 88 }}
+        sx={{ display: { xs: 'flex', md: 'none' }, position: 'fixed', right: 20, bottom: 88 }}
       >
         <AddIcon />
       </Fab>

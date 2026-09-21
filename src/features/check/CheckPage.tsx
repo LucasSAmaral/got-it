@@ -17,7 +17,7 @@ export function CheckPage() {
   const found = (data?.items.length ?? 0) > 0
 
   return (
-    <Box sx={{ px: 3, py: 5 }}>
+    <Box sx={{ px: { xs: 3, md: 5 }, py: { xs: 5, md: 6 }, maxWidth: { md: 720 } }}>
       <Typography variant="h2">Eu tenho?</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Digite um ISBN ou o título da edição.

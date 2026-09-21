@@ -63,7 +63,18 @@ export function CollectionItemCard({ item, showDelete = false }: { item: Collect
         )}
       </Box>
       <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
-        <Typography variant="h4" noWrap>
+        {/* Celular: uma linha com reticências. Tela larga: até duas linhas, porque o título é o que identifica a edição. */}
+        <Typography
+          variant="h4"
+          sx={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: { xs: 'nowrap', md: 'normal' },
+            display: { xs: 'block', md: '-webkit-box' },
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: { md: 2 },
+          }}
+        >
           {item.title}
         </Typography>
         <Typography variant="body2" color="text.secondary" noWrap>

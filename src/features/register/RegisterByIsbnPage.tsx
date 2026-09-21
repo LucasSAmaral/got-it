@@ -127,7 +127,20 @@ export function RegisterByIsbnPage() {
   }
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        maxWidth: { md: 760 },
+        mx: 'auto',
+        bgcolor: { md: 'background.paper' },
+        // Cor junto da espessura: o atalho border-left dentro do breakpoint zeraria um borderColor separado.
+        borderLeft: { md: (theme) => `1px solid ${theme.palette.divider}` },
+        borderRight: { md: (theme) => `1px solid ${theme.palette.divider}` },
+      }}
+    >
       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', p: 2.5, borderBottom: 1, borderColor: 'divider' }}>
         <IconButton aria-label="Voltar" onClick={() => navigate(-1)} edge="start">
           <ArrowBackIcon />

@@ -53,6 +53,9 @@ export function LoginPage() {
     <Box
       sx={{
         height: '100%',
+        width: '100%',
+        maxWidth: 420,
+        mx: 'auto',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
