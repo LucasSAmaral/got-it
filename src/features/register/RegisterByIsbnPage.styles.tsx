@@ -2,22 +2,6 @@ import { Box, Chip, Stack, styled, Typography } from '@mui/material'
 import type { ElementType } from 'react'
 import { tokens } from '../../theme'
 
-/** Painel da tela de cadastro: ocupa a tela toda no celular, vira coluna com borda em telas largas. */
-export const RegisterPanel = styled(Box)(({ theme }) => ({
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  width: '100%',
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  [theme.breakpoints.up('md')]: {
-    maxWidth: 760,
-    backgroundColor: theme.palette.background.paper,
-    borderLeft: `1px solid ${theme.palette.divider}`,
-    borderRight: `1px solid ${theme.palette.divider}`,
-  },
-}))
-
 /** Rótulo pequeno acima de um campo ou grupo de campos (ex.: "ISBN", "Foto da capa"). */
 export const FieldLabel = styled(Typography)(({ theme }) => ({
   fontWeight: 600,
