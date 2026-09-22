@@ -54,7 +54,7 @@ Formato: PWA em React; apps Android e iOS depois, empacotados com Capacitor (só
 - **Scanner** (`src/features/scanner`, `src/lib/barcode.ts`): EAN-13 pela câmera traseira; só aceita um código lido 2 vezes seguidas (reflexo do plástico do gibi gera leituras erradas isoladas). Carregado sob demanda para não pesar o bundle inicial.
 - **Capas**: reduzidas no navegador antes do envio (`src/lib/image.ts`): lado maior 800 px, JPEG. O bucket `covers` só aceita JPEG de até 1 MB.
 - **Offline** (`src/lib/mirrorStore.ts`, `src/lib/localSearch.ts`, `src/auth/AuthProvider.tsx`): ver "Como o modo offline funciona".
-- **Layout**: mobile primeiro; a partir de 900 px (`md`) entra barra lateral e a coleção vira grade. Abaixo de 900 px o layout de celular não mudou.
+- **Layout**: mobile primeiro; a partir de 900 px (`md`) entra barra lateral e a coleção vira grade. Abaixo de 900 px o layout de celular não mudou. A barra lateral (`src/layout/Sidebar.tsx`) e a área de conteúdo (`PageContent.tsx`, largura máxima 1120px) são usadas tanto pelo `AppLayout` (via `Outlet`) quanto pela tela de cadastro, que fica fora do `AppLayout` de propósito — não ganha a navegação inferior do celular. O cadastro segue o mesmo padrão de título (`h2`) e espaçamento das outras páginas; a seta de voltar só aparece abaixo de `md`, porque a partir dali já tem a barra lateral pra navegar. A tela de escanear continua em tela cheia em qualquer tamanho.
 - **PWA**: manifest com ícones, service worker, publicado no Netlify.
 
 ## Estrutura do código
@@ -70,7 +70,7 @@ src/
     collection/    lista, cartão, busca com fallback offline (api.ts), OfflineNotice
     register/      cadastro por ISBN e envio da capa (api.ts, constants.ts)
     scanner/       ScannerDialog, useBarcodeScanner, LazyScannerDialog
-  layout/          AppLayout (barra lateral no desktop, navegação inferior no celular)
+  layout/          AppLayout (navegação inferior no celular), Sidebar, PageContent, navItems (os dois primeiros também usados pelo cadastro)
   lib/             isbn, barcode, image, localSearch, mirrorStore, supabase (com testes .test.ts ao lado)
   types/catalog.ts
 supabase/migrations/   schema, busca, bucket de capas e limites do bucket
