@@ -11,6 +11,7 @@ Este arquivo dá a uma sessão nova do Claude Code o contexto necessário para c
 - Prefira soluções simples. Não adicione dependências, camadas ou abstrações que o escopo atual não exija.
 - Nunca mute estado ou props do React no lugar (sempre crie um novo objeto/array). O React decide se re-renderiza, e `React.memo`/`useMemo`/`useCallback` decidem se recalculam, comparando por referência (`===`); mutar quebra essas otimizações. Essa é a única relação real entre imutabilidade e performance do React.
 - Fora do que o React observa, prefira o paradigma funcional (funções puras, `map`/`filter`/`reduce` em vez de laço com variável mutada) na lógica pura em `src/lib`, por legibilidade — não porque deixa o React mais rápido, já que é código que roda fora de qualquer render. Não vale a ponto de piorar a complexidade do algoritmo (ex.: `wordSimilarity` em `src/lib/localSearch.ts` roda a cada tecla digitada sobre até 1000 itens; virar totalmente imutável trocaria O(n²) por O(n³), então mantém laço com `Set` mutado localmente) nem contra o próprio modelo do React ou do JS (flag mutável de cancelamento em `useEffect`, classe de erro com `extends Error`). Na dúvida sobre até onde levar, pergunte antes de refatorar o projeto inteiro.
+- **`sx` do MUI extenso vira `styled()`.** Quando o `sx` de um componente tem várias props, multi-linha, breakpoint ou seletor aninhado, extraia para um `<Componente>.styles.tsx` ao lado do arquivo que usa (ex.: `AppLayout.tsx` + `AppLayout.styles.tsx`), com `styled(ComponenteMui)(({ theme }) => ({...}))`. `sx` de 1-2 props continua inline — não vale a pena nomear e mover algo tão pequeno. Estilo que depende de estado do componente (ex.: `display` baseado numa variável) também fica inline; forçar isso pro `styled()` exige prop transiente extra pra um ganho pequeno. Estilo repetido em mais de um arquivo (não só dentro do mesmo) vira componente em `src/components/`, não em `.styles.tsx` (ex.: `LoadingSpinner.tsx`). Um `styled(Box)` que precisa trocar a tag HTML via `component="nav"` (ou `="img"` etc.) exige o generic `<{ component?: ElementType }>` — sem isso o TypeScript recusa a prop. E cuidado: `borderRadius: 3` no `sx` multiplica por `theme.shape.borderRadius` (12 no nosso tema), não por `theme.spacing` — ao mover pro `styled()`, ou usa esse multiplicador ou escreve o valor final em px.
 - Ele testa no iPhone real (PWA instalado) e no desktop. Quando algo falha no aparelho, reproduza num navegador antes de mexer (ver "Como verificar") e prove a correção com um teste, em vez de chutar a causa.
 
 ## O que é o produto
@@ -60,6 +61,7 @@ Formato: PWA em React; apps Android e iOS depois, empacotados com Capacitor (só
 ```
 src/
   auth/            AuthProvider (sessão + acesso offline), RequireAuth, useAuth
+  components/      componentes compartilhados entre mais de um arquivo (ex.: LoadingSpinner)
   features/
     auth/          LoginPage
     check/         "Eu tenho?" (CheckPage, useCheck)
@@ -72,6 +74,8 @@ src/
 supabase/migrations/   schema, busca, bucket de capas e limites do bucket
 netlify.toml           build, Node 22 e redirecionamento do SPA
 ```
+
+Componente com `sx` extenso tem um `<Componente>.styles.tsx` ao lado (ver regra em "Quem é o dono e como trabalhar com ele").
 
 ## Modelo de dados
 
@@ -102,6 +106,7 @@ Se `search_my_collection` mudar, refaça os valores de `src/lib/localSearch.test
 - `npm run build` (`tsc -b` + Vite), `npm test` (Vitest, só lógica pura), `npm run lint`. O lint tem 3 avisos conhecidos (`only-export-components` no `AuthProvider`, `set-state-in-effect` no scanner e no cadastro).
 - **Postgres local** para validar migrações e a equivalência da busca local: container `postgres:16`, com `auth.users`, `auth.uid()` (lendo `request.jwt.claim.sub`) e o role `authenticated` simulados. Crie um container temporário próprio e remova ao terminar.
 - **Testes de navegador (Playwright) não estão no repositório**, porque o projeto não tem essa dependência. Foram feitos com Chromium: Supabase simulado por `page.route` (login, refresh de token, `/rest/v1/*`), `context.setOffline`, câmera falsa com `--use-fake-device-for-media-stream` e vídeo `.mjpeg` com um EAN-13 desenhado. Cubra assim mudanças em auth, offline e scanner. `innerText` respeita `text-transform`, então textos em maiúsculas por CSS precisam de comparação sem diferenciar caixa.
+- **Print rápido de uma tela sem instalar nada no projeto**: `npx playwright screenshot ...` roda sem tocar no `package.json`/lockfile (o Chromium já costuma estar em cache da máquina). Pra ver uma tela que exige login, sem servidor de teste nenhum: grave uma sessão falsa em `localStorage` antes do primeiro load (`context.addInitScript`), na chave `sb-<ref-do-projeto>-auth-token` (o `<ref>` é o subdomínio de `VITE_SUPABASE_URL`), com um objeto `{ access_token, token_type, expires_in, expires_at, refresh_token, user }` — o `RequireAuth`/`AuthProvider` aceitam sem validar assinatura. Depois só falta interceptar as chamadas REST relevantes com `page.route`.
 - **Testar no celular**: `npm run dev` e, em outro terminal, `npm run tunnel` (precisa do `cloudflared` no PATH; a URL muda a cada execução). Câmera e service worker exigem https. Para testar o PWA de verdade, use o deploy do Netlify: cada URL de túnel é uma origem nova.
 
 ## Armadilhas conhecidas
