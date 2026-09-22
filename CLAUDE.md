@@ -9,6 +9,8 @@ Este arquivo dá a uma sessão nova do Claude Code o contexto necessário para c
 - Entregas pequenas e verificáveis: a cada passo, rode `tsc`, testes e build e diga o que passou e o que ficou sem verificar.
 - Não faça commit nem push sem ele pedir. Ele costuma dizer "pode commitar"; o push geralmente é ele quem faz.
 - Prefira soluções simples. Não adicione dependências, camadas ou abstrações que o escopo atual não exija.
+- Nunca mute estado ou props do React no lugar (sempre crie um novo objeto/array). O React decide se re-renderiza, e `React.memo`/`useMemo`/`useCallback` decidem se recalculam, comparando por referência (`===`); mutar quebra essas otimizações. Essa é a única relação real entre imutabilidade e performance do React.
+- Fora do que o React observa, prefira o paradigma funcional (funções puras, `map`/`filter`/`reduce` em vez de laço com variável mutada) na lógica pura em `src/lib`, por legibilidade — não porque deixa o React mais rápido, já que é código que roda fora de qualquer render. Não vale a ponto de piorar a complexidade do algoritmo (ex.: `wordSimilarity` em `src/lib/localSearch.ts` roda a cada tecla digitada sobre até 1000 itens; virar totalmente imutável trocaria O(n²) por O(n³), então mantém laço com `Set` mutado localmente) nem contra o próprio modelo do React ou do JS (flag mutável de cancelamento em `useEffect`, classe de erro com `extends Error`). Na dúvida sobre até onde levar, pergunte antes de refatorar o projeto inteiro.
 - Ele testa no iPhone real (PWA instalado) e no desktop. Quando algo falha no aparelho, reproduza num navegador antes de mexer (ver "Como verificar") e prove a correção com um teste, em vez de chutar a causa.
 
 ## O que é o produto
