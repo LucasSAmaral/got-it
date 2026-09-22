@@ -14,24 +14,27 @@ export function isValidIsbn10(isbn: string): boolean {
   const value = normalizeIsbn(isbn)
   if (!/^[0-9]{9}[0-9X]$/.test(value)) return false
 
-  let sum = 0
-  for (let i = 0; i < 10; i++) {
-    const digit = value[i] === 'X' ? 10 : Number(value[i])
-    sum += digit * (10 - i)
-  }
+  const sum = Array.from(value).reduce(
+    (total, char, i) => total + (char === 'X' ? 10 : Number(char)) * (10 - i),
+    0,
+  )
   return sum % 11 === 0
+}
+
+/** Dígito verificador do ISBN-13 para os 12 primeiros dígitos de `core` (pesos alternados 1 e 3). */
+function isbn13CheckDigit(core: string): number {
+  const sum = Array.from(core.slice(0, 12)).reduce(
+    (total, digit, i) => total + Number(digit) * (i % 2 === 0 ? 1 : 3),
+    0,
+  )
+  return (10 - (sum % 10)) % 10
 }
 
 export function isValidIsbn13(isbn: string): boolean {
   const value = normalizeIsbn(isbn)
   if (!/^[0-9]{13}$/.test(value)) return false
 
-  let sum = 0
-  for (let i = 0; i < 12; i++) {
-    sum += Number(value[i]) * (i % 2 === 0 ? 1 : 3)
-  }
-  const checkDigit = (10 - (sum % 10)) % 10
-  return checkDigit === Number(value[12])
+  return isbn13CheckDigit(value) === Number(value[12])
 }
 
 export function isValidIsbn(isbn: string): boolean {
@@ -49,12 +52,7 @@ export function convertIsbn10ToIsbn13(isbn10: string): string {
   }
 
   const core = `978${value.slice(0, 9)}`
-  let sum = 0
-  for (let i = 0; i < 12; i++) {
-    sum += Number(core[i]) * (i % 2 === 0 ? 1 : 3)
-  }
-  const checkDigit = (10 - (sum % 10)) % 10
-  return `${core}${checkDigit}`
+  return `${core}${isbn13CheckDigit(core)}`
 }
 
 /** Normaliza e garante ISBN-13, convertendo a partir de ISBN-10 quando necessário. */

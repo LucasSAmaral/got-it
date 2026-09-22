@@ -11,16 +11,33 @@ const SIMILARITY_THRESHOLD = 0.25
 
 const WORD_PATTERN = /[\p{L}\p{N}]+/gu
 
+/** Trigramas de uma palavra já demarcada (2 espaços antes, 1 depois), na ordem em que aparecem. */
+function wordTrigrams(word: string): string[] {
+  const chars = Array.from(`  ${word} `)
+  return chars.slice(0, -2).map((_, i) => chars.slice(i, i + 3).join(''))
+}
+
 /** Trigramas na ordem do texto, como o pg_trgm: cada palavra ganha 2 espaços antes e 1 depois. */
 function trigramSequence(text: string): string[] {
-  const trigrams: string[] = []
-  for (const [word] of text.toLowerCase().matchAll(WORD_PATTERN)) {
-    const chars = Array.from(`  ${word} `)
-    for (let i = 0; i + 3 <= chars.length; i++) {
-      trigrams.push(chars.slice(i, i + 3).join(''))
-    }
-  }
-  return trigrams
+  return Array.from(text.toLowerCase().matchAll(WORD_PATTERN)).flatMap(([word]) => wordTrigrams(word))
+}
+
+/**
+ * Maior similaridade entre `queryTrigrams` e um trecho de `remaining` que começa no início da lista.
+ * `extent` (os trigramas distintos já vistos) é mutado localmente por conveniência: criar uma cópia
+ * a cada passo trocaria O(n) por O(n²) só nesta função, sem ganho de legibilidade.
+ */
+function bestSimilarityFromStart(remaining: string[], queryTrigrams: Set<string>): number {
+  const extent = new Set<string>()
+  return remaining.reduce(
+    ({ common, best }, trigram) => {
+      if (extent.has(trigram)) return { common, best: Math.max(best, common / (queryTrigrams.size + extent.size - common)) }
+      extent.add(trigram)
+      const nextCommon = common + (queryTrigrams.has(trigram) ? 1 : 0)
+      return { common: nextCommon, best: Math.max(best, nextCommon / (queryTrigrams.size + extent.size - nextCommon)) }
+    },
+    { common: 0, best: 0 },
+  ).best
 }
 
 /**
@@ -32,20 +49,10 @@ export function wordSimilarity(query: string, text: string): number {
   const textTrigrams = trigramSequence(text)
   if (queryTrigrams.size === 0 || textTrigrams.length === 0) return 0
 
-  let best = 0
-  for (let start = 0; start < textTrigrams.length; start++) {
-    const extent = new Set<string>()
-    let common = 0
-    for (let end = start; end < textTrigrams.length; end++) {
-      const trigram = textTrigrams[end]!
-      if (!extent.has(trigram)) {
-        extent.add(trigram)
-        if (queryTrigrams.has(trigram)) common++
-      }
-      const similarity = common / (queryTrigrams.size + extent.size - common)
-      if (similarity > best) best = similarity
-    }
-  }
+  const best = textTrigrams.reduce(
+    (max, _, start) => Math.max(max, bestSimilarityFromStart(textTrigrams.slice(start), queryTrigrams)),
+    0,
+  )
   // O Postgres compara em float4.
   return Math.fround(best)
 }

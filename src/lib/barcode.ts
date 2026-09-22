@@ -56,6 +56,16 @@ export function describeScan(result: AcceptedScan): string {
   }
 }
 
+type ScanConfirmState = { code: string; count: number; readAt: number }
+
+const INITIAL_CONFIRM_STATE: ScanConfirmState = { code: '', count: 0, readAt: 0 }
+
+/** A partir do estado anterior e da leitura atual, calcula o próximo estado (sem mutar nada). */
+function nextConfirmState(state: ScanConfirmState, code: string, now: number, maxGapMs: number): ScanConfirmState {
+  const count = code === state.code && now - state.readAt <= maxGapMs ? state.count + 1 : 1
+  return { code, count, readAt: now }
+}
+
 /**
  * Reflexo e curvatura do plástico às vezes produzem um código errado que passa no dígito verificador.
  * Um erro assim raramente se repete, então só aceitamos um código lido `required` vezes seguidas,
@@ -63,18 +73,10 @@ export function describeScan(result: AcceptedScan): string {
  * Frames sem leitura não contam: não zeram nem somam.
  */
 export function createScanConfirmer(required = 2, maxGapMs = 2000) {
-  let lastCode = ''
-  let count = 0
-  let lastReadAt = 0
+  let state = INITIAL_CONFIRM_STATE
 
   return (code: string, now = Date.now()): boolean => {
-    if (code === lastCode && now - lastReadAt <= maxGapMs) {
-      count += 1
-    } else {
-      lastCode = code
-      count = 1
-    }
-    lastReadAt = now
-    return count >= required
+    state = nextConfirmState(state, code, now, maxGapMs)
+    return state.count >= required
   }
 }
