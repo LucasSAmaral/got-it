@@ -49,7 +49,8 @@ Formato: PWA em React; apps Android e iOS depois, empacotados com Capacitor (só
 
 - **Login** (`src/features/auth`): e-mail e senha, com o link por e-mail como alternativa.
 - **Coleção** e **"Eu tenho?"** (`src/features/collection`, `src/features/check`): busca por título, editora e ISBN (prefixo). Não busca por autor (a tabela `works` existe, mas não tem interface).
-- **Cadastro por ISBN** (`src/features/register`): se a edição existe no catálogo, preenche; se não, formulário manual que cria a edição e o exemplar. Avisa quando o usuário já tem um exemplar da edição, sem impedir. Excluir exemplar existe; editar exemplar ou trocar a capa de uma edição existente ainda não.
+- **Cadastro por ISBN** (`src/features/register`): se a edição existe no catálogo, preenche; se não, formulário manual que cria a edição e o exemplar. Avisa quando o usuário já tem um exemplar da edição, sem impedir. Excluir exemplar existe; editar exemplar ainda não.
+- **Painel de admin** (`src/features/admin`): item de menu "Editar catálogo", visível só para o Lucas (`isAdmin`, ver "Modelo de dados"). Busca ou lista qualquer edição do catálogo (`search_editions`, não só a coleção do usuário) e edita título/editora/volume/formato/ano/capa direto pelo app, sem precisar mexer no Supabase.
 - **Scanner** (`src/features/scanner`, `src/lib/barcode.ts`): EAN-13 pela câmera traseira; só aceita um código lido 2 vezes seguidas (reflexo do plástico do gibi gera leituras erradas isoladas). Carregado sob demanda para não pesar o bundle inicial.
 - **Capas**: reduzidas no navegador antes do envio (`src/lib/image.ts`): lado maior 800 px, JPEG. O bucket `covers` só aceita JPEG de até 1 MB.
 - **Offline** (`src/lib/mirrorStore.ts`, `src/lib/localSearch.ts`, `src/auth/AuthProvider.tsx`): ver "Como o modo offline funciona".
@@ -63,10 +64,11 @@ src/
   auth/            AuthProvider (sessão + acesso offline), RequireAuth, useAuth
   components/      componentes compartilhados entre mais de um arquivo (ex.: LoadingSpinner)
   features/
+    admin/         painel de edição do catálogo, só para o Lucas (admin.ts, api.ts)
     auth/          LoginPage
     check/         "Eu tenho?" (CheckPage, useCheck)
     collection/    lista, cartão, busca com fallback offline (api.ts), OfflineNotice
-    register/      cadastro por ISBN e envio da capa (api.ts)
+    register/      cadastro por ISBN e envio da capa (api.ts, constants.ts)
     scanner/       ScannerDialog, useBarcodeScanner, LazyScannerDialog
   layout/          AppLayout (barra lateral no desktop, navegação inferior no celular)
   lib/             isbn, barcode, image, localSearch, mirrorStore, supabase (com testes .test.ts ao lado)
@@ -82,9 +84,9 @@ Componente com `sx` extenso tem um `<Componente>.styles.tsx` ao lado (ver regra 
 Três níveis: **Obra** (a história), **Edição** (a versão física publicada) e **Exemplar** (a cópia do usuário). A fonte da verdade é `supabase/migrations/`. Uma tabela de "conteúdo" que liga edições ao que elas reúnem (edições equivalentes) fica para uma fase posterior; não crie agora.
 
 - `editions.isbn13` é único (quando não nulo). `works` existe mas não tem interface nem entra na busca.
-- **RLS ligada nas três tabelas.** `works` e `editions`: qualquer usuário autenticado lê e insere com `created_by = auth.uid()`; em `editions`, só o criador atualiza e apenas enquanto `verified = false`. `copies`: cada usuário lê, insere, atualiza e apaga só as próprias linhas.
+- **RLS ligada nas três tabelas.** `works` e `editions`: qualquer usuário autenticado lê e insere com `created_by = auth.uid()`; em `editions`, só o criador atualiza e apenas enquanto `verified = false` — **mais uma política** (`editions_update_admin`, `20260922000000_admin_editions.sql`) libera update irrestrito para o `auth.uid()` do Lucas, fixo em `src/features/admin/admin.ts` (`ADMIN_USER_ID`, mesmo valor nos dois lugares). Políticas permissivas do Postgres se somam com OR, então não precisou mexer na política antiga. `copies`: cada usuário lê, insere, atualiza e apaga só as próprias linhas.
 - Uma pessoa pode ter mais de um exemplar da mesma edição (é legítimo).
-- `search_my_collection(q text)`: busca nos exemplares do usuário por prefixo de ISBN ou `word_similarity > 0.25` (pg_trgm) em título e editora, ISBN exato primeiro. Compara com `>` explícito porque o role do pooler do Supabase não pode alterar `pg_trgm.word_similarity_threshold`.
+- `search_my_collection(q text)`: busca nos exemplares do usuário por prefixo de ISBN ou `word_similarity > 0.25` (pg_trgm) em título e editora, ISBN exato primeiro. Compara com `>` explícito porque o role do pooler do Supabase não pode alterar `pg_trgm.word_similarity_threshold`. `search_editions(q text)` é a mesma lógica sobre o catálogo inteiro (sem join com `copies` nem filtro por usuário), usada só no painel de admin.
 - Storage: bucket público `covers` (leitura pública, envio só autenticado), limitado a 1 MB e `image/jpeg` pela migração `cover_limits`.
 - **As migrações são aplicadas à mão no SQL Editor do Supabase** (não há `supabase/config.toml` nem CLI configurada). Aplique a de limites do bucket só depois de publicar o app que reduz a imagem.
 
@@ -103,7 +105,7 @@ Se `search_my_collection` mudar, refaça os valores de `src/lib/localSearch.test
 
 ## Como verificar
 
-- `npm run build` (`tsc -b` + Vite), `npm test` (Vitest, só lógica pura), `npm run lint`. O lint tem 3 avisos conhecidos (`only-export-components` no `AuthProvider`, `set-state-in-effect` no scanner e no cadastro).
+- `npm run build` (`tsc -b` + Vite), `npm test` (Vitest, só lógica pura), `npm run lint`. O lint tem avisos conhecidos, sempre das duas mesmas categorias: `only-export-components` (`AuthProvider`) e `set-state-in-effect` num `useEffect` que reresponde a uma prop/estado mudando — reseta o formulário do cadastro, o do admin e o preview da capa nos dois. Novo aviso dessas categorias em código parecido não é bug; categoria nova, sim.
 - **Postgres local** para validar migrações e a equivalência da busca local: container `postgres:16`, com `auth.users`, `auth.uid()` (lendo `request.jwt.claim.sub`) e o role `authenticated` simulados. Crie um container temporário próprio e remova ao terminar.
 - **Testes de navegador (Playwright) não estão no repositório**, porque o projeto não tem essa dependência. Foram feitos com Chromium: Supabase simulado por `page.route` (login, refresh de token, `/rest/v1/*`), `context.setOffline`, câmera falsa com `--use-fake-device-for-media-stream` e vídeo `.mjpeg` com um EAN-13 desenhado. Cubra assim mudanças em auth, offline e scanner. `innerText` respeita `text-transform`, então textos em maiúsculas por CSS precisam de comparação sem diferenciar caixa.
 - **Print rápido de uma tela sem instalar nada no projeto**: `npx playwright screenshot ...` roda sem tocar no `package.json`/lockfile (o Chromium já costuma estar em cache da máquina). Pra ver uma tela que exige login, sem servidor de teste nenhum: grave uma sessão falsa em `localStorage` antes do primeiro load (`context.addInitScript`), na chave `sb-<ref-do-projeto>-auth-token` (o `<ref>` é o subdomínio de `VITE_SUPABASE_URL`), com um objeto `{ access_token, token_type, expires_in, expires_at, refresh_token, user }` — o `RequireAuth`/`AuthProvider` aceitam sem validar assinatura. Depois só falta interceptar as chamadas REST relevantes com `page.route`.
@@ -129,7 +131,7 @@ Fica fora por enquanto: perfil público, listas de troca e venda, equivalência 
 
 - Fechar os cadastros no Supabase antes de compartilhar o app.
 - Não há botão "Sair" (quando existir, o `SIGNED_OUT` já limpa a cópia offline).
-- Não há tela para trocar a capa de uma edição existente (hoje: enviar o arquivo no Storage e `update editions set cover_url = ...` no SQL Editor).
+- O admin é um UUID fixo (`ADMIN_USER_ID`), não um papel de verdade — revisitar (tabela/coluna própria) quando houver mais de um editor de confiança no catálogo.
 - PostgREST devolve no máximo 1000 linhas por resposta: lista e cópia offline truncam acima disso.
 - Capas não ficam disponíveis offline (o cartão mostra a inicial do título).
 - Tablets em pé (600 a 899 px) usam o layout de celular; a tela de escanear continua em tela cheia no desktop; não há tela de detalhe de exemplar.
