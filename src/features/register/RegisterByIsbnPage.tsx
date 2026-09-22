@@ -12,6 +12,7 @@ import { describeScan } from '../../lib/barcode'
 import { isValidIsbn, normalizeIsbn, toIsbn13 } from '../../lib/isbn'
 import { tokens } from '../../theme'
 import { LazyScannerDialog } from '../scanner/LazyScannerDialog'
+import { FORMATS } from './constants'
 import {
   DuplicateIsbnError,
   addCopyToExistingEdition,
@@ -32,7 +33,6 @@ import {
 } from './RegisterByIsbnPage.styles'
 
 const CONDITIONS = ['Ótimo', 'Bom', 'Regular']
-const FORMATS = ['Banca', 'Encadernado', 'Tankôbon', 'Especial']
 
 export function RegisterByIsbnPage() {
   const [searchParams] = useSearchParams()
