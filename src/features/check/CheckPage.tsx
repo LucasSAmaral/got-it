@@ -1,10 +1,12 @@
 import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined'
-import { Alert, Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { CollectionItemCard } from '../collection/CollectionItemCard'
 import { OfflineNotice } from '../collection/OfflineNotice'
 import { LazyScannerDialog } from '../scanner/LazyScannerDialog'
+import { EmptyStateCard, SearchField } from './CheckPage.styles'
 import { useCheck } from './useCheck'
 
 export function CheckPage() {
@@ -23,17 +25,12 @@ export function CheckPage() {
         Digite um ISBN ou o título da edição.
       </Typography>
 
-      <TextField
+      <SearchField
         autoFocus
         fullWidth
         placeholder="978… ou título"
         value={term}
         onChange={(event) => setTerm(event.target.value)}
-        sx={{
-          mb: 4,
-          '& .MuiOutlinedInput-root': { borderRadius: 999, borderColor: 'primary.main' },
-          '& .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main', borderWidth: 2 },
-        }}
       />
 
       <Button
@@ -58,11 +55,7 @@ export function CheckPage() {
 
       {data?.fromMirror && <OfflineNotice savedAt={data.savedAt} />}
 
-      {isFetching && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-          <CircularProgress size={24} />
-        </Box>
-      )}
+      {isFetching && <LoadingSpinner size={24} sx={{ py: 2 }} />}
 
       {!isFetching && hasSearched && found && data && (
         <Stack spacing={1.5}>
@@ -80,10 +73,7 @@ export function CheckPage() {
       )}
 
       {!isFetching && hasSearched && !isError && !found && (
-        <Stack
-          spacing={1.5}
-          sx={{ bgcolor: 'background.paper', borderRadius: 3, p: 2.5, border: 1, borderColor: 'divider', borderStyle: 'dashed' }}
-        >
+        <EmptyStateCard spacing={1.5}>
           <Typography variant="body2" sx={{ fontWeight: 700 }} color="text.secondary">
             Ainda não tem
           </Typography>
@@ -96,7 +86,7 @@ export function CheckPage() {
           >
             Cadastrar esta edição
           </Button>
-        </Stack>
+        </EmptyStateCard>
       )}
     </Box>
   )

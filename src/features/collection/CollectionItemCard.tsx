@@ -15,6 +15,7 @@ import {
 import { useState } from 'react'
 import { tokens } from '../../theme'
 import type { CollectionItem } from '../../types/catalog'
+import { ClampedTitle, CoverPlaceholder } from './CollectionItemCard.styles'
 import { useDeleteCopy } from './useDeleteCopy'
 
 function initials(title: string) {
@@ -33,21 +34,7 @@ export function CollectionItemCard({ item, showDelete = false }: { item: Collect
 
   return (
     <Card variant="outlined" sx={{ display: 'flex', gap: 1.5, alignItems: 'center', p: 1.5, borderColor: 'divider' }}>
-      <Box
-        sx={{
-          width: 56,
-          height: 76,
-          flexShrink: 0,
-          borderRadius: `${tokens.radius.sm}px`,
-          bgcolor: 'background.default',
-          border: 1,
-          borderColor: 'divider',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-        }}
-      >
+      <CoverPlaceholder>
         {item.cover_url && !coverFailed ? (
           <Box
             component="img"
@@ -61,22 +48,10 @@ export function CollectionItemCard({ item, showDelete = false }: { item: Collect
             {initials(item.title)}
           </Typography>
         )}
-      </Box>
+      </CoverPlaceholder>
       <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
         {/* Celular: uma linha com reticências. Tela larga: até duas linhas, porque o título é o que identifica a edição. */}
-        <Typography
-          variant="h4"
-          sx={{
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: { xs: 'nowrap', md: 'normal' },
-            display: { xs: 'block', md: '-webkit-box' },
-            WebkitBoxOrient: 'vertical',
-            WebkitLineClamp: { md: 2 },
-          }}
-        >
-          {item.title}
-        </Typography>
+        <ClampedTitle variant="h4">{item.title}</ClampedTitle>
         <Typography variant="body2" color="text.secondary" noWrap>
           {[item.publisher, item.volume].filter(Boolean).join(' · ') || 'Editora não informada'}
         </Typography>

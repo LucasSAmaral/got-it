@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { supabase } from '../../lib/supabase'
+import { LoginPageBox } from './LoginPage.styles'
 
 type Mode = 'senha' | 'link'
 
@@ -50,19 +51,7 @@ export function LoginPage() {
   }
 
   return (
-    <Box
-      sx={{
-        height: '100%',
-        width: '100%',
-        maxWidth: 420,
-        mx: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        px: 3,
-        gap: 4,
-      }}
-    >
+    <LoginPageBox>
       <Stack spacing={1}>
         <Typography variant="h1" color="text.primary">
           Got it?
@@ -133,6 +122,6 @@ export function LoginPage() {
       <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
         Ao continuar, você concorda em guardar sua coleção nesta conta.
       </Typography>
-    </Box>
+    </LoginPageBox>
   )
 }

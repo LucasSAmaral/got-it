@@ -1,9 +1,11 @@
 import AddIcon from '@mui/icons-material/Add'
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined'
-import { Alert, Box, CircularProgress, Fab, InputAdornment, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Box, InputAdornment, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { CollectionItemCard } from './CollectionItemCard'
+import { AddFab, CollectionGrid, SearchField } from './CollectionPage.styles'
 import { OfflineNotice } from './OfflineNotice'
 import { useCollection } from './useCollection'
 
@@ -24,12 +26,11 @@ export function CollectionPage() {
 
       {data?.fromMirror && <OfflineNotice savedAt={data.savedAt} />}
 
-      <TextField
+      <SearchField
         fullWidth
         placeholder="Buscar por título, editora ou ISBN"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        sx={{ mb: 2.5, maxWidth: { md: 560 }, '& .MuiOutlinedInput-root': { borderRadius: 999 } }}
         slotProps={{
           input: {
             startAdornment: (
@@ -41,11 +42,7 @@ export function CollectionPage() {
         }}
       />
 
-      {isLoading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <CircularProgress size={28} />
-        </Box>
-      )}
+      {isLoading && <LoadingSpinner size={28} sx={{ py: 4 }} />}
 
       {isError && <Alert severity="error">Não deu para carregar sua coleção agora.</Alert>}
 
@@ -55,20 +52,15 @@ export function CollectionPage() {
         </Typography>
       )}
 
-      <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', md: 'repeat(auto-fill, minmax(320px, 1fr))' } }}>
+      <CollectionGrid>
         {items?.map((item) => (
           <CollectionItemCard key={item.copy_id} item={item} showDelete={!data?.fromMirror} />
         ))}
-      </Box>
+      </CollectionGrid>
 
-      <Fab
-        color="primary"
-        aria-label="Cadastrar novo exemplar"
-        onClick={() => navigate('/cadastro')}
-        sx={{ display: { xs: 'flex', md: 'none' }, position: 'fixed', right: 20, bottom: 88 }}
-      >
+      <AddFab color="primary" aria-label="Cadastrar novo exemplar" onClick={() => navigate('/cadastro')}>
         <AddIcon />
-      </Fab>
+      </AddFab>
     </Box>
   )
 }

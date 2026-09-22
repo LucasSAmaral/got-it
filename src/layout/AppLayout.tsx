@@ -10,11 +10,11 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Paper,
   Typography,
 } from '@mui/material'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useCollection } from '../features/collection/useCollection'
+import { BottomNavBar, SidebarNav } from './AppLayout.styles'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Coleção', icon: <GridViewOutlinedIcon /> },
@@ -32,20 +32,7 @@ export function AppLayout() {
 
   return (
     <Box sx={{ display: 'flex', height: '100%' }}>
-      <Box
-        component="nav"
-        sx={{
-          display: { xs: 'none', md: 'flex' },
-          flexDirection: 'column',
-          gap: 3,
-          width: 240,
-          flexShrink: 0,
-          p: 2.5,
-          bgcolor: 'background.paper',
-          borderRight: 1,
-          borderColor: 'divider',
-        }}
-      >
+      <SidebarNav component="nav">
         <Typography variant="h3" sx={{ px: 1, color: 'primary.main' }}>
           Got it?
         </Typography>
@@ -65,7 +52,7 @@ export function AppLayout() {
             </ListItemButton>
           ))}
         </List>
-      </Box>
+      </SidebarNav>
 
       <Box sx={{ flex: 1, minWidth: 0, overflowY: 'auto', pb: { xs: 8, md: 0 } }}>
         <Box sx={{ maxWidth: 1120, mx: 'auto' }}>
@@ -73,24 +60,13 @@ export function AppLayout() {
         </Box>
       </Box>
 
-      <Paper
-        elevation={0}
-        sx={{
-          display: { xs: 'block', md: 'none' },
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          borderTop: 1,
-          borderColor: 'divider',
-        }}
-      >
+      <BottomNavBar elevation={0}>
         <BottomNavigation showLabels value={value} onChange={(_event, newValue: string) => navigate(newValue)}>
           {NAV_ITEMS.map((item) => (
             <BottomNavigationAction key={item.to} label={item.label} value={item.to} icon={item.icon} />
           ))}
         </BottomNavigation>
-      </Paper>
+      </BottomNavBar>
     </Box>
   )
 }

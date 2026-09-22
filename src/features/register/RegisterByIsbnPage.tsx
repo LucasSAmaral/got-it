@@ -3,22 +3,11 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CloseIcon from '@mui/icons-material/Close'
 import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined'
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined'
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  IconButton,
-  InputAdornment,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Alert, Box, Button, IconButton, InputAdornment, MenuItem, Stack, TextField, Typography } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { describeScan } from '../../lib/barcode'
 import { isValidIsbn, normalizeIsbn, toIsbn13 } from '../../lib/isbn'
 import { tokens } from '../../theme'
@@ -33,6 +22,14 @@ import {
   type CopyFormInput,
   type NewEditionInput,
 } from './api'
+import {
+  CoverPreview,
+  FieldLabel,
+  FieldRow,
+  FoundChip,
+  NotFoundChip,
+  RegisterPanel,
+} from './RegisterByIsbnPage.styles'
 
 const CONDITIONS = ['Ótimo', 'Bom', 'Regular']
 const FORMATS = ['Banca', 'Encadernado', 'Tankôbon', 'Especial']
@@ -127,20 +124,7 @@ export function RegisterByIsbnPage() {
   }
 
   return (
-    <Box
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        maxWidth: { md: 760 },
-        mx: 'auto',
-        bgcolor: { md: 'background.paper' },
-        // Cor junto da espessura: o atalho border-left dentro do breakpoint zeraria um borderColor separado.
-        borderLeft: { md: (theme) => `1px solid ${theme.palette.divider}` },
-        borderRight: { md: (theme) => `1px solid ${theme.palette.divider}` },
-      }}
-    >
+    <RegisterPanel>
       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', p: 2.5, borderBottom: 1, borderColor: 'divider' }}>
         <IconButton aria-label="Voltar" onClick={() => navigate(-1)} edge="start">
           <ArrowBackIcon />
@@ -150,9 +134,7 @@ export function RegisterByIsbnPage() {
 
       <Box sx={{ flex: 1, overflowY: 'auto', p: 2.5 }}>
         <Stack spacing={0.75} sx={{ mb: 3 }}>
-          <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-            ISBN
-          </Typography>
+          <FieldLabel variant="caption">ISBN</FieldLabel>
           <TextField
             fullWidth
             placeholder="978…"
@@ -190,11 +172,7 @@ export function RegisterByIsbnPage() {
           }}
         />
 
-        {isbn13 && editionQuery.isLoading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-            <CircularProgress size={24} />
-          </Box>
-        )}
+        {isbn13 && editionQuery.isLoading && <LoadingSpinner size={24} sx={{ py: 3 }} />}
 
         {isbn13 && editionQuery.isError && (
           <Alert severity="error">Não deu para consultar o catálogo agora.</Alert>
@@ -203,7 +181,7 @@ export function RegisterByIsbnPage() {
         {isbn13 && editionQuery.isSuccess && edition && (
           <Box component="form" onSubmit={handleSubmitExisting}>
             <Stack spacing={2}>
-              <Chip label="Encontrado no catálogo" size="small" sx={{ alignSelf: 'flex-start', bgcolor: 'rgba(163,118,15,0.12)', color: tokens.color.gold, fontWeight: 600, textTransform: 'uppercase', fontSize: 10 }} />
+              <FoundChip label="Encontrado no catálogo" size="small" />
 
               <Stack spacing={0.25}>
                 <Typography variant="h4">{edition.title}</Typography>
@@ -223,7 +201,7 @@ export function RegisterByIsbnPage() {
                 Seu exemplar
               </Typography>
 
-              <Stack direction="row" sx={{ display: 'flex', gap: 2 }}>
+              <FieldRow direction="row">
                 <TextField
                   select
                   label="Condição"
@@ -245,7 +223,7 @@ export function RegisterByIsbnPage() {
                   onChange={(event) => setCopyForm({ ...copyForm, acquiredAt: event.target.value })}
                   slotProps={{ inputLabel: { shrink: true } }}
                 />
-              </Stack>
+              </FieldRow>
 
               <TextField
                 label="Preço pago"
@@ -266,12 +244,7 @@ export function RegisterByIsbnPage() {
         {isbn13 && editionQuery.isSuccess && edition === null && (
           <Box component="form" onSubmit={handleSubmitManual}>
             <Stack spacing={2}>
-              <Chip
-                label="Não encontramos no catálogo"
-                size="small"
-                variant="outlined"
-                sx={{ alignSelf: 'flex-start', fontWeight: 600, textTransform: 'uppercase', fontSize: 10 }}
-              />
+              <NotFoundChip label="Não encontramos no catálogo" size="small" variant="outlined" />
               <Typography variant="body2" color="text.secondary">
                 Preencha os dados da edição — as próximas pessoas que escanearem esse ISBN recebem tudo pronto.
               </Typography>
@@ -285,7 +258,7 @@ export function RegisterByIsbnPage() {
                 onChange={(event) => setManualEdition({ ...manualEdition, title: event.target.value })}
               />
 
-              <Stack direction="row" sx={{ display: 'flex', gap: 2 }}>
+              <FieldRow direction="row">
                 <TextField
                   label="Editora"
                   fullWidth
@@ -300,9 +273,9 @@ export function RegisterByIsbnPage() {
                   value={manualEdition.volume}
                   onChange={(event) => setManualEdition({ ...manualEdition, volume: event.target.value })}
                 />
-              </Stack>
+              </FieldRow>
 
-              <Stack direction="row" sx={{ display: 'flex', gap: 2 }}>
+              <FieldRow direction="row">
                 <TextField
                   select
                   label="Formato"
@@ -323,12 +296,10 @@ export function RegisterByIsbnPage() {
                   value={manualEdition.year}
                   onChange={(event) => setManualEdition({ ...manualEdition, year: event.target.value })}
                 />
-              </Stack>
+              </FieldRow>
 
               <Stack spacing={0.75}>
-                <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                  Foto da capa (opcional)
-                </Typography>
+                <FieldLabel variant="caption">Foto da capa (opcional)</FieldLabel>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -338,12 +309,7 @@ export function RegisterByIsbnPage() {
                 />
                 {coverPreview ? (
                   <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-                    <Box
-                      component="img"
-                      src={coverPreview}
-                      alt="Prévia da capa"
-                      sx={{ width: 64, height: 88, objectFit: 'cover', borderRadius: `${tokens.radius.sm}px`, border: 1, borderColor: 'divider' }}
-                    />
+                    <CoverPreview component="img" src={coverPreview} alt="Prévia da capa" />
                     <Button
                       type="button"
                       size="small"
@@ -375,7 +341,7 @@ export function RegisterByIsbnPage() {
                 Seu exemplar
               </Typography>
 
-              <Stack direction="row" sx={{ display: 'flex', gap: 2 }}>
+              <FieldRow direction="row">
                 <TextField
                   select
                   label="Condição"
@@ -397,7 +363,7 @@ export function RegisterByIsbnPage() {
                   onChange={(event) => setCopyForm({ ...copyForm, acquiredAt: event.target.value })}
                   slotProps={{ inputLabel: { shrink: true } }}
                 />
-              </Stack>
+              </FieldRow>
 
               <TextField
                 label="Preço pago"
@@ -415,6 +381,6 @@ export function RegisterByIsbnPage() {
           </Box>
         )}
       </Box>
-    </Box>
+    </RegisterPanel>
   )
 }
