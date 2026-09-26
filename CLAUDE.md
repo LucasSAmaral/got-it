@@ -137,10 +137,12 @@ Fica fora por enquanto: perfil público, listas de troca e venda, equivalência 
 - Não há botão "Sair" (quando existir, o `SIGNED_OUT` já limpa a cópia offline).
 - O admin é um UUID fixo (`ADMIN_USER_ID`), não um papel de verdade — revisitar (tabela/coluna própria) quando houver mais de um editor de confiança no catálogo.
 - PostgREST devolve no máximo 1000 linhas por resposta: lista e cópia offline truncam acima disso, e as sugestões de editora contam só as primeiras 1000 edições.
+- **Coleção grande** (pedido do Lucas, para depois): (1) `loading="lazy"` nas `<img>` de capa, que hoje baixam todas ao abrir a coleção; (2) paginação só na exibição ("Mostrar mais" ou carregar ao rolar, blocos de 24 ou 30 para fechar a grade de 2 e 3 colunas), com os dados ainda buscados inteiros: a lista completa alimenta a cópia offline, e paginar no servidor faria o "Eu tenho?" offline responder "Ainda não tem" para o que não foi baixado. A busca continua sobre a coleção toda. O limite de 1000 linhas se resolve à parte, buscando em partes de 1000 seguidas.
 - Capas não ficam disponíveis offline (o cartão mostra a inicial do título).
 - Tablets em pé (600 a 899 px) usam o layout de celular; a tela de escanear continua em tela cheia no desktop.
 - Detalhe do exemplar offline: dá para mostrar uma versão parcial a partir da cópia do IndexedDB (sem capa, formato, ano e preço), se fizer falta.
 - Considerar `unaccent` na busca (servidor e cópia local juntos).
+- **Séries** (ideia do Lucas, ainda não decidida para fazer): listar só os gibis de uma série (Absolute Batman, Invencível…). Usar `works` + `editions.work_id`, que já existem sem interface, em vez de campo de texto novo. Proposta: campo "Série" com sugestões (como o de editora) no cadastro e no admin; nome da série clicável no detalhe abre a lista dela, ordenada por volume numérico; filtro sobre a lista completa, então funciona offline sem mexer na busca. Chips de série na coleção só se fizer falta. A mesma tabela (`works.authors`) serve depois para a busca por autor. Conferir a RLS de `works` e criar índice em `work_id` numa migração.
 - O `README.md` ainda é o do template do Vite.
 - Perguntar ao Lucas se importados e mangás justificam testar bases abertas (Open Library, Google Books) como fonte extra de preenchimento.
 - Fases seguintes do plano: listas "procuro" e "troca ou venda", cadastro por foto da capa, edições equivalentes.
