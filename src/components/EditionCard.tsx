@@ -1,30 +1,25 @@
 import { Box, Card, Stack, Typography } from '@mui/material'
 import { useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
+import { titleInitials } from '../lib/format'
 import { tokens } from '../theme'
 import type { Edition } from '../types/catalog'
-import { ClampedTitle, CoverPlaceholder } from './EditionCard.styles'
-
-function initials(title: string) {
-  return title
-    .split(/\s+/)
-    .filter((word) => word.length > 0 && word !== '—')
-    .slice(0, 2)
-    .map((word) => word[0]!.toUpperCase())
-    .join('')
-}
+import { CardBody, CardLink, ClampedTitle, CoverPlaceholder } from './EditionCard.styles'
 
 type EditionCardProps = {
   edition: Pick<Edition, 'title' | 'publisher' | 'volume' | 'isbn13' | 'cover_url'>
   /** Botão no canto superior direito (ex.: excluir na coleção, editar no admin). */
   action?: ReactNode
+  /** Rota aberta ao tocar na capa ou no texto. O `action` fica fora do link: botão dentro de link não é HTML válido. */
+  to?: string
 }
 
 /** Cartão de uma edição: capa, título, editora · volume e ISBN. Usado na coleção e no painel de admin. */
-export function EditionCard({ edition, action }: EditionCardProps) {
+export function EditionCard({ edition, action, to }: EditionCardProps) {
   const [coverFailed, setCoverFailed] = useState(false)
 
-  return (
-    <Card variant="outlined" sx={{ display: 'flex', gap: 1.5, alignItems: 'center', p: 1.5, borderColor: 'divider' }}>
+  const content = (
+    <>
       <CoverPlaceholder>
         {edition.cover_url && !coverFailed ? (
           <Box
@@ -36,7 +31,7 @@ export function EditionCard({ edition, action }: EditionCardProps) {
           />
         ) : (
           <Typography variant="h4" color="text.secondary" sx={{ fontSize: 16 }}>
-            {initials(edition.title)}
+            {titleInitials(edition.title)}
           </Typography>
         )}
       </CoverPlaceholder>
@@ -56,6 +51,18 @@ export function EditionCard({ edition, action }: EditionCardProps) {
           </Typography>
         )}
       </Stack>
+    </>
+  )
+
+  return (
+    <Card variant="outlined" sx={{ display: 'flex', gap: 1.5, alignItems: 'center', p: 1.5, borderColor: 'divider' }}>
+      {to ? (
+        <CardLink component={Link} to={to}>
+          {content}
+        </CardLink>
+      ) : (
+        <CardBody>{content}</CardBody>
+      )}
 
       {action}
     </Card>

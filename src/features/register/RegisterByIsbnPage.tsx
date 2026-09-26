@@ -25,6 +25,7 @@ import {
   type CopyFormInput,
   type NewEditionInput,
 } from './api'
+import { PublisherField } from './PublisherField'
 import { CoverPreview, FieldLabel, FieldRow, FoundChip, NotFoundChip } from './RegisterByIsbnPage.styles'
 
 const CONDITIONS = ['Ótimo', 'Bom', 'Regular']
@@ -256,12 +257,9 @@ export function RegisterByIsbnPage() {
                 />
 
                 <FieldRow direction="row">
-                  <TextField
-                    label="Editora"
-                    fullWidth
-                    placeholder="Ex.: Panini"
+                  <PublisherField
                     value={manualEdition.publisher}
-                    onChange={(event) => setManualEdition({ ...manualEdition, publisher: event.target.value })}
+                    onChange={(publisher) => setManualEdition({ ...manualEdition, publisher })}
                   />
                   <TextField
                     label="Volume / nº"

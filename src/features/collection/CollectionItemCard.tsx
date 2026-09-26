@@ -20,6 +20,7 @@ export function CollectionItemCard({ item, showDelete = false }: { item: Collect
   return (
     <EditionCard
       edition={item}
+      to={`/exemplar/${item.copy_id}`}
       action={
         showDelete && (
           <>

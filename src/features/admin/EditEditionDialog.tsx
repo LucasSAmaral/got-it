@@ -17,6 +17,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { uploadCoverImage } from '../register/api'
 import { FORMATS } from '../register/constants'
+import { PublisherField } from '../register/PublisherField'
 import { CoverPreview, FieldRow } from '../register/RegisterByIsbnPage.styles'
 import { updateEdition, type EditionFormInput, type EditionSummary } from './api'
 
@@ -103,12 +104,7 @@ export function EditEditionDialog({ edition, onClose }: EditEditionDialogProps) 
             />
 
             <FieldRow direction="row">
-              <TextField
-                label="Editora"
-                fullWidth
-                value={form.publisher}
-                onChange={(event) => setForm({ ...form, publisher: event.target.value })}
-              />
+              <PublisherField value={form.publisher} onChange={(publisher) => setForm({ ...form, publisher })} />
               <TextField
                 label="Volume / nº"
                 fullWidth

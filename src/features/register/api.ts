@@ -88,3 +88,10 @@ export async function createEditionAndCopy(edition: NewEditionInput, form: CopyF
 
   await addCopyToExistingEdition(data.id, form)
 }
+
+/** Editora de cada edição do catálogo (com repetição), para ordenar as sugestões pelo uso. */
+export async function fetchCatalogPublishers(): Promise<string[]> {
+  const { data, error } = await supabase.from('editions').select('publisher').not('publisher', 'is', null)
+  if (error) throw error
+  return (data ?? []).map((row) => row.publisher as string)
+}

@@ -1,4 +1,5 @@
-import { Box, styled, Typography } from '@mui/material'
+import { Box, CardActionArea, styled, Typography } from '@mui/material'
+import type { ElementType } from 'react'
 import { tokens } from '../theme'
 
 /** Espaço reservado da capa: mostra a imagem quando existe, senão as iniciais do título. */
@@ -28,3 +29,15 @@ export const ClampedTitle = styled(Typography)(({ theme }) => ({
     WebkitLineClamp: 2,
   },
 }))
+
+const cardBody = { display: 'flex', gap: 12, alignItems: 'center', flex: 1, minWidth: 0 } as const
+
+/** Capa + texto do cartão, quando ele não abre nada. */
+export const CardBody = styled(Box)(cardBody)
+
+/** Capa + texto do cartão como link (ex.: para o detalhe do exemplar). */
+export const CardLink = styled(CardActionArea)<{ component?: ElementType; to?: string }>({
+  ...cardBody,
+  justifyContent: 'flex-start',
+  borderRadius: tokens.radius.sm,
+})
