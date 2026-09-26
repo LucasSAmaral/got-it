@@ -1,11 +1,12 @@
 import AddIcon from '@mui/icons-material/Add'
-import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined'
-import { Alert, Box, InputAdornment, Stack, Typography } from '@mui/material'
+import { Alert, Box, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { EditionGrid } from '../../components/EditionGrid'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
+import { SearchField } from '../../components/SearchField'
 import { CollectionItemCard } from './CollectionItemCard'
-import { AddFab, CollectionGrid, SearchField } from './CollectionPage.styles'
+import { AddFab } from './CollectionPage.styles'
 import { OfflineNotice } from './OfflineNotice'
 import { useCollection } from './useCollection'
 
@@ -26,21 +27,7 @@ export function CollectionPage() {
 
       {data?.fromMirror && <OfflineNotice savedAt={data.savedAt} />}
 
-      <SearchField
-        fullWidth
-        placeholder="Buscar por título, editora ou ISBN"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlinedIcon fontSize="small" color="disabled" />
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
+      <SearchField placeholder="Buscar por título, editora ou ISBN" value={query} onChange={setQuery} />
 
       {isLoading && <LoadingSpinner size={28} sx={{ py: 4 }} />}
 
@@ -52,11 +39,11 @@ export function CollectionPage() {
         </Typography>
       )}
 
-      <CollectionGrid>
+      <EditionGrid>
         {items?.map((item) => (
           <CollectionItemCard key={item.copy_id} item={item} showDelete={!data?.fromMirror} />
         ))}
-      </CollectionGrid>
+      </EditionGrid>
 
       <AddFab color="primary" aria-label="Cadastrar novo exemplar" onClick={() => navigate('/cadastro')}>
         <AddIcon />

@@ -1,12 +1,15 @@
-import { Alert, Box, List, ListItemButton, ListItemText, Typography } from '@mui/material'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import { Alert, Box, IconButton, Typography } from '@mui/material'
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
+import { EditionCard } from '../../components/EditionCard'
+import { EditionGrid } from '../../components/EditionGrid'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
+import { SearchField } from '../../components/SearchField'
 import { isAdmin } from './admin'
 import type { EditionSummary } from './api'
 import { EditEditionDialog } from './EditEditionDialog'
-import { SearchField } from '../collection/CollectionPage.styles'
 import { useAdminEditions } from './useAdminEditions'
 
 /** Busca e edita qualquer edição do catálogo — sem precisar mexer direto no Supabase. */
@@ -26,12 +29,7 @@ export function AdminEditionsPage() {
         Editar catálogo
       </Typography>
 
-      <SearchField
-        fullWidth
-        placeholder="Buscar por título, editora ou ISBN"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-      />
+      <SearchField placeholder="Buscar por título, editora ou ISBN" value={query} onChange={setQuery} />
 
       {isLoading && <LoadingSpinner size={28} sx={{ py: 4 }} />}
 
@@ -43,16 +41,24 @@ export function AdminEditionsPage() {
         </Typography>
       )}
 
-      <List disablePadding>
+      <EditionGrid>
         {data?.map((edition) => (
-          <ListItemButton key={edition.id} onClick={() => setEditing(edition)} sx={{ borderRadius: 2, mb: 0.5 }}>
-            <ListItemText
-              primary={edition.title}
-              secondary={[edition.publisher, edition.isbn13].filter(Boolean).join(' · ') || 'Sem editora informada'}
-            />
-          </ListItemButton>
+          <EditionCard
+            key={edition.id}
+            edition={edition}
+            action={
+              <IconButton
+                aria-label={`Editar "${edition.title}"`}
+                size="small"
+                onClick={() => setEditing(edition)}
+                sx={{ alignSelf: 'flex-start', color: 'text.secondary' }}
+              >
+                <EditOutlinedIcon fontSize="small" />
+              </IconButton>
+            }
+          />
         ))}
-      </List>
+      </EditionGrid>
 
       <EditEditionDialog edition={editing} onClose={() => setEditing(null)} />
     </Box>
