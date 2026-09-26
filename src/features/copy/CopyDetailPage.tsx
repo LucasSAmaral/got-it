@@ -7,7 +7,7 @@ import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { formatDate, formatPrice, titleInitials } from '../../lib/format'
 import { tokens } from '../../theme'
 import { fetchCopyDetail } from './api'
-import { CoverFrame, DetailList, SectionTitle } from './CopyDetailPage.styles'
+import { CoverFrame, DetailList, SectionCard, SectionTitle } from './CopyDetailPage.styles'
 
 type Detail = { label: string; value: string | null; mono?: boolean }
 
@@ -88,25 +88,30 @@ export function CopyDetailPage() {
             </Typography>
           </Stack>
 
-          <SectionTitle variant="overline">Edição</SectionTitle>
-          <Details
-            items={[
-              { label: 'Editora', value: data.edition.publisher },
-              { label: 'Volume / nº', value: data.edition.volume },
-              { label: 'Formato', value: data.edition.format },
-              { label: 'Ano', value: data.edition.year ? String(data.edition.year) : null },
-              { label: 'ISBN', value: data.edition.isbn13, mono: true },
-            ]}
-          />
-
-          <SectionTitle variant="overline">Seu exemplar</SectionTitle>
-          <Details
-            items={[
-              { label: 'Condição', value: data.condition },
-              { label: 'Adquirido em', value: data.acquired_at ? formatDate(data.acquired_at) : null },
-              { label: 'Preço pago', value: data.price_paid !== null ? formatPrice(data.price_paid) : null },
-            ]}
-          />
+          <Stack spacing={2} sx={{ mt: 3 }}>
+            <SectionCard variant="outlined">
+              <SectionTitle variant="overline">Edição</SectionTitle>
+              <Details
+                items={[
+                  { label: 'Editora', value: data.edition.publisher },
+                  { label: 'Volume / nº', value: data.edition.volume },
+                  { label: 'Formato', value: data.edition.format },
+                  { label: 'Ano', value: data.edition.year ? String(data.edition.year) : null },
+                  { label: 'ISBN', value: data.edition.isbn13, mono: true },
+                ]}
+              />
+            </SectionCard>
+            <SectionCard variant="outlined">
+              <SectionTitle variant="overline">Seu exemplar</SectionTitle>
+              <Details
+                items={[
+                  { label: 'Condição', value: data.condition },
+                  { label: 'Adquirido em', value: data.acquired_at ? formatDate(data.acquired_at) : null },
+                  { label: 'Preço pago', value: data.price_paid !== null ? formatPrice(data.price_paid) : null },
+                ]}
+              />
+            </SectionCard>
+          </Stack>
         </>
       )}
     </Box>

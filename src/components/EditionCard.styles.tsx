@@ -35,9 +35,13 @@ const cardBody = { display: 'flex', gap: 12, alignItems: 'center', flex: 1, minW
 /** Capa + texto do cartão, quando ele não abre nada. */
 export const CardBody = styled(Box)(cardBody)
 
-/** Capa + texto do cartão como link (ex.: para o detalhe do exemplar). */
+/**
+ * Capa + texto do cartão como link (ex.: para o detalhe do exemplar). Sem o fundo cinza do MUI no hover;
+ * o destaque de foco pelo teclado (Tab) continua.
+ */
 export const CardLink = styled(CardActionArea)<{ component?: ElementType; to?: string }>({
   ...cardBody,
   justifyContent: 'flex-start',
   borderRadius: tokens.radius.sm,
+  '&:hover .MuiCardActionArea-focusHighlight': { opacity: 0 },
 })
