@@ -1,6 +1,9 @@
 import AddIcon from '@mui/icons-material/Add'
+import LogoutIcon from '@mui/icons-material/Logout'
 import { Button, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { LogoutDialog } from '../features/auth/LogoutDialog'
 import { SidebarNav } from './AppLayout.styles'
 import { useNavItems } from './navItems'
 
@@ -13,6 +16,7 @@ export function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
   const navItems = useNavItems()
+  const [logoutOpen, setLogoutOpen] = useState(false)
 
   return (
     <SidebarNav component="nav">
@@ -35,6 +39,15 @@ export function Sidebar() {
           </ListItemButton>
         ))}
       </List>
+
+      {/* `mt: auto` empurra o Sair para o pé da barra; `flexGrow: 0` porque o ListItemButton cresce por padrão. */}
+      <ListItemButton onClick={() => setLogoutOpen(true)} sx={{ borderRadius: 2, mt: 'auto', flexGrow: 0 }}>
+        <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+          <LogoutIcon />
+        </ListItemIcon>
+        <ListItemText primary="Sair" slotProps={{ primary: { sx: { fontWeight: 600 } } }} />
+      </ListItemButton>
+      <LogoutDialog open={logoutOpen} onClose={() => setLogoutOpen(false)} />
     </SidebarNav>
   )
 }

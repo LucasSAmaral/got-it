@@ -47,7 +47,7 @@ Formato: PWA em React; apps Android e iOS depois, empacotados com Capacitor (só
 
 ## Estado atual (Fase 1 concluída, em uso pelo Lucas)
 
-- **Login** (`src/features/auth`): e-mail e senha, com o link por e-mail como alternativa.
+- **Login** (`src/features/auth`): e-mail e senha, com o link por e-mail como alternativa. **Sair** (`LogoutDialog`): no pé da barra lateral e, no celular, ícone no título da Coleção (fora da navegação inferior, para evitar toque sem querer). Pede confirmação, porque apaga a cópia offline, e fica desligado sem conexão. O `SIGNED_OUT` também limpa o cache do TanStack Query, para a próxima conta no aparelho não ver a coleção da anterior.
 - **Coleção** e **"Eu tenho?"** (`src/features/collection`, `src/features/check`): busca por título, editora e ISBN (prefixo). Não busca por autor (a tabela `works` existe, mas não tem interface). Lista grande: os dados vêm inteiros (em partes de 1000, por causa do limite do PostgREST; `fetchAllCopyRows`), mas a tela mostra 30 cartões e vai mostrando mais ao rolar (`useShowMore`, também no admin); capas com `loading="lazy"`. Paginar no servidor faria a cópia offline ficar incompleta e o "Eu tenho?" offline responder "Ainda não tem" para o que não foi baixado.
 - **Cadastro por ISBN** (`src/features/register`): se a edição existe no catálogo, preenche; se não, formulário manual que cria a edição e o exemplar. Avisa quando o usuário já tem um exemplar da edição, sem impedir. Excluir exemplar existe; editar exemplar ainda não. A editora (cadastro manual e diálogo do admin) é um `Autocomplete` com texto livre (`PublisherField`): sugere as editoras do catálogo, mais usadas primeiro, e depois `COMMON_PUBLISHERS` (`register/constants.ts`); a ordem vem de `rankPublishers` (`src/lib/publishers.ts`).
 - **Detalhe do exemplar** (`src/features/copy`, rota `/exemplar/:copyId`): abre ao tocar na capa/título do cartão na coleção e no "Eu tenho?" (prop `to` do `EditionCard`; o botão de ação fica fora do link, porque botão dentro de link não é HTML válido). Capa grande no topo, centralizada na coluna, e abaixo os dados da edição e do exemplar, cada bloco num cartão como o da coleção. O link do cartão não tem o fundo de hover do MUI (só o destaque de foco pelo teclado). Só funciona online: sem conexão avisa na hora, já que capa e detalhes não ficam no aparelho.
@@ -66,7 +66,7 @@ src/
   components/      componentes compartilhados entre mais de um arquivo: LoadingSpinner, SearchField (pílula com lupa), EditionGrid e EditionCard (capa, título, editora, ISBN e um botão de ação — lixeira na coleção, lápis no admin)
   features/
     admin/         painel de edição do catálogo, só para o Lucas (admin.ts, api.ts)
-    auth/          LoginPage
+    auth/          LoginPage, LogoutDialog
     check/         "Eu tenho?" (CheckPage, useCheck)
     copy/          detalhe do exemplar (CopyDetailPage, api.ts)
     collection/    lista, cartão (EditionCard + excluir), busca com fallback offline (api.ts), OfflineNotice
@@ -122,6 +122,7 @@ Se `search_my_collection` mudar, refaça os valores de `src/lib/localSearch.test
 - **TanStack Query v5** pausa consultas sem rede por padrão: o app usa `networkMode: 'always'` e `onlineManager.setOnline(navigator.onLine)`.
 - **"Eu tenho?"**: erro de consulta nunca pode virar "Ainda não tem" (levaria a comprar repetido).
 - **Vite:** não suba uma segunda instância no mesmo projeto enquanto o dev server do Lucas estiver aberto. Ela reotimiza `node_modules/.vite` e o servidor em uso passa a devolver 504 (tela em branco). Se acontecer, `npx vite --force`.
+- **MUI `ListItemButton`** tem `flex-grow: 1`: para empurrá-lo com `mt: 'auto'` num flex em coluna, ponha `flexGrow: 0` (senão ele estica e centraliza o texto).
 - **MUI `Typography`:** as variantes `overline`, `caption` e `button` renderizam `<span>` (as `h*` e `body*` não) — margem vertical é ignorada. Com `styled()`, ponha `display: 'block'` (ex.: `SectionTitle` do detalhe).
 - **Datas do Postgres** (`2026-03-05`): não passe por `new Date()` pra exibir — é meia-noite UTC, que em Brasília ainda é o dia anterior. Use `formatDate` (`src/lib/format.ts`).
 - **Busca e acentos:** como no servidor, "acao" não acha "Ação" (o pg_trgm não ignora acentos).
@@ -135,7 +136,6 @@ Fica fora por enquanto: perfil público, listas de troca e venda, equivalência 
 ## Em aberto e próximos passos
 
 - Fechar os cadastros no Supabase antes de compartilhar o app.
-- Não há botão "Sair" (quando existir, o `SIGNED_OUT` já limpa a cópia offline).
 - O admin é um UUID fixo (`ADMIN_USER_ID`), não um papel de verdade — revisitar (tabela/coluna própria) quando houver mais de um editor de confiança no catálogo.
 - PostgREST devolve no máximo 1000 linhas por resposta. A lista da coleção (e a cópia offline) já busca em partes; ainda truncam em 1000 a lista do admin (`search_editions`), os resultados de busca e as sugestões de editora.
 - Capas não ficam disponíveis offline (o cartão mostra a inicial do título).

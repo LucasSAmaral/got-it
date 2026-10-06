@@ -1,4 +1,5 @@
 import { isAuthRetryableFetchError, type Session } from '@supabase/supabase-js'
+import { useQueryClient } from '@tanstack/react-query'
 import { createContext, useEffect, useState, type ReactNode } from 'react'
 import { clearMirror, loadMirror } from '../lib/mirrorStore'
 import { supabase } from '../lib/supabase'
@@ -25,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const [offlineAccess, setOfflineAccess] = useState(false)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     let active = true
@@ -57,6 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (event === 'SIGNED_OUT') {
         setOfflineAccess(false)
         clearMirror()
+        // A próxima conta neste aparelho não pode ver, nem por um instante, a coleção da anterior.
+        queryClient.clear()
       }
     })
 
@@ -64,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       active = false
       subscription.subscription.unsubscribe()
     }
-  }, [])
+  }, [queryClient])
 
   return <AuthContext.Provider value={{ session, loading, offlineAccess }}>{children}</AuthContext.Provider>
 }
