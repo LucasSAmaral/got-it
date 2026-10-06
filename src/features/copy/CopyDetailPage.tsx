@@ -6,8 +6,9 @@ import { Fragment, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { formatDate, formatPrice, titleInitials } from '../../lib/format'
+import { seriesPosition } from '../../lib/series'
 import { tokens } from '../../theme'
-import { fetchCopyDetail } from './api'
+import { fetchCopyDetail, type CopyDetail } from './api'
 import { CoverFrame, DetailList, SectionCard, SectionTitle } from './CopyDetailPage.styles'
 import { EditCopyDialog } from './EditCopyDialog'
 
@@ -32,6 +33,13 @@ function Details({ items }: { items: Detail[] }) {
       ))}
     </DetailList>
   )
+}
+
+/** "Homem-Aranha 2099 · nº 1"; o nº vem do "Nº na série" ou, sem ele, do volume. */
+function seriesLabel(edition: CopyDetail['edition']): string | null {
+  if (!edition.work) return null
+  const position = seriesPosition(edition)
+  return position === null ? edition.work.title : `${edition.work.title} · nº ${position}`
 }
 
 /** Detalhe de um exemplar da coleção: capa grande no topo e, abaixo, os dados da edição e do exemplar. */
@@ -96,6 +104,7 @@ export function CopyDetailPage() {
               <SectionTitle variant="overline">Edição</SectionTitle>
               <Details
                 items={[
+                  { label: 'Série', value: seriesLabel(data.edition) },
                   { label: 'Editora', value: data.edition.publisher },
                   { label: 'Volume / nº', value: data.edition.volume },
                   { label: 'Formato', value: data.edition.format },

@@ -1,5 +1,6 @@
 import { parsePrice } from '../../lib/format'
 import { shrinkCover } from '../../lib/image'
+import { parseSeriesPosition } from '../../lib/series'
 import { supabase } from '../../lib/supabase'
 import type { Edition } from '../../types/catalog'
 
@@ -19,6 +20,9 @@ export interface NewEditionInput {
   format: string
   year: string
   coverUrl: string
+  /** Nome da série; vazio, a edição fica sem série. */
+  series: string
+  seriesPosition: string
 }
 
 export async function uploadCoverImage(file: File, isbn13: string): Promise<string> {
@@ -81,6 +85,7 @@ export async function createEditionAndCopy(edition: NewEditionInput, form: CopyF
       format: edition.format || null,
       year: edition.year ? Number(edition.year) : null,
       cover_url: edition.coverUrl || null,
+      ...(await seriesColumns(edition.series, edition.seriesPosition)),
     })
     .select('id')
     .single()
@@ -100,4 +105,23 @@ export async function fetchCatalogPublishers(): Promise<string[]> {
   const { data, error } = await supabase.from('editions').select('publisher').not('publisher', 'is', null)
   if (error) throw error
   return (data ?? []).map((row) => row.publisher as string)
+}
+
+/** Nomes das séries do catálogo, para as sugestões do campo "Série". */
+export async function fetchSeriesTitles(): Promise<string[]> {
+  const { data, error } = await supabase.from('works').select('title').order('title')
+  if (error) throw error
+  return (data ?? []).map((row) => row.title as string)
+}
+
+/**
+ * Colunas de série de uma edição a partir do formulário. O nome vira o id da série pela função
+ * `get_or_create_work` (acha ignorando maiúsculas ou cria); sem série, o nº na série também fica vazio.
+ * Usado no cadastro manual e na edição pelo painel de admin.
+ */
+export async function seriesColumns(series: string, position: string) {
+  if (!series.trim()) return { work_id: null, series_position: null }
+  const { data, error } = await supabase.rpc('get_or_create_work', { p_title: series })
+  if (error) throw error
+  return { work_id: data as string, series_position: parseSeriesPosition(position) }
 }

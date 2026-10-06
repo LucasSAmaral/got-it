@@ -12,6 +12,8 @@ export interface Edition {
   isbn13: string | null
   cover_url: string | null
   year: number | null
+  /** Posição na série (`work_id`) quando o volume não serve para ordenar; vazio, vale o volume. */
+  series_position: number | null
   verified: boolean
   created_by: string | null
   created_at: string

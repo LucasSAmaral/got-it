@@ -13,6 +13,7 @@ import { Sidebar } from '../../layout/Sidebar'
 import { describeScan } from '../../lib/barcode'
 import { isPriceInputValid } from '../../lib/format'
 import { isValidIsbn, normalizeIsbn, toIsbn13 } from '../../lib/isbn'
+import { isSeriesPositionInputValid } from '../../lib/series'
 import { tokens } from '../../theme'
 import { LazyScannerDialog } from '../scanner/LazyScannerDialog'
 import { CONDITIONS, FORMATS } from './constants'
@@ -28,6 +29,7 @@ import {
 } from './api'
 import { PriceField } from './PriceField'
 import { PublisherField } from './PublisherField'
+import { SeriesFields } from './SeriesFields'
 import { CoverPreview, FieldLabel, FieldRow, FoundChip, NotFoundChip } from './RegisterByIsbnPage.styles'
 
 export function RegisterByIsbnPage() {
@@ -42,7 +44,15 @@ export function RegisterByIsbnPage() {
   const [scanLabel, setScanLabel] = useState('')
 
   const [copyForm, setCopyForm] = useState<CopyFormInput>({ condition: '', acquiredAt: '', pricePaid: '' })
-  const [manualEdition, setManualEdition] = useState({ title: '', publisher: '', volume: '', format: '', year: '' })
+  const [manualEdition, setManualEdition] = useState({
+    title: '',
+    publisher: '',
+    volume: '',
+    format: '',
+    year: '',
+    series: '',
+    seriesPosition: '',
+  })
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [coverPreview, setCoverPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -269,6 +279,13 @@ export function RegisterByIsbnPage() {
                   />
                 </FieldRow>
 
+                <SeriesFields
+                  series={manualEdition.series}
+                  position={manualEdition.seriesPosition}
+                  onSeriesChange={(series) => setManualEdition({ ...manualEdition, series })}
+                  onPositionChange={(seriesPosition) => setManualEdition({ ...manualEdition, seriesPosition })}
+                />
+
                 <FieldRow direction="row">
                   <TextField
                     select
@@ -366,7 +383,12 @@ export function RegisterByIsbnPage() {
                 <Button
                   type="submit"
                   variant="contained"
-                  disabled={submitting || !manualEdition.title || !isPriceInputValid(copyForm.pricePaid)}
+                  disabled={
+                    submitting ||
+                    !manualEdition.title ||
+                    !isPriceInputValid(copyForm.pricePaid) ||
+                    !isSeriesPositionInputValid(manualEdition.seriesPosition)
+                  }
                 >
                   {submitting ? 'Salvando…' : 'Cadastrar e adicionar à coleção'}
                 </Button>

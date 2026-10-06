@@ -1,10 +1,22 @@
 import { supabase } from '../../lib/supabase'
+import { seriesColumns } from '../register/api'
 import type { Edition } from '../../types/catalog'
 
 export type EditionSummary = Pick<
   Edition,
-  'id' | 'title' | 'publisher' | 'isbn13' | 'volume' | 'format' | 'year' | 'cover_url' | 'verified' | 'created_at'
->
+  | 'id'
+  | 'title'
+  | 'publisher'
+  | 'isbn13'
+  | 'volume'
+  | 'format'
+  | 'year'
+  | 'cover_url'
+  | 'verified'
+  | 'created_at'
+  | 'work_id'
+  | 'series_position'
+> & { series_title: string | null }
 
 /** Busca no catálogo inteiro (não só na coleção do usuário). Vazio devolve tudo, mais recente primeiro. */
 export async function searchEditions(query: string): Promise<EditionSummary[]> {
@@ -19,6 +31,8 @@ export interface EditionFormInput {
   volume: string
   format: string
   year: string
+  series: string
+  seriesPosition: string
 }
 
 export async function updateEdition(id: string, form: EditionFormInput, coverUrl: string | null): Promise<void> {
@@ -31,6 +45,7 @@ export async function updateEdition(id: string, form: EditionFormInput, coverUrl
       format: form.format || null,
       year: form.year ? Number(form.year) : null,
       ...(coverUrl ? { cover_url: coverUrl } : {}),
+      ...(await seriesColumns(form.series, form.seriesPosition)),
     })
     .eq('id', id)
   if (error) throw error

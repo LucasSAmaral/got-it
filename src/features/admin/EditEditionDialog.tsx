@@ -15,13 +15,23 @@ import {
 } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { isSeriesPositionInputValid } from '../../lib/series'
 import { uploadCoverImage } from '../register/api'
 import { FORMATS } from '../register/constants'
 import { PublisherField } from '../register/PublisherField'
+import { SeriesFields } from '../register/SeriesFields'
 import { CoverPreview, FieldRow } from '../register/RegisterByIsbnPage.styles'
 import { updateEdition, type EditionFormInput, type EditionSummary } from './api'
 
-const EMPTY_FORM: EditionFormInput = { title: '', publisher: '', volume: '', format: '', year: '' }
+const EMPTY_FORM: EditionFormInput = {
+  title: '',
+  publisher: '',
+  volume: '',
+  format: '',
+  year: '',
+  series: '',
+  seriesPosition: '',
+}
 
 function formFromEdition(edition: EditionSummary): EditionFormInput {
   return {
@@ -30,6 +40,8 @@ function formFromEdition(edition: EditionSummary): EditionFormInput {
     volume: edition.volume ?? '',
     format: edition.format ?? '',
     year: edition.year ? String(edition.year) : '',
+    series: edition.series_title ?? '',
+    seriesPosition: edition.series_position ? String(edition.series_position) : '',
   }
 }
 
@@ -75,7 +87,12 @@ export function EditEditionDialog({ edition, onClose }: EditEditionDialogProps) 
     try {
       const coverUrl = coverFile ? await uploadCoverImage(coverFile, edition.isbn13 ?? edition.id) : null
       await updateEdition(edition.id, form, coverUrl)
-      await queryClient.invalidateQueries({ queryKey: ['admin-editions'] })
+      // A série pode ter sido criada agora: as sugestões e o detalhe dos exemplares precisam vê-la.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-editions'] }),
+        queryClient.invalidateQueries({ queryKey: ['series-titles'] }),
+        queryClient.invalidateQueries({ queryKey: ['copy-detail'] }),
+      ])
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Não deu para salvar. Tenta de novo.')
@@ -112,6 +129,13 @@ export function EditEditionDialog({ edition, onClose }: EditEditionDialogProps) 
                 onChange={(event) => setForm({ ...form, volume: event.target.value })}
               />
             </FieldRow>
+
+            <SeriesFields
+              series={form.series}
+              position={form.seriesPosition}
+              onSeriesChange={(series) => setForm({ ...form, series })}
+              onPositionChange={(seriesPosition) => setForm({ ...form, seriesPosition })}
+            />
 
             <FieldRow direction="row">
               <TextField
@@ -164,7 +188,7 @@ export function EditEditionDialog({ edition, onClose }: EditEditionDialogProps) 
           <Button color="inherit" onClick={onClose}>
             Cancelar
           </Button>
-          <Button type="submit" variant="contained" disabled={saving}>
+          <Button type="submit" variant="contained" disabled={saving || !isSeriesPositionInputValid(form.seriesPosition)}>
             {saving ? 'Salvando…' : 'Salvar'}
           </Button>
         </DialogActions>
