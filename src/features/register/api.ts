@@ -35,13 +35,17 @@ export async function uploadCoverImage(file: File, isbn13: string): Promise<stri
   return data.publicUrl
 }
 
-function toCopyRow(editionId: string, form: CopyFormInput) {
+/** Campos do formulário do exemplar como colunas de `copies`. Usado no cadastro e na edição do exemplar. */
+export function copyColumns(form: CopyFormInput) {
   return {
-    edition_id: editionId,
     condition: form.condition || null,
     acquired_at: form.acquiredAt || null,
     price_paid: form.pricePaid ? Number(form.pricePaid.replace(',', '.')) : null,
   }
+}
+
+function toCopyRow(editionId: string, form: CopyFormInput) {
+  return { edition_id: editionId, ...copyColumns(form) }
 }
 
 export async function fetchEditionByIsbn(isbn13: string): Promise<Edition | null> {

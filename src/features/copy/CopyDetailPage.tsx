@@ -1,4 +1,5 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { Alert, Box, IconButton, Stack, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { Fragment, useState } from 'react'
@@ -8,6 +9,7 @@ import { formatDate, formatPrice, titleInitials } from '../../lib/format'
 import { tokens } from '../../theme'
 import { fetchCopyDetail } from './api'
 import { CoverFrame, DetailList, SectionCard, SectionTitle } from './CopyDetailPage.styles'
+import { EditCopyDialog } from './EditCopyDialog'
 
 type Detail = { label: string; value: string | null; mono?: boolean }
 
@@ -37,6 +39,7 @@ export function CopyDetailPage() {
   const { copyId } = useParams<{ copyId: string }>()
   const navigate = useNavigate()
   const [coverFailed, setCoverFailed] = useState(false)
+  const [editing, setEditing] = useState(false)
 
   const offline = !navigator.onLine
   const { data, isLoading, isError } = useQuery({
@@ -102,7 +105,17 @@ export function CopyDetailPage() {
               />
             </SectionCard>
             <SectionCard variant="outlined">
-              <SectionTitle variant="overline">Seu exemplar</SectionTitle>
+              <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <SectionTitle variant="overline">Seu exemplar</SectionTitle>
+                <IconButton
+                  aria-label="Editar exemplar"
+                  size="small"
+                  onClick={() => setEditing(true)}
+                  sx={{ mt: -0.75, mr: -0.75, color: 'text.secondary' }}
+                >
+                  <EditOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Stack>
               <Details
                 items={[
                   { label: 'Condição', value: data.condition },
@@ -112,6 +125,8 @@ export function CopyDetailPage() {
               />
             </SectionCard>
           </Stack>
+
+          {editing && <EditCopyDialog copy={data} onClose={() => setEditing(false)} />}
         </>
       )}
     </Box>
