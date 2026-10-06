@@ -1,3 +1,4 @@
+import { parsePrice } from '../../lib/format'
 import { shrinkCover } from '../../lib/image'
 import { supabase } from '../../lib/supabase'
 import type { Edition } from '../../types/catalog'
@@ -40,7 +41,8 @@ export function copyColumns(form: CopyFormInput) {
   return {
     condition: form.condition || null,
     acquired_at: form.acquiredAt || null,
-    price_paid: form.pricePaid ? Number(form.pricePaid.replace(',', '.')) : null,
+    // Os formulários só deixam salvar com preço vazio ou válido (`PriceField`).
+    price_paid: parsePrice(form.pricePaid),
   }
 }
 

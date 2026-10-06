@@ -14,7 +14,9 @@ import {
 } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
+import { isPriceInputValid } from '../../lib/format'
 import { CONDITIONS } from '../register/constants'
+import { PriceField } from '../register/PriceField'
 import { copyFormFromDetail, updateCopy, type CopyDetail } from './api'
 
 type EditCopyDialogProps = {
@@ -86,12 +88,7 @@ export function EditCopyDialog({ copy, onClose }: EditCopyDialogProps) {
               onChange={(event) => setForm({ ...form, acquiredAt: event.target.value })}
               slotProps={{ inputLabel: { shrink: true } }}
             />
-            <TextField
-              label="Preço pago"
-              placeholder="R$ 0,00"
-              value={form.pricePaid}
-              onChange={(event) => setForm({ ...form, pricePaid: event.target.value })}
-            />
+            <PriceField value={form.pricePaid} onChange={(pricePaid) => setForm({ ...form, pricePaid })} />
 
             {error && <Alert severity="error">{error}</Alert>}
           </Stack>
@@ -100,7 +97,7 @@ export function EditCopyDialog({ copy, onClose }: EditCopyDialogProps) {
           <Button color="inherit" onClick={onClose}>
             Cancelar
           </Button>
-          <Button type="submit" variant="contained" disabled={saving}>
+          <Button type="submit" variant="contained" disabled={saving || !isPriceInputValid(form.pricePaid)}>
             {saving ? 'Salvando…' : 'Salvar'}
           </Button>
         </DialogActions>

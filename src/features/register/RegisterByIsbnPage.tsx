@@ -11,6 +11,7 @@ import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { PageContent } from '../../layout/PageContent'
 import { Sidebar } from '../../layout/Sidebar'
 import { describeScan } from '../../lib/barcode'
+import { isPriceInputValid } from '../../lib/format'
 import { isValidIsbn, normalizeIsbn, toIsbn13 } from '../../lib/isbn'
 import { tokens } from '../../theme'
 import { LazyScannerDialog } from '../scanner/LazyScannerDialog'
@@ -25,6 +26,7 @@ import {
   type CopyFormInput,
   type NewEditionInput,
 } from './api'
+import { PriceField } from './PriceField'
 import { PublisherField } from './PublisherField'
 import { CoverPreview, FieldLabel, FieldRow, FoundChip, NotFoundChip } from './RegisterByIsbnPage.styles'
 
@@ -221,16 +223,15 @@ export function RegisterByIsbnPage() {
                   />
                 </FieldRow>
 
-                <TextField
-                  label="Preço pago"
-                  placeholder="R$ 0,00"
-                  value={copyForm.pricePaid}
-                  onChange={(event) => setCopyForm({ ...copyForm, pricePaid: event.target.value })}
-                />
+                <PriceField value={copyForm.pricePaid} onChange={(pricePaid) => setCopyForm({ ...copyForm, pricePaid })} />
 
                 {submitError && <Alert severity="error">{submitError}</Alert>}
 
-                <Button type="submit" variant="contained" disabled={submitting}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={submitting || !isPriceInputValid(copyForm.pricePaid)}
+                >
                   {submitting ? 'Salvando…' : 'Adicionar à minha coleção'}
                 </Button>
               </Stack>
@@ -358,16 +359,15 @@ export function RegisterByIsbnPage() {
                   />
                 </FieldRow>
 
-                <TextField
-                  label="Preço pago"
-                  placeholder="R$ 0,00"
-                  value={copyForm.pricePaid}
-                  onChange={(event) => setCopyForm({ ...copyForm, pricePaid: event.target.value })}
-                />
+                <PriceField value={copyForm.pricePaid} onChange={(pricePaid) => setCopyForm({ ...copyForm, pricePaid })} />
 
                 {submitError && <Alert severity="error">{submitError}</Alert>}
 
-                <Button type="submit" variant="contained" disabled={submitting || !manualEdition.title}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={submitting || !manualEdition.title || !isPriceInputValid(copyForm.pricePaid)}
+                >
                   {submitting ? 'Salvando…' : 'Cadastrar e adicionar à coleção'}
                 </Button>
               </Stack>
