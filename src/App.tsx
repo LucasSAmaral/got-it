@@ -6,6 +6,7 @@ import { CollectionPage } from './features/collection/CollectionPage'
 import { CopyDetailPage } from './features/copy/CopyDetailPage'
 import { LoginPage } from './features/auth/LoginPage'
 import { RegisterByIsbnPage } from './features/register/RegisterByIsbnPage'
+import { SeriesPage } from './features/series/SeriesPage'
 import { AppLayout } from './layout/AppLayout'
 
 export function App() {
@@ -17,6 +18,7 @@ export function App() {
           <Route index element={<CollectionPage />} />
           <Route path="eu-tenho" element={<CheckPage />} />
           <Route path="exemplar/:copyId" element={<CopyDetailPage />} />
+          <Route path="serie/:workId" element={<SeriesPage />} />
           <Route path="admin" element={<AdminEditionsPage />} />
         </Route>
         <Route path="cadastro" element={<RegisterByIsbnPage />} />

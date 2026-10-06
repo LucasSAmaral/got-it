@@ -15,6 +15,9 @@ interface RawCopyRow {
     isbn13: string | null
     volume: string | null
     cover_url: string | null
+    work_id: string | null
+    series_position: number | null
+    work: { title: string } | null
   } | null
 }
 
@@ -30,7 +33,7 @@ const SEARCH_TIMEOUT_MS = 2000
 const LIST_TIMEOUT_MS = 4000
 
 /** O servidor não respondeu (sem rede, sem sessão para perguntar ou tempo esgotado), diferente de um erro que ele devolve. */
-class NetworkError extends Error {}
+export class NetworkError extends Error {}
 
 async function fetchFromServer(query: string, signal: AbortSignal): Promise<CollectionItem[]> {
   if (query) {
@@ -52,6 +55,9 @@ async function fetchFromServer(query: string, signal: AbortSignal): Promise<Coll
       status: row.status,
       condition: row.condition,
       acquired_at: row.acquired_at,
+      work_id: row.editions!.work_id,
+      series_title: row.editions!.work?.title ?? null,
+      series_position: row.editions!.series_position,
     }))
 }
 
@@ -62,7 +68,9 @@ const PAGE_ROWS = 1000
 async function fetchAllCopyRows(signal: AbortSignal, from = 0): Promise<RawCopyRow[]> {
   const { data, error, status } = await supabase
     .from('copies')
-    .select('id, status, condition, acquired_at, editions(id, title, publisher, isbn13, volume, cover_url)')
+    .select(
+      'id, status, condition, acquired_at, editions(id, title, publisher, isbn13, volume, cover_url, work_id, series_position, work:works(title))',
+    )
     // `id` desempata exemplares criados no mesmo instante: sem ordem estável, um item poderia
     // aparecer em duas partes e outro em nenhuma.
     .order('created_at', { ascending: false })
@@ -84,7 +92,7 @@ async function fetchAllCopyRows(signal: AbortSignal, from = 0): Promise<RawCopyR
  * Sem rede o supabase-js ainda pode passar até ~30 s tentando renovar o token antes de fazer o pedido, e
  * o AbortSignal só vale depois disso. Por isso o prazo vale para tudo, autenticação inclusa.
  */
-async function withinTimeout<T>(ms: number, run: (signal: AbortSignal) => Promise<T>): Promise<T> {
+export async function withinTimeout<T>(ms: number, run: (signal: AbortSignal) => Promise<T>): Promise<T> {
   const controller = new AbortController()
   const expired = new Promise<never>((_, reject) => {
     controller.signal.addEventListener('abort', () => reject(new NetworkError('tempo esgotado')), { once: true })

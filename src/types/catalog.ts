@@ -43,4 +43,11 @@ export interface CollectionItem {
   status: CopyStatus
   condition: string | null
   acquired_at: string | null
+  /**
+   * Série da edição. Só vem na lista completa (que alimenta a cópia offline e a página da série sem sinal),
+   * não nos resultados de busca; cópias salvas antes das séries também não têm.
+   */
+  work_id?: string | null
+  series_title?: string | null
+  series_position?: number | null
 }

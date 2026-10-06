@@ -3,7 +3,7 @@ import { copyColumns, type CopyFormInput } from '../register/api'
 import type { Copy, Edition } from '../../types/catalog'
 
 export type CopyDetail = Pick<Copy, 'id' | 'condition' | 'acquired_at' | 'price_paid'> & {
-  edition: Pick<Edition, 'title' | 'publisher' | 'volume' | 'format' | 'year' | 'isbn13' | 'cover_url' | 'series_position'> & {
+  edition: Pick<Edition, 'title' | 'publisher' | 'volume' | 'format' | 'year' | 'isbn13' | 'cover_url' | 'series_position' | 'work_id'> & {
     work: { title: string } | null
   }
 }
@@ -13,7 +13,7 @@ export async function fetchCopyDetail(copyId: string): Promise<CopyDetail | null
   const { data, error } = await supabase
     .from('copies')
     .select(
-      'id, condition, acquired_at, price_paid, edition:editions(title, publisher, volume, format, year, isbn13, cover_url, series_position, work:works(title))',
+      'id, condition, acquired_at, price_paid, edition:editions(title, publisher, volume, format, year, isbn13, cover_url, series_position, work_id, work:works(title))',
     )
     .eq('id', copyId)
     .maybeSingle()

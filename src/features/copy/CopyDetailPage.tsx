@@ -1,9 +1,9 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
-import { Alert, Box, IconButton, Stack, Typography } from '@mui/material'
+import { Alert, Box, IconButton, Link, Stack, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { Fragment, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { formatDate, formatPrice, titleInitials } from '../../lib/format'
 import { seriesPosition } from '../../lib/series'
@@ -12,7 +12,8 @@ import { fetchCopyDetail, type CopyDetail } from './api'
 import { CoverFrame, DetailList, SectionCard, SectionTitle } from './CopyDetailPage.styles'
 import { EditCopyDialog } from './EditCopyDialog'
 
-type Detail = { label: string; value: string | null; mono?: boolean }
+/** `to`: o valor vira link (ex.: a série abre a página dela). */
+type Detail = { label: string; value: string | null; mono?: boolean; to?: string }
 
 function Details({ items }: { items: Detail[] }) {
   return (
@@ -27,7 +28,13 @@ function Details({ items }: { items: Detail[] }) {
             variant="body2"
             sx={{ fontWeight: 600, fontFamily: item.mono && item.value ? tokens.font.mono : undefined }}
           >
-            {item.value ?? '—'}
+            {item.value && item.to ? (
+              <Link component={RouterLink} to={item.to}>
+                {item.value}
+              </Link>
+            ) : (
+              (item.value ?? '—')
+            )}
           </Typography>
         </Fragment>
       ))}
@@ -104,7 +111,11 @@ export function CopyDetailPage() {
               <SectionTitle variant="overline">Edição</SectionTitle>
               <Details
                 items={[
-                  { label: 'Série', value: seriesLabel(data.edition) },
+                  {
+                    label: 'Série',
+                    value: seriesLabel(data.edition),
+                    to: data.edition.work_id ? `/serie/${data.edition.work_id}` : undefined,
+                  },
                   { label: 'Editora', value: data.edition.publisher },
                   { label: 'Volume / nº', value: data.edition.volume },
                   { label: 'Formato', value: data.edition.format },
