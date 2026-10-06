@@ -27,7 +27,7 @@ Formato: PWA em React; apps Android e iOS depois, empacotados com Capacitor (só
 
 ## Decisões já tomadas
 
-- **Catálogo colaborativo desde o dia 1.** Dois ISBNs brasileiros válidos (prefixo 978-65), um de banca e um encadernado, não retornam nada em Open Library, Google Books nem Comic Vine. A base própria é a fonte principal: o primeiro usuário que escaneia um código cadastra a edição, e os seguintes recebem tudo preenchido. Bases abertas ficam como extra futuro, principalmente para importados e mangás.
+- **Catálogo colaborativo desde o dia 1.** Dois ISBNs brasileiros válidos (prefixo 978-65), um de banca e um encadernado, não retornam nada em Open Library, Google Books nem Comic Vine. A base própria é a fonte principal: o primeiro usuário que escaneia um código cadastra a edição, e os seguintes recebem tudo preenchido. Bases abertas como fonte extra de preenchimento foram descartadas: o Lucas procurou e não achou nenhuma que trouxesse os dados só pelo código (nem para importados e mangás). Não proponha de novo sem fato novo.
 - **ISBN-13 é a chave de busca** de uma edição. Aceitar ISBN-10 na entrada e converter para ISBN-13. Gibi de banca pode trazer só EAN (977 periódico, 789 EAN Brasil); o scanner aceita esses códigos.
 - **Backend: Supabase** (Postgres, autenticação, storage), com políticas de acesso por linha (RLS).
 - **Busca: Postgres com `pg_trgm`**, tolerante a erros de digitação.
@@ -144,7 +144,6 @@ Fica fora por enquanto: perfil público, listas de troca e venda, equivalência 
 - Considerar `unaccent` na busca (servidor e cópia local juntos).
 - **Séries** (ideia do Lucas, ainda não decidida para fazer): listar só os gibis de uma série (Absolute Batman, Invencível…). Usar `works` + `editions.work_id`, que já existem sem interface, em vez de campo de texto novo. Proposta: campo "Série" com sugestões (como o de editora) no cadastro e no admin; nome da série clicável no detalhe abre a lista dela, ordenada por volume numérico; filtro sobre a lista completa, então funciona offline sem mexer na busca. Chips de série na coleção só se fizer falta. A mesma tabela (`works.authors`) serve depois para a busca por autor. Conferir a RLS de `works` e criar índice em `work_id` numa migração.
 - O `README.md` ainda é o do template do Vite.
-- Perguntar ao Lucas se importados e mangás justificam testar bases abertas (Open Library, Google Books) como fonte extra de preenchimento.
 - Fases seguintes do plano: listas "procuro" e "troca ou venda", cadastro por foto da capa, edições equivalentes.
 
 ## Material de apoio
