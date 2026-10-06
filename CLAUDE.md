@@ -48,7 +48,7 @@ Formato: PWA em React; apps Android e iOS depois, empacotados com Capacitor (só
 ## Estado atual (Fase 1 concluída, em uso pelo Lucas)
 
 - **Login** (`src/features/auth`): e-mail e senha, com o link por e-mail como alternativa.
-- **Coleção** e **"Eu tenho?"** (`src/features/collection`, `src/features/check`): busca por título, editora e ISBN (prefixo). Não busca por autor (a tabela `works` existe, mas não tem interface).
+- **Coleção** e **"Eu tenho?"** (`src/features/collection`, `src/features/check`): busca por título, editora e ISBN (prefixo). Não busca por autor (a tabela `works` existe, mas não tem interface). Lista grande: os dados vêm inteiros (em partes de 1000, por causa do limite do PostgREST; `fetchAllCopyRows`), mas a tela mostra 30 cartões e vai mostrando mais ao rolar (`useShowMore`, também no admin); capas com `loading="lazy"`. Paginar no servidor faria a cópia offline ficar incompleta e o "Eu tenho?" offline responder "Ainda não tem" para o que não foi baixado.
 - **Cadastro por ISBN** (`src/features/register`): se a edição existe no catálogo, preenche; se não, formulário manual que cria a edição e o exemplar. Avisa quando o usuário já tem um exemplar da edição, sem impedir. Excluir exemplar existe; editar exemplar ainda não. A editora (cadastro manual e diálogo do admin) é um `Autocomplete` com texto livre (`PublisherField`): sugere as editoras do catálogo, mais usadas primeiro, e depois `COMMON_PUBLISHERS` (`register/constants.ts`); a ordem vem de `rankPublishers` (`src/lib/publishers.ts`).
 - **Detalhe do exemplar** (`src/features/copy`, rota `/exemplar/:copyId`): abre ao tocar na capa/título do cartão na coleção e no "Eu tenho?" (prop `to` do `EditionCard`; o botão de ação fica fora do link, porque botão dentro de link não é HTML válido). Capa grande no topo, centralizada na coluna, e abaixo os dados da edição e do exemplar, cada bloco num cartão como o da coleção. O link do cartão não tem o fundo de hover do MUI (só o destaque de foco pelo teclado). Só funciona online: sem conexão avisa na hora, já que capa e detalhes não ficam no aparelho.
 - **Painel de admin** (`src/features/admin`): item de menu "Editar catálogo", visível só para o Lucas (`isAdmin`, ver "Modelo de dados"). Busca ou lista qualquer edição do catálogo (`search_editions`, não só a coleção do usuário) e edita título/editora/volume/formato/ano/capa direto pelo app, sem precisar mexer no Supabase. A lista usa os mesmos cartões e a mesma grade da coleção (`EditionCard`, `EditionGrid`), com um lápis no lugar da lixeira.
@@ -72,6 +72,7 @@ src/
     collection/    lista, cartão (EditionCard + excluir), busca com fallback offline (api.ts), OfflineNotice
     register/      cadastro por ISBN, envio da capa e PublisherField (api.ts, constants.ts); o admin reaproveita os três
     scanner/       ScannerDialog, useBarcodeScanner, LazyScannerDialog
+  hooks/           useShowMore (exibir lista longa em blocos de 30 ao rolar)
   layout/          AppLayout (navegação inferior no celular), Sidebar, PageContent, navItems (os dois primeiros também usados pelo cadastro)
   lib/             isbn, barcode, image, localSearch, mirrorStore, publishers, format (datas, preço, iniciais), supabase (com testes .test.ts ao lado)
   types/catalog.ts
@@ -136,8 +137,7 @@ Fica fora por enquanto: perfil público, listas de troca e venda, equivalência 
 - Fechar os cadastros no Supabase antes de compartilhar o app.
 - Não há botão "Sair" (quando existir, o `SIGNED_OUT` já limpa a cópia offline).
 - O admin é um UUID fixo (`ADMIN_USER_ID`), não um papel de verdade — revisitar (tabela/coluna própria) quando houver mais de um editor de confiança no catálogo.
-- PostgREST devolve no máximo 1000 linhas por resposta: lista e cópia offline truncam acima disso, e as sugestões de editora contam só as primeiras 1000 edições.
-- **Coleção grande** (pedido do Lucas, para depois): as capas do `EditionCard` já usam `loading="lazy"` (só baixam perto da área visível); falta a paginação só na exibição ("Mostrar mais" ou carregar ao rolar, blocos de 24 ou 30 para fechar a grade de 2 e 3 colunas), com os dados ainda buscados inteiros: a lista completa alimenta a cópia offline, e paginar no servidor faria o "Eu tenho?" offline responder "Ainda não tem" para o que não foi baixado. A busca continua sobre a coleção toda. O limite de 1000 linhas se resolve à parte, buscando em partes de 1000 seguidas.
+- PostgREST devolve no máximo 1000 linhas por resposta. A lista da coleção (e a cópia offline) já busca em partes; ainda truncam em 1000 a lista do admin (`search_editions`), os resultados de busca e as sugestões de editora.
 - Capas não ficam disponíveis offline (o cartão mostra a inicial do título).
 - Tablets em pé (600 a 899 px) usam o layout de celular; a tela de escanear continua em tela cheia no desktop.
 - Detalhe do exemplar offline: dá para mostrar uma versão parcial a partir da cópia do IndexedDB (sem capa, formato, ano e preço), se fizer falta.

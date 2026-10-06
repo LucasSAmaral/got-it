@@ -39,18 +39,7 @@ async function fetchFromServer(query: string, signal: AbortSignal): Promise<Coll
     return (data ?? []) as CollectionItem[]
   }
 
-  const { data, error, status } = await supabase
-    .from('copies')
-    .select('id, status, condition, acquired_at, editions(id, title, publisher, isbn13, volume, cover_url)')
-    .order('created_at', { ascending: false })
-    .abortSignal(signal)
-    // Sem isso o supabase-js repete o GET com espera crescente (1 s, 2 s, 4 s) quando a rede falha,
-    // e o fallback para a cópia local só entraria depois de vários segundos.
-    .retry(false)
-
-  if (error) throw status === 0 ? new NetworkError(error.message) : error
-
-  return ((data ?? []) as unknown as RawCopyRow[])
+  return (await fetchAllCopyRows(signal))
     .filter((row) => row.editions !== null)
     .map((row) => ({
       copy_id: row.id,
@@ -64,6 +53,31 @@ async function fetchFromServer(query: string, signal: AbortSignal): Promise<Coll
       condition: row.condition,
       acquired_at: row.acquired_at,
     }))
+}
+
+// O PostgREST devolve no máximo 1000 linhas por pedido (max-rows padrão do Supabase).
+const PAGE_ROWS = 1000
+
+/** A lista inteira, em partes de 1000 seguidas: ela alimenta a cópia offline, então não pode vir cortada. */
+async function fetchAllCopyRows(signal: AbortSignal, from = 0): Promise<RawCopyRow[]> {
+  const { data, error, status } = await supabase
+    .from('copies')
+    .select('id, status, condition, acquired_at, editions(id, title, publisher, isbn13, volume, cover_url)')
+    // `id` desempata exemplares criados no mesmo instante: sem ordem estável, um item poderia
+    // aparecer em duas partes e outro em nenhuma.
+    .order('created_at', { ascending: false })
+    .order('id')
+    .range(from, from + PAGE_ROWS - 1)
+    .abortSignal(signal)
+    // Sem isso o supabase-js repete o GET com espera crescente (1 s, 2 s, 4 s) quando a rede falha,
+    // e o fallback para a cópia local só entraria depois de vários segundos.
+    .retry(false)
+
+  if (error) throw status === 0 ? new NetworkError(error.message) : error
+
+  const page = (data ?? []) as unknown as RawCopyRow[]
+  // Parte incompleta é a última.
+  return page.length < PAGE_ROWS ? page : [...page, ...(await fetchAllCopyRows(signal, from + PAGE_ROWS))]
 }
 
 /**

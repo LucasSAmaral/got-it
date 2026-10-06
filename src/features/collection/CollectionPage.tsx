@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { EditionGrid } from '../../components/EditionGrid'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { SearchField } from '../../components/SearchField'
+import { useShowMore } from '../../hooks/useShowMore'
 import { CollectionItemCard } from './CollectionItemCard'
 import { AddFab } from './CollectionPage.styles'
 import { OfflineNotice } from './OfflineNotice'
@@ -15,6 +16,7 @@ export function CollectionPage() {
   const { data, isLoading, isError } = useCollection(query)
   const items = data?.items
   const navigate = useNavigate()
+  const { visibleCount, hasMore, sentinelRef } = useShowMore(items?.length ?? 0, query.trim())
 
   return (
     <Box sx={{ px: { xs: 2.5, md: 5 }, py: { xs: 4, md: 5 } }}>
@@ -40,10 +42,11 @@ export function CollectionPage() {
       )}
 
       <EditionGrid>
-        {items?.map((item) => (
+        {items?.slice(0, visibleCount).map((item) => (
           <CollectionItemCard key={item.copy_id} item={item} showDelete={!data?.fromMirror} />
         ))}
       </EditionGrid>
+      {hasMore && <Box ref={sentinelRef} />}
 
       <AddFab color="primary" aria-label="Cadastrar novo exemplar" onClick={() => navigate('/cadastro')}>
         <AddIcon />

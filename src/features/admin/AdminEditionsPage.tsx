@@ -7,6 +7,7 @@ import { EditionCard } from '../../components/EditionCard'
 import { EditionGrid } from '../../components/EditionGrid'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { SearchField } from '../../components/SearchField'
+import { useShowMore } from '../../hooks/useShowMore'
 import { isAdmin } from './admin'
 import type { EditionSummary } from './api'
 import { EditEditionDialog } from './EditEditionDialog'
@@ -18,6 +19,7 @@ export function AdminEditionsPage() {
   const [query, setQuery] = useState('')
   const { data, isLoading, isError } = useAdminEditions(query)
   const [editing, setEditing] = useState<EditionSummary | null>(null)
+  const { visibleCount, hasMore, sentinelRef } = useShowMore(data?.length ?? 0, query.trim())
 
   if (!isAdmin(session)) {
     return <Navigate to="/" replace />
@@ -42,7 +44,7 @@ export function AdminEditionsPage() {
       )}
 
       <EditionGrid>
-        {data?.map((edition) => (
+        {data?.slice(0, visibleCount).map((edition) => (
           <EditionCard
             key={edition.id}
             edition={edition}
@@ -59,6 +61,7 @@ export function AdminEditionsPage() {
           />
         ))}
       </EditionGrid>
+      {hasMore && <Box ref={sentinelRef} />}
 
       <EditEditionDialog edition={editing} onClose={() => setEditing(null)} />
     </Box>
