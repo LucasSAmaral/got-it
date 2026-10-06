@@ -26,6 +26,8 @@ export function EditionCard({ edition, action, to }: EditionCardProps) {
             component="img"
             src={edition.cover_url}
             alt=""
+            // Coleção grande: só baixa as capas perto da área visível. O contêiner tem tamanho fixo, então nada pula ao carregar.
+            loading="lazy"
             onError={() => setCoverFailed(true)}
             sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
