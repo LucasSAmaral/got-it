@@ -2,7 +2,7 @@ import { Box, BottomNavigation, BottomNavigationAction } from '@mui/material'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useCollection } from '../features/collection/useCollection'
 import { BottomNavBar } from './AppLayout.styles'
-import { useNavItems } from './navItems'
+import { activeNavItem, useNavItems } from './navItems'
 import { PageContent } from './PageContent'
 import { Sidebar } from './Sidebar'
 
@@ -11,7 +11,8 @@ export function AppLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const navItems = useNavItems()
-  const value = navItems.slice(1).find((item) => location.pathname.startsWith(item.to))?.to ?? '/'
+  // Rota sem item próprio (ex.: detalhe do exemplar) deixa a Coleção marcada.
+  const value = activeNavItem(navItems, location.pathname)?.to ?? '/'
 
   // Carrega a lista completa em qualquer aba do app: é ela que atualiza a cópia usada offline.
   useCollection('')

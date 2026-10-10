@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase'
+import { sortSeriesByTitle, summarizeSeries, type SeriesSummary } from '../../lib/series'
 import type { Edition } from '../../types/catalog'
 import { NetworkError, withinTimeout } from '../collection/api'
 
@@ -44,5 +45,36 @@ export async function fetchSeries(workId: string): Promise<Series | null> {
       title: raw.title,
       editions: raw.editions.map(({ copies, ...edition }) => ({ ...edition, myCopyId: copies[0]?.id ?? null })),
     }
+  })
+}
+
+interface RawSeriesListRow {
+  id: string
+  title: string
+  editions: { title: string; volume: string | null; series_position: number | null; cover_url: string | null; copies: { id: string }[] }[]
+}
+
+/**
+ * Todas as séries com pelo menos uma edição (`editions!inner` descarta as que ficaram sem edição), já
+ * resumidas e em ordem alfabética. Mesma ideia de `fetchSeries`: a RLS de `copies` só devolve os seus.
+ * Sem resposta do servidor lança `NetworkError` (a página cai para as suas, a partir da coleção).
+ */
+export async function fetchSeriesList(): Promise<SeriesSummary[]> {
+  return withinTimeout(SERIES_TIMEOUT_MS, async (signal) => {
+    const { data, error, status } = await supabase
+      .from('works')
+      .select('id, title, editions!inner(title, volume, series_position, cover_url, copies(id))')
+      .abortSignal(signal)
+      .retry(false)
+    if (error) throw status === 0 ? new NetworkError(error.message) : error
+    const rows = (data ?? []) as unknown as RawSeriesListRow[]
+    return sortSeriesByTitle(
+      rows.map(({ editions, ...work }) =>
+        summarizeSeries({
+          ...work,
+          editions: editions.map(({ copies, ...edition }) => ({ ...edition, owned: copies.length > 0 })),
+        }),
+      ),
+    )
   })
 }

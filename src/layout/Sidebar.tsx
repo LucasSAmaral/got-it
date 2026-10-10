@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { LogoutDialog } from '../features/auth/LogoutDialog'
 import { SidebarNav } from './AppLayout.styles'
-import { useNavItems } from './navItems'
+import { activeNavItem, useNavItems } from './navItems'
 
 /**
  * Barra lateral (tela larga, a partir de `md`): título, cadastrar e navegação. Fica escondida no
@@ -16,6 +16,7 @@ export function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
   const navItems = useNavItems()
+  const active = activeNavItem(navItems, location.pathname)
   const [logoutOpen, setLogoutOpen] = useState(false)
 
   return (
@@ -30,7 +31,7 @@ export function Sidebar() {
         {navItems.map((item) => (
           <ListItemButton
             key={item.to}
-            selected={location.pathname === item.to}
+            selected={item === active}
             onClick={() => navigate(item.to)}
             sx={{ borderRadius: 2, mb: 0.5 }}
           >

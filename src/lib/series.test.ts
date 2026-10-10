@@ -5,8 +5,12 @@ import {
   parseSeriesPosition,
   seriesPosition,
   seriesProgress,
+  seriesSummariesFromCollection,
+  sortSeriesByTitle,
+  summarizeSeries,
   titleWithinSeries,
 } from './series'
+import type { CollectionItem } from '../types/catalog'
 
 describe('parseSeriesPosition', () => {
   it('aceita inteiro positivo, com espaços nas pontas', () => {
@@ -119,5 +123,92 @@ describe('titleWithinSeries', () => {
   it('não corta no meio de uma palavra', () => {
     expect(titleWithinSeries('Batmania', 'Batman')).toBe('Batmania')
     expect(titleWithinSeries('Invencível 10', 'Invencível 1')).toBe('Invencível 10')
+  })
+})
+
+describe('summarizeSeries', () => {
+  const edition = (title: string, volume: string | null, owned: boolean, cover_url: string | null = null) => ({
+    title,
+    volume,
+    series_position: null,
+    owned,
+    cover_url,
+  })
+
+  it('conta as posições, as edições e se você segue', () => {
+    const summary = summarizeSeries({
+      id: 'w1',
+      title: 'Invencível',
+      editions: [edition('Invencível 2', '2', true, 'b.jpg'), edition('Invencível 1', '1', false, 'a.jpg'), edition('Invencível 3', '3', false)],
+    })
+    expect(summary).toEqual({
+      id: 'w1',
+      title: 'Invencível',
+      coverUrl: 'a.jpg',
+      covered: 1,
+      total: 3,
+      editionCount: 3,
+      following: true,
+    })
+  })
+
+  it('a capa da primeira posição é a sua quando há mais de uma edição nela', () => {
+    const summary = summarizeSeries({
+      id: 'w1',
+      title: 'X',
+      editions: [edition('A capa dura', '1', false, 'dura.jpg'), edition('B banca', '1', true, 'banca.jpg')],
+    })
+    expect(summary.coverUrl).toBe('banca.jpg')
+  })
+
+  it('sem exemplar seu, não segue', () => {
+    const summary = summarizeSeries({ id: 'w1', title: 'X', editions: [edition('X 1', '1', false)] })
+    expect(summary.following).toBe(false)
+    expect(summary.covered).toBe(0)
+  })
+})
+
+describe('sortSeriesByTitle', () => {
+  it('ordem alfabética sem separar acentos e caixa, sem mudar o array recebido', () => {
+    const input = [{ title: 'Watchmen' }, { title: 'asterix' }, { title: 'Ásterix e Cleópatra' }, { title: 'Batman' }]
+    expect(sortSeriesByTitle(input).map((series) => series.title)).toEqual([
+      'asterix',
+      'Ásterix e Cleópatra',
+      'Batman',
+      'Watchmen',
+    ])
+    expect(input[0]!.title).toBe('Watchmen')
+  })
+})
+
+describe('seriesSummariesFromCollection', () => {
+  const item = (overrides: Partial<CollectionItem>): CollectionItem => ({
+    copy_id: 'c',
+    edition_id: 'e',
+    title: 'T',
+    publisher: null,
+    isbn13: null,
+    volume: null,
+    cover_url: null,
+    status: 'collection',
+    condition: null,
+    acquired_at: null,
+    ...overrides,
+  })
+
+  it('agrupa os seus exemplares por série, contando cada edição uma vez', () => {
+    const summaries = seriesSummariesFromCollection([
+      item({ copy_id: 'c1', edition_id: 'e1', volume: '1', work_id: 'w2', series_title: 'Saga' }),
+      item({ copy_id: 'c2', edition_id: 'e1', volume: '1', work_id: 'w2', series_title: 'Saga' }),
+      item({ copy_id: 'c3', edition_id: 'e2', volume: '3', work_id: 'w2', series_title: 'Saga' }),
+      item({ copy_id: 'c4', edition_id: 'e3', work_id: 'w1', series_title: 'Akira', series_position: 1 }),
+      item({ copy_id: 'c5', edition_id: 'e4', work_id: null }),
+      // Cópia salva antes das séries: sem `work_id`.
+      item({ copy_id: 'c6', edition_id: 'e5' }),
+    ])
+    expect(summaries.map(({ id, title, covered, total, editionCount, following }) => ({ id, title, covered, total, editionCount, following }))).toEqual([
+      { id: 'w1', title: 'Akira', covered: 1, total: 1, editionCount: 1, following: true },
+      { id: 'w2', title: 'Saga', covered: 2, total: 2, editionCount: 2, following: true },
+    ])
   })
 })

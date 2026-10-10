@@ -1,6 +1,15 @@
-import { Box, CardActionArea, styled, Typography } from '@mui/material'
+import { Box, Card, CardActionArea, styled, Typography } from '@mui/material'
 import type { ElementType } from 'react'
 import { tokens } from '../theme'
+
+/** Moldura do cartão (edição na coleção/admin/série, série na listagem). */
+export const CardFrame = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing(1.5),
+  alignItems: 'center',
+  padding: theme.spacing(1.5),
+  borderColor: theme.palette.divider,
+}))
 
 /** Espaço reservado da capa: mostra a imagem quando existe, senão as iniciais do título. */
 export const CoverPlaceholder = styled(Box)(({ theme }) => ({
