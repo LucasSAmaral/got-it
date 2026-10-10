@@ -11,7 +11,7 @@ import type { CollectionItem } from '../../types/catalog'
 import { NetworkError } from '../collection/api'
 import { useCollection } from '../collection/useCollection'
 import { fetchSeries, type Series } from './api'
-import { SlotTitle } from './SeriesPage.styles'
+import { SlotGrid, SlotTitle } from './SeriesPage.styles'
 
 const STATUS_CHIP: Record<SeriesStatus, { label: string; color: 'success' | 'default' | 'warning' }> = {
   owned: { label: 'Tenho', color: 'success' },
@@ -95,29 +95,31 @@ export function SeriesPage() {
             )
           )}
 
-          {slots.map((slot) => (
-            <section key={slot.position ?? 'sem-numero'}>
-              <SlotTitle variant="overline">{slot.position === null ? 'Sem número' : `Nº ${slot.position}`}</SlotTitle>
-              <EditionGrid>
-                {slot.items.map(({ edition, status }) => (
-                  <EditionCard
-                    key={edition.id}
-                    edition={{ ...edition, title: titleWithinSeries(edition.title, series.title) }}
-                    to={edition.myCopyId ? `/exemplar/${edition.myCopyId}` : undefined}
-                    action={
-                      <Chip
-                        size="small"
-                        label={STATUS_CHIP[status].label}
-                        color={STATUS_CHIP[status].color}
-                        variant={status === 'owned' ? 'filled' : 'outlined'}
-                        sx={{ alignSelf: 'flex-start' }}
-                      />
-                    }
-                  />
-                ))}
-              </EditionGrid>
-            </section>
-          ))}
+          <SlotGrid>
+            {slots.map((slot) => (
+              <section key={slot.position ?? 'sem-numero'}>
+                <SlotTitle variant="overline">{slot.position === null ? 'Sem número' : `Nº ${slot.position}`}</SlotTitle>
+                <EditionGrid>
+                  {slot.items.map(({ edition, status }) => (
+                    <EditionCard
+                      key={edition.id}
+                      edition={{ ...edition, title: titleWithinSeries(edition.title, series.title) }}
+                      to={edition.myCopyId ? `/exemplar/${edition.myCopyId}` : undefined}
+                      action={
+                        <Chip
+                          size="small"
+                          label={STATUS_CHIP[status].label}
+                          color={STATUS_CHIP[status].color}
+                          variant={status === 'owned' ? 'filled' : 'outlined'}
+                          sx={{ alignSelf: 'flex-start' }}
+                        />
+                      }
+                    />
+                  ))}
+                </EditionGrid>
+              </section>
+            ))}
+          </SlotGrid>
         </>
       )}
     </Box>
