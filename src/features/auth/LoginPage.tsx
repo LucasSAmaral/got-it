@@ -54,7 +54,7 @@ export function LoginPage() {
     <LoginPageBox>
       <Stack spacing={1}>
         <Typography variant="h1" color="text.primary">
-          Got it?
+          Tem esse?
         </Typography>
         <Typography variant="body2" color="text.secondary">
           sua coleção de HQs, sempre à mão

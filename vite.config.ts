@@ -14,8 +14,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Got it?',
-        short_name: 'Got it?',
+        name: 'Tem esse?',
+        short_name: 'Tem esse?',
         description: 'Catálogo da sua coleção de quadrinhos, HQs, encadernados e mangás.',
         lang: 'pt-BR',
         theme_color: '#c1421a',

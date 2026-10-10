@@ -26,7 +26,7 @@ export function LogoutDialog({ open, onClose }: { open: boolean; onClose: () => 
 
   return (
     <Dialog open={open} onClose={close}>
-      <DialogTitle>Sair do Got it?</DialogTitle>
+      <DialogTitle>Sair do Tem esse?</DialogTitle>
       <DialogContent>
         <DialogContentText>
           A cópia da coleção salva neste aparelho será apagada. Para consultar sem sinal de novo, entre com internet

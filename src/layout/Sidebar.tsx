@@ -22,7 +22,7 @@ export function Sidebar() {
   return (
     <SidebarNav component="nav">
       <Typography variant="h3" sx={{ px: 1, color: 'primary.main' }}>
-        Got it?
+        Tem esse?
       </Typography>
       <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/cadastro')}>
         Cadastrar edição
