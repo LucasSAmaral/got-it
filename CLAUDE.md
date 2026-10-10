@@ -99,8 +99,8 @@ Três níveis: **Obra** (a história), **Edição** (a versão física publicada
 ## Configuração fora do repositório
 
 - **Variáveis** `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`: em `.env` (não versionado; modelo em `.env.example`) e no painel do Netlify. **Não marque como secretas** no Netlify: vão para o bundle por desenho, e o scan de segredos pode reprovar o build (se acontecer, defina `SECRETS_SCAN_OMIT_KEYS` com as duas). Nunca use a chave `service_role` no front.
-- **Netlify**: deploy automático do `main` no GitHub (`LucasSAmaral/got-it`).
-- **Supabase → Authentication → URL Configuration**: o link por e-mail redireciona para `window.location.origin`, então a URL de produção (`*.netlify.app`) e `https://*.trycloudflare.com/**` (testes no celular) precisam estar em Redirect URLs.
+- **Netlify**: deploy automático do `main` no GitHub (`LucasSAmaral/got-it`), publicado em `temesse.netlify.app`.
+- **Supabase → Authentication → URL Configuration**: o link por e-mail redireciona para `window.location.origin`, então a URL de produção (`https://temesse.netlify.app`) e `https://*.trycloudflare.com/**` (testes no celular) precisam estar em Redirect URLs.
 - **Cadastros abertos**: "Allow new users to sign up" continua ligado. Desligar antes de mostrar o app a outras pessoas; contas novas passam a ser criadas em Authentication → Users.
 
 ## Como o modo offline funciona
