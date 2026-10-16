@@ -1,3 +1,4 @@
+import { coverPathFromUrl } from '../../lib/covers'
 import { parsePrice } from '../../lib/format'
 import { shrinkCover } from '../../lib/image'
 import { parseSeriesPosition } from '../../lib/series'
@@ -38,6 +39,21 @@ export async function uploadCoverImage(file: File, isbn13: string): Promise<stri
 
   const { data } = supabase.storage.from('covers').getPublicUrl(path)
   return data.publicUrl
+}
+
+/**
+ * Apaga do bucket a capa que deixou de ser usada. Só o admin tem permissão (migração
+ * `cover_delete_admin`). Sem permissão o Storage não dá erro, só não apaga nada (como a RLS no
+ * PostgREST); por isso confere se voltou o arquivo apagado.
+ */
+export async function removeCoverImage(url: string | null): Promise<void> {
+  // `getPublicUrl('')` dá a URL pública do bucket, terminada em `/`.
+  const path = coverPathFromUrl(url, supabase.storage.from('covers').getPublicUrl('').data.publicUrl)
+  if (!path) return
+
+  const { data, error } = await supabase.storage.from('covers').remove([path])
+  if (error) throw error
+  if (!data?.length) throw new Error(`A capa antiga (${path}) não foi apagada do Storage.`)
 }
 
 /** Campos do formulário do exemplar como colunas de `copies`. Usado no cadastro e na edição do exemplar. */

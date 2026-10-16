@@ -16,7 +16,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { isSeriesPositionInputValid } from '../../lib/series'
-import { uploadCoverImage } from '../register/api'
+import { removeCoverImage, uploadCoverImage } from '../register/api'
 import { FORMATS } from '../register/constants'
 import { PublisherField } from '../register/PublisherField'
 import { SeriesFields } from '../register/SeriesFields'
@@ -87,6 +87,11 @@ export function EditEditionDialog({ edition, onClose }: EditEditionDialogProps) 
     try {
       const coverUrl = coverFile ? await uploadCoverImage(coverFile, edition.isbn13 ?? edition.id) : null
       await updateEdition(edition.id, form, coverUrl)
+      // Só depois de a edição apontar para a capa nova: se algo falhou antes, a antiga ainda está em uso.
+      // Não apagar não impede a edição de ficar salva; o arquivo só fica sobrando no bucket.
+      if (coverUrl) {
+        removeCoverImage(edition.cover_url).catch((err) => console.warn(err))
+      }
       // A série pode ter sido criada agora: as sugestões e o detalhe dos exemplares precisam vê-la.
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-editions'] }),
