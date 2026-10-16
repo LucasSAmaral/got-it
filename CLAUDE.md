@@ -77,9 +77,9 @@ src/
     series/        listagem de séries (SeriesListPage) e página da série (SeriesPage, api.ts)
   hooks/           useShowMore (exibir lista longa em blocos de 30 ao rolar; admin, listagem de séries e a coleção no celular)
   layout/          AppLayout (navegação inferior no celular), Sidebar, PageContent, navItems (os dois primeiros também usados pelo cadastro)
-  lib/             isbn, barcode, image, localSearch, mirrorStore, pagination, publishers, series, format (datas, preço — exibir e interpretar —, iniciais), supabase (com testes .test.ts ao lado)
+  lib/             isbn, barcode, covers, image, localSearch, mirrorStore, pagination, publishers, series, format (datas, preço — exibir e interpretar —, iniciais), supabase (com testes .test.ts ao lado)
   types/catalog.ts
-supabase/migrations/   schema, busca, bucket de capas e limites do bucket
+supabase/migrations/   schema, busca, bucket de capas (limites e exclusão pelo admin)
 netlify.toml           build, Node 22 e redirecionamento do SPA
 ```
 
@@ -93,8 +93,8 @@ Três níveis: **Obra** (a história), **Edição** (a versão física publicada
 - **RLS ligada nas três tabelas.** `works` e `editions`: qualquer usuário autenticado lê e insere com `created_by = auth.uid()`; em `editions`, só o criador atualiza e apenas enquanto `verified = false` — **mais uma política** (`editions_update_admin`, `20260922000000_admin_editions.sql`) libera update irrestrito para o `auth.uid()` do Lucas, fixo em `src/features/admin/admin.ts` (`ADMIN_USER_ID`, mesmo valor nos dois lugares). Políticas permissivas do Postgres se somam com OR, então não precisou mexer na política antiga. `copies`: cada usuário lê, insere, atualiza e apaga só as próprias linhas.
 - Uma pessoa pode ter mais de um exemplar da mesma edição (é legítimo).
 - `search_my_collection(q text)`: busca nos exemplares do usuário por prefixo de ISBN ou `word_similarity > 0.25` (pg_trgm) em título e editora, ISBN exato primeiro. Compara com `>` explícito porque o role do pooler do Supabase não pode alterar `pg_trgm.word_similarity_threshold`. `search_editions(q text)` é a mesma lógica sobre o catálogo inteiro (sem join com `copies` nem filtro por usuário), usada só no painel de admin.
-- Storage: bucket público `covers` (leitura pública, envio só autenticado), limitado a 1 MB e `image/jpeg` pela migração `cover_limits`.
-- **As migrações são aplicadas à mão no SQL Editor do Supabase** (não há `supabase/config.toml` nem CLI configurada). Aplique a de limites do bucket só depois de publicar o app que reduz a imagem. A de séries (`20261005000000_series.sql`) é o contrário: aplique **antes** de publicar o app que a usa (o detalhe e o admin pedem colunas e funções que só existem depois dela).
+- Storage: bucket público `covers` (leitura pública, envio só autenticado), limitado a 1 MB e `image/jpeg` pela migração `cover_limits`. Apagar só o admin (`cover_delete_admin`): ao trocar a capa no admin, o app apaga a antiga (`removeCoverImage`) depois de salvar a edição com a nova; se falhar, só avisa no console. Remoção bloqueada pela política não dá erro no Storage (volta lista vazia), por isso o código confere o retorno. Arquivo sobrando se apaga pela API ou pelo painel, nunca com `delete` em `storage.objects` (o Supabase bloqueia e o arquivo físico ficaria).
+- **Migrações no projeto remoto pelo plugin do Supabase (MCP)**, que o Lucas autorizou em 2026-10-16 (projeto `urfmibhdswfdeiiesnar`, o subdomínio de `VITE_SUPABASE_URL`). Não há `supabase/config.toml` nem CLI configurada. Sempre: arquivo em `supabase/migrations/` primeiro, inspecionar o estado atual (`execute_sql`), aplicar (`apply_migration`) e conferir que o objeto foi criado. É o banco de produção: confirme com o Lucas antes de aplicar e antes de qualquer `execute_sql` que altere ou apague dados. Se o plugin pedir login de novo, o Lucas autoriza pelo link do OAuth; o SQL Editor continua como alternativa manual. Aplique a de limites do bucket só depois de publicar o app que reduz a imagem. A de séries (`20261005000000_series.sql`) é o contrário: aplique **antes** de publicar o app que a usa (o detalhe e o admin pedem colunas e funções que só existem depois dela).
 
 ## Configuração fora do repositório
 
