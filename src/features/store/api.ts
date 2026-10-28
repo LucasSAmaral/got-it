@@ -81,3 +81,14 @@ export async function deleteArrival(id: string): Promise<void> {
   if (error) throw error
   if (!data?.length) throw new Error('A chegada não foi apagada.')
 }
+
+/**
+ * Quais dessas edições quem está logado tem (para "Tenho" / "Falta esse" na vitrine). A RLS de `copies`
+ * já devolve só os exemplares de quem pergunta. Só chamar com sessão: sem ela o pedido é recusado.
+ */
+export async function fetchOwnedEditionIds(editionIds: string[]): Promise<Set<string>> {
+  if (editionIds.length === 0) return new Set()
+  const { data, error } = await supabase.from('copies').select('edition_id').in('edition_id', editionIds)
+  if (error) throw error
+  return new Set((data ?? []).map((row) => row.edition_id as string))
+}

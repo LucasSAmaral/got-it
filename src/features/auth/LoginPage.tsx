@@ -1,6 +1,6 @@
 import { Alert, Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useState, type FormEvent } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { supabase } from '../../lib/supabase'
 import { LoginPageBox } from './LoginPage.styles'
@@ -20,9 +20,14 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  // Volta para onde a pessoa estava (ex.: a vitrine da loja). Só caminho interno: "//outro.site" seria
+  // outro endereço.
+  const [searchParams] = useSearchParams()
+  const back = searchParams.get('voltar')
+  const next = back?.startsWith('/') && !back.startsWith('//') ? back : '/'
 
   if (!loading && session) {
-    return <Navigate to="/" replace />
+    return <Navigate to={next} replace />
   }
 
   async function handleSubmit(event: FormEvent) {

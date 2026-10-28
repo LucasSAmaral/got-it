@@ -12,7 +12,7 @@ Decidido pelo Lucas em 2026-10-07; troca feita em 2026-10-10. "Got it?" não fun
 
 ## Vitrine da Lazarus (próxima funcionalidade)
 
-Andamento (2026-10-27): banco (`stores`, `store_arrivals`) aplicado e tela de registro das chegadas no admin pronta; falta a página pública. Contato e preço ainda dependem da conversa com o dono.
+Andamento (2026-10-27): banco (`stores`, `store_arrivals`) aplicado, tela de registro das chegadas no admin e página pública `/loja/lazarus` prontas. Falta: contato da loja (preencher `whatsapp` ou `instagram` em `stores`), confirmar com o dono se mostra preço, fechar os cadastros no Supabase e testar no iPhone e nos navegadores internos do Instagram/WhatsApp.
 
 Decidida em 2026-10-14. A Lazarus é a loja de quadrinhos perto do Lucas e não tem site. Hoje ela fotografa cada lançamento que chega e posta foto por foto no grupo de WhatsApp da loja e depois nos stories do Instagram; os clientes pedem reserva e pagam por Pix. O preço só é informado se alguém pergunta, e esgotado também. O Lucas mostrou o "Eu tenho?" ao dono, que topou divulgar um link do app no Instagram e no grupo no lugar das fotos.
 - **Versão 1 (teste de adoção):** quem cadastra as chegadas é o **Lucas, pelo admin**; a loja só divulga o link. Medir se os clientes usam o link para reservar e quanto tempo leva cadastrar um lote. Perfil de loja (conta própria cadastrando pelo scanner, tabela `store_members` com RLS, substituindo a lógica do `ADMIN_USER_ID`) só se o teste der certo; modelar como "lojas" desde já, mas começar só com a Lazarus. Uma página "Lançamentos" juntando várias lojas só faz sentido com uma segunda loja.

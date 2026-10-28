@@ -36,8 +36,9 @@ export function EditionCard({ edition, action, to, detail }: EditionCardProps) {
             {edition.isbn13}
           </Typography>
         )}
+        {/* Quebra em vez de cortar: aqui costuma estar o preço, que não pode sumir nas reticências. */}
         {detail && (
-          <Typography variant="body2" color="text.secondary" noWrap>
+          <Typography variant="body2" color="text.secondary">
             {detail}
           </Typography>
         )}

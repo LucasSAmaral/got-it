@@ -9,12 +9,15 @@ import { LoginPage } from './features/auth/LoginPage'
 import { RegisterByIsbnPage } from './features/register/RegisterByIsbnPage'
 import { SeriesListPage } from './features/series/SeriesListPage'
 import { SeriesPage } from './features/series/SeriesPage'
+import { StorePage } from './features/store/StorePage'
 import { AppLayout } from './layout/AppLayout'
 
 export function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      {/* Pública: quem chega pelo link da loja pode não ter conta. */}
+      <Route path="/loja/:slug" element={<StorePage />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route index element={<CollectionPage />} />
