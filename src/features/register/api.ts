@@ -90,7 +90,11 @@ export async function addCopyToExistingEdition(editionId: string, form: CopyForm
   if (error) throw error
 }
 
-export async function createEditionAndCopy(edition: NewEditionInput, form: CopyFormInput) {
+/**
+ * Cria a edição no catálogo e devolve o id. `DuplicateIsbnError` quando o ISBN acabou de ser cadastrado
+ * por outra pessoa. Usado no cadastro (junto com o exemplar) e nas chegadas da loja (sem exemplar).
+ */
+export async function createEdition(edition: NewEditionInput): Promise<string> {
   const { data, error } = await supabase
     .from('editions')
     .insert({
@@ -112,8 +116,11 @@ export async function createEditionAndCopy(edition: NewEditionInput, form: CopyF
     }
     throw error
   }
+  return data.id as string
+}
 
-  await addCopyToExistingEdition(data.id, form)
+export async function createEditionAndCopy(edition: NewEditionInput, form: CopyFormInput) {
+  await addCopyToExistingEdition(await createEdition(edition), form)
 }
 
 /** Editora de cada edição do catálogo (com repetição), para ordenar as sugestões pelo uso. */

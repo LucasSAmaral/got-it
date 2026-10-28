@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import { RequireAuth } from './auth/RequireAuth'
 import { AdminEditionsPage } from './features/admin/AdminEditionsPage'
+import { StoreArrivalsPage } from './features/admin/StoreArrivalsPage'
 import { CheckPage } from './features/check/CheckPage'
 import { CollectionPage } from './features/collection/CollectionPage'
 import { CopyDetailPage } from './features/copy/CopyDetailPage'
@@ -22,6 +23,7 @@ export function App() {
           <Route path="series" element={<SeriesListPage />} />
           <Route path="serie/:workId" element={<SeriesPage />} />
           <Route path="admin" element={<AdminEditionsPage />} />
+          <Route path="admin/loja/:slug" element={<StoreArrivalsPage />} />
         </Route>
         <Route path="cadastro" element={<RegisterByIsbnPage />} />
       </Route>

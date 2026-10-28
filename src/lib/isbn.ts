@@ -72,3 +72,9 @@ export function classifyIsbnPrefix(isbn13: string): IsbnPrefixType {
   if (value.startsWith('789') || value.startsWith('790')) return 'ean-brasil'
   return 'desconhecido'
 }
+
+/** ISBN-13 do que foi digitado ou lido (ISBN-10 é convertido); `null` quando não é um ISBN válido. */
+export function isbn13FromInput(input: string): string | null {
+  const value = normalizeIsbn(input)
+  return isValidIsbn(value) ? toIsbn13(value) : null
+}

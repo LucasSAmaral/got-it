@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { formatDate, formatPrice, isPriceInputValid, parsePrice, titleInitials } from './format'
+import {
+  formatArrival,
+  formatDate,
+  formatPrice,
+  isoDateDaysBefore,
+  isPriceInputValid,
+  parsePrice,
+  titleInitials,
+  toIsoDate,
+} from './format'
 
 describe('titleInitials', () => {
   it('pega a inicial das duas primeiras palavras, em maiúscula', () => {
@@ -71,5 +80,28 @@ describe('isPriceInputValid', () => {
     expect(isPriceInputValid('R$ 39,90')).toBe(true)
     expect(isPriceInputValid('R$')).toBe(false)
     expect(isPriceInputValid('39,999')).toBe(false)
+  })
+})
+
+describe('toIsoDate', () => {
+  it('usa o dia local, não o de UTC', () => {
+    // 23h do dia 5 no fuso do aparelho continua sendo o dia 5, qualquer que seja o fuso.
+    expect(toIsoDate(new Date(2026, 2, 5, 23, 30))).toBe('2026-03-05')
+    expect(toIsoDate(new Date(2026, 2, 5, 0, 5))).toBe('2026-03-05')
+  })
+})
+
+describe('isoDateDaysBefore', () => {
+  it('volta os dias atravessando mês e ano', () => {
+    expect(isoDateDaysBefore(new Date(2026, 9, 27, 22, 0), 30)).toBe('2026-09-27')
+    expect(isoDateDaysBefore(new Date(2026, 0, 10), 30)).toBe('2025-12-11')
+    expect(isoDateDaysBefore(new Date(2026, 2, 1), 1)).toBe('2026-02-28')
+  })
+})
+
+describe('formatArrival', () => {
+  it('mostra dia e mês da chegada, e o preço quando há', () => {
+    expect(formatArrival('2026-10-05', null)).toBe('Chegou em 05/10')
+    expect(formatArrival('2026-10-05', 39.9)).toMatch(/^Chegou em 05\/10 · R\$\s39,90$/)
   })
 })

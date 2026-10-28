@@ -1,22 +1,15 @@
-import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import CloseIcon from '@mui/icons-material/Close'
-import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined'
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined'
-import { Alert, Box, Button, IconButton, InputAdornment, MenuItem, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { PageContent } from '../../layout/PageContent'
 import { Sidebar } from '../../layout/Sidebar'
-import { describeScan } from '../../lib/barcode'
 import { isPriceInputValid } from '../../lib/format'
-import { isValidIsbn, normalizeIsbn, toIsbn13 } from '../../lib/isbn'
-import { isSeriesPositionInputValid } from '../../lib/series'
-import { tokens } from '../../theme'
-import { LazyScannerDialog } from '../scanner/LazyScannerDialog'
-import { CONDITIONS, FORMATS } from './constants'
+import { isbn13FromInput } from '../../lib/isbn'
+import { CONDITIONS } from './constants'
 import {
   DuplicateIsbnError,
   addCopyToExistingEdition,
@@ -27,10 +20,11 @@ import {
   type CopyFormInput,
   type NewEditionInput,
 } from './api'
+import { IsbnField } from './IsbnField'
+import { EMPTY_EDITION_FORM, isNewEditionFormValid } from './editionForm'
+import { NewEditionFields } from './NewEditionFields'
 import { PriceField } from './PriceField'
-import { PublisherField } from './PublisherField'
-import { SeriesFields } from './SeriesFields'
-import { CoverPreview, FieldLabel, FieldRow, FoundChip, NotFoundChip } from './RegisterByIsbnPage.styles'
+import { FieldRow, FoundChip, NotFoundChip } from './RegisterByIsbnPage.styles'
 
 export function RegisterByIsbnPage() {
   const [searchParams] = useSearchParams()
@@ -40,43 +34,12 @@ export function RegisterByIsbnPage() {
   const [isbnInput, setIsbnInput] = useState(searchParams.get('isbn') ?? '')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const [scannerOpen, setScannerOpen] = useState(false)
-  const [scanLabel, setScanLabel] = useState('')
 
   const [copyForm, setCopyForm] = useState<CopyFormInput>({ condition: '', acquiredAt: '', pricePaid: '' })
-  const [manualEdition, setManualEdition] = useState({
-    title: '',
-    publisher: '',
-    volume: '',
-    format: '',
-    year: '',
-    series: '',
-    seriesPosition: '',
-  })
+  const [manualEdition, setManualEdition] = useState(EMPTY_EDITION_FORM)
   const [coverFile, setCoverFile] = useState<File | null>(null)
-  const [coverPreview, setCoverPreview] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    if (!coverFile) {
-      setCoverPreview(null)
-      return
-    }
-    const url = URL.createObjectURL(coverFile)
-    setCoverPreview(url)
-    return () => URL.revokeObjectURL(url)
-  }, [coverFile])
-
-  const normalized = normalizeIsbn(isbnInput)
-  const isbnIsValid = normalized.length > 0 && isValidIsbn(normalized)
-  const isbn13 = useMemo(() => {
-    if (!isbnIsValid) return null
-    try {
-      return toIsbn13(normalized)
-    } catch {
-      return null
-    }
-  }, [isbnIsValid, normalized])
+  const isbn13 = isbn13FromInput(isbnInput)
 
   const editionQuery = useQuery({
     queryKey: ['edition-by-isbn', isbn13],
@@ -141,44 +104,7 @@ export function RegisterByIsbnPage() {
             <Typography variant="h2">Cadastrar edição</Typography>
           </Stack>
 
-          <Stack spacing={0.75} sx={{ mb: 3 }}>
-            <FieldLabel variant="caption">ISBN</FieldLabel>
-            <TextField
-              fullWidth
-              placeholder="978…"
-              value={isbnInput}
-              onChange={(event) => {
-                setIsbnInput(event.target.value)
-                setScanLabel('')
-              }}
-              error={isbnInput.length > 0 && !isbnIsValid}
-              helperText={
-                isbnInput.length > 0 && !isbnIsValid ? 'ISBN inválido' : scanLabel ? `Lido pela câmera · ${scanLabel}` : ' '
-              }
-              slotProps={{
-                htmlInput: { style: { fontFamily: tokens.font.mono } },
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton aria-label="Escanear código de barras" edge="end" onClick={() => setScannerOpen(true)}>
-                        <PhotoCameraOutlinedIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
-              }}
-            />
-          </Stack>
-
-          <LazyScannerDialog
-            open={scannerOpen}
-            onClose={() => setScannerOpen(false)}
-            onDetected={(scan) => {
-              setIsbnInput(scan.code)
-              setScanLabel(describeScan(scan))
-              setScannerOpen(false)
-            }}
-          />
+          <IsbnField value={isbnInput} onChange={setIsbnInput} />
 
           {isbn13 && editionQuery.isLoading && <LoadingSpinner size={24} sx={{ py: 3 }} />}
 
@@ -256,97 +182,12 @@ export function RegisterByIsbnPage() {
                   Preencha os dados da edição — as próximas pessoas que escanearem esse ISBN recebem tudo pronto.
                 </Typography>
 
-                <TextField
-                  label="Título"
-                  required
-                  fullWidth
-                  placeholder="Ex.: Watchmen"
-                  value={manualEdition.title}
-                  onChange={(event) => setManualEdition({ ...manualEdition, title: event.target.value })}
+                <NewEditionFields
+                  value={manualEdition}
+                  onChange={setManualEdition}
+                  coverFile={coverFile}
+                  onCoverFileChange={setCoverFile}
                 />
-
-                <FieldRow direction="row">
-                  <PublisherField
-                    value={manualEdition.publisher}
-                    onChange={(publisher) => setManualEdition({ ...manualEdition, publisher })}
-                  />
-                  <TextField
-                    label="Volume / nº"
-                    fullWidth
-                    placeholder="Ex.: 1"
-                    value={manualEdition.volume}
-                    onChange={(event) => setManualEdition({ ...manualEdition, volume: event.target.value })}
-                  />
-                </FieldRow>
-
-                <SeriesFields
-                  series={manualEdition.series}
-                  position={manualEdition.seriesPosition}
-                  onSeriesChange={(series) => setManualEdition({ ...manualEdition, series })}
-                  onPositionChange={(seriesPosition) => setManualEdition({ ...manualEdition, seriesPosition })}
-                />
-
-                <FieldRow direction="row">
-                  <TextField
-                    select
-                    label="Formato"
-                    fullWidth
-                    value={manualEdition.format}
-                    onChange={(event) => setManualEdition({ ...manualEdition, format: event.target.value })}
-                  >
-                    {FORMATS.map((option) => (
-                      <MenuItem key={option} value={option}>
-                        {option}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                  <TextField
-                    label="Ano"
-                    fullWidth
-                    placeholder="Ex.: 2024"
-                    value={manualEdition.year}
-                    onChange={(event) => setManualEdition({ ...manualEdition, year: event.target.value })}
-                  />
-                </FieldRow>
-
-                <Stack spacing={0.75}>
-                  <FieldLabel variant="caption">Foto da capa (opcional)</FieldLabel>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={(event) => setCoverFile(event.target.files?.[0] ?? null)}
-                  />
-                  {coverPreview ? (
-                    <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-                      <CoverPreview component="img" src={coverPreview} alt="Prévia da capa" />
-                      <Button
-                        type="button"
-                        size="small"
-                        color="inherit"
-                        startIcon={<CloseIcon fontSize="small" />}
-                        onClick={() => {
-                          setCoverFile(null)
-                          if (fileInputRef.current) fileInputRef.current.value = ''
-                        }}
-                      >
-                        Remover
-                      </Button>
-                    </Stack>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outlined"
-                      color="inherit"
-                      startIcon={<AddPhotoAlternateOutlinedIcon />}
-                      onClick={() => fileInputRef.current?.click()}
-                      sx={{ alignSelf: 'flex-start' }}
-                    >
-                      Adicionar foto da capa
-                    </Button>
-                  )}
-                </Stack>
 
                 <Typography variant="h4" sx={{ mt: 1 }}>
                   Seu exemplar
@@ -385,9 +226,8 @@ export function RegisterByIsbnPage() {
                   variant="contained"
                   disabled={
                     submitting ||
-                    !manualEdition.title ||
-                    !isPriceInputValid(copyForm.pricePaid) ||
-                    !isSeriesPositionInputValid(manualEdition.seriesPosition)
+                    !isNewEditionFormValid(manualEdition) ||
+                    !isPriceInputValid(copyForm.pricePaid)
                   }
                 >
                   {submitting ? 'Salvando…' : 'Cadastrar e adicionar à coleção'}

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   classifyIsbnPrefix,
   convertIsbn10ToIsbn13,
+  isbn13FromInput,
   isValidIsbn,
   isValidIsbn10,
   isValidIsbn13,
@@ -111,5 +112,18 @@ describe('classifyIsbnPrefix', () => {
 
   it('classifica outros prefixos como desconhecido', () => {
     expect(classifyIsbnPrefix('1234567890123')).toBe('desconhecido')
+  })
+})
+
+describe('isbn13FromInput', () => {
+  it('devolve o ISBN-13 do que foi digitado, convertendo ISBN-10', () => {
+    expect(isbn13FromInput('978-85-359-1484-9')).toBe('9788535914849')
+    expect(isbn13FromInput('0-306-40615-2')).toBe('9780306406157')
+  })
+
+  it('devolve null para texto vazio ou ISBN inválido', () => {
+    expect(isbn13FromInput('')).toBeNull()
+    expect(isbn13FromInput('9788535914840')).toBeNull()
+    expect(isbn13FromInput('978853591')).toBeNull()
   })
 })

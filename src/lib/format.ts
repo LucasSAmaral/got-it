@@ -17,10 +17,31 @@ export function formatDate(isoDate: string): string {
   return `${day}/${month}/${year}`
 }
 
+/**
+ * Dia do aparelho no formato do Postgres (`2026-03-05`). `toISOString()` daria o dia em UTC, que depois das
+ * 21h de Brasília já é amanhã.
+ */
+export function toIsoDate(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${month}-${day}`
+}
+
+/** O dia `days` dias antes de `date`, no formato do Postgres. */
+export function isoDateDaysBefore(date: Date, days: number): string {
+  return toIsoDate(new Date(date.getFullYear(), date.getMonth(), date.getDate() - days))
+}
+
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
 
 export function formatPrice(value: number): string {
   return brl.format(value)
+}
+
+/** "Chegou em 27/10 · R$ 39,90", com o preço só quando informado. Usado nas chegadas da loja. */
+export function formatArrival(arrivedOn: string, price: number | null): string {
+  const day = formatDate(arrivedOn).slice(0, 5)
+  return price === null ? `Chegou em ${day}` : `Chegou em ${day} · ${formatPrice(price)}`
 }
 
 // numeric(10,2) no banco: até 99.999.999,99.

@@ -1,13 +1,16 @@
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
-import { Alert, Box, IconButton, Typography } from '@mui/material'
+import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined'
+import { Alert, Box, Button, IconButton, Stack, Typography } from '@mui/material'
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { EditionCard } from '../../components/EditionCard'
 import { EditionGrid } from '../../components/EditionGrid'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { SearchField } from '../../components/SearchField'
 import { useShowMore } from '../../hooks/useShowMore'
+import { fetchStores } from '../store/api'
 import { isAdmin } from './admin'
 import type { EditionSummary } from './api'
 import { EditEditionDialog } from './EditEditionDialog'
@@ -20,6 +23,8 @@ export function AdminEditionsPage() {
   const { data, isLoading, isError } = useAdminEditions(query)
   const [editing, setEditing] = useState<EditionSummary | null>(null)
   const { visibleCount, hasMore, sentinelRef } = useShowMore(data?.length ?? 0, query.trim())
+  // Se falhar, só os atalhos das lojas somem; a edição do catálogo continua.
+  const { data: stores } = useQuery({ queryKey: ['stores'], queryFn: fetchStores })
 
   if (!isAdmin(session)) {
     return <Navigate to="/" replace />
@@ -30,6 +35,23 @@ export function AdminEditionsPage() {
       <Typography variant="h2" sx={{ mb: 2.5 }}>
         Editar catálogo
       </Typography>
+
+      {stores && stores.length > 0 && (
+        <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1, mb: 2.5 }}>
+          {stores.map((store) => (
+            <Button
+              key={store.id}
+              component={Link}
+              to={`/admin/loja/${store.slug}`}
+              variant="outlined"
+              color="inherit"
+              startIcon={<StorefrontOutlinedIcon />}
+            >
+              Chegadas na {store.name}
+            </Button>
+          ))}
+        </Stack>
+      )}
 
       <SearchField placeholder="Buscar por título, editora ou ISBN" value={query} onChange={setQuery} />
 

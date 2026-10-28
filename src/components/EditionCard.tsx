@@ -12,10 +12,12 @@ type EditionCardProps = {
   action?: ReactNode
   /** Rota aberta ao tocar na capa ou no texto. O `action` fica fora do link: botão dentro de link não é HTML válido. */
   to?: string
+  /** Linha extra embaixo do ISBN (ex.: "Chegou em 27/10 · R$ 39,90" nas chegadas da loja). */
+  detail?: ReactNode
 }
 
-/** Cartão de uma edição: capa, título, editora · volume e ISBN. Usado na coleção e no painel de admin. */
-export function EditionCard({ edition, action, to }: EditionCardProps) {
+/** Cartão de uma edição: capa, título, editora · volume e ISBN. Usado na coleção, no painel de admin e nas chegadas da loja. */
+export function EditionCard({ edition, action, to, detail }: EditionCardProps) {
   const content = (
     <>
       <CoverThumb coverUrl={edition.cover_url} title={edition.title} />
@@ -32,6 +34,11 @@ export function EditionCard({ edition, action, to }: EditionCardProps) {
             sx={{ fontFamily: tokens.font.mono, mt: 0.25 }}
           >
             {edition.isbn13}
+          </Typography>
+        )}
+        {detail && (
+          <Typography variant="body2" color="text.secondary" noWrap>
+            {detail}
           </Typography>
         )}
       </Stack>
