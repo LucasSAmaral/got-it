@@ -1,6 +1,6 @@
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined'
-import { Alert, Box, Button, IconButton, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, IconButton, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
@@ -23,7 +23,7 @@ export function AdminEditionsPage() {
   const { data, isLoading, isError } = useAdminEditions(query)
   const [editing, setEditing] = useState<EditionSummary | null>(null)
   const { visibleCount, hasMore, sentinelRef } = useShowMore(data?.length ?? 0, query.trim())
-  // Se falhar, só os atalhos das lojas somem; a edição do catálogo continua.
+  // Se falhar, só o atalho das chegadas some; a edição do catálogo continua.
   const { data: stores } = useQuery({ queryKey: ['stores'], queryFn: fetchStores })
 
   if (!isAdmin(session)) {
@@ -36,21 +36,19 @@ export function AdminEditionsPage() {
         Editar catálogo
       </Typography>
 
+      {/* O Box põe o botão numa linha própria: sozinho ele é inline e fica colado na busca. */}
       {stores && stores.length > 0 && (
-        <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1, mb: 2.5 }}>
-          {stores.map((store) => (
-            <Button
-              key={store.id}
-              component={Link}
-              to={`/admin/loja/${store.slug}`}
-              variant="outlined"
-              color="inherit"
-              startIcon={<StorefrontOutlinedIcon />}
-            >
-              Chegadas na {store.name}
-            </Button>
-          ))}
-        </Stack>
+        <Box sx={{ mb: 2.5 }}>
+          <Button
+            component={Link}
+            to="/admin/chegadas"
+            variant="outlined"
+            color="inherit"
+            startIcon={<StorefrontOutlinedIcon />}
+          >
+            Chegou nas lojas
+          </Button>
+        </Box>
       )}
 
       <SearchField placeholder="Buscar por título, editora ou ISBN" value={query} onChange={setQuery} />

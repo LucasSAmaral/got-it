@@ -22,6 +22,11 @@ export interface StoreArrival {
   edition: Pick<Edition, 'id' | 'title' | 'publisher' | 'volume' | 'isbn13' | 'cover_url'>
 }
 
+/** Chegada com a loja embutida, para o Início, que junta todas as lojas. */
+export interface ArrivalWithStore extends StoreArrival {
+  store: Store
+}
+
 export interface ArrivalFormInput {
   arrivedOn: string
   price: string
@@ -55,6 +60,20 @@ export async function fetchRecentArrivals(storeId: string, today = new Date()): 
     .order('created_at', { ascending: false })
   if (error) throw error
   return (data ?? []) as unknown as StoreArrival[]
+}
+
+/** Chegadas recentes de todas as lojas (Início), mais recentes primeiro, com edição e loja embutidas. */
+export async function fetchRecentArrivalsAllStores(today = new Date()): Promise<ArrivalWithStore[]> {
+  const { data, error } = await supabase
+    .from('store_arrivals')
+    .select(
+      'id, arrived_on, price, edition:editions(id, title, publisher, volume, isbn13, cover_url), store:stores(id, name, slug, whatsapp, instagram)',
+    )
+    .gte('arrived_on', isoDateDaysBefore(today, ARRIVAL_WINDOW_DAYS))
+    .order('arrived_on', { ascending: false })
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data ?? []) as unknown as ArrivalWithStore[]
 }
 
 /** Registra a chegada; `DuplicateArrivalError` quando a edição já foi registrada nessa loja nesse dia. */

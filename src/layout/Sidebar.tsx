@@ -2,7 +2,7 @@ import AddIcon from '@mui/icons-material/Add'
 import LogoutIcon from '@mui/icons-material/Logout'
 import { Button, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
 import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LogoutDialog } from '../features/auth/LogoutDialog'
 import { SidebarNav } from './AppLayout.styles'
 import { activeNavItem, useNavItems } from './navItems'
@@ -21,7 +21,7 @@ export function Sidebar() {
 
   return (
     <SidebarNav component="nav">
-      <Typography variant="h3" sx={{ px: 1, color: 'primary.main' }}>
+      <Typography variant="h3" component={Link} to="/" sx={{ px: 1, color: 'primary.main', textDecoration: 'none' }}>
         Tem esse?
       </Typography>
       <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/cadastro')}>

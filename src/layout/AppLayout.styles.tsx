@@ -28,3 +28,16 @@ export const BottomNavBar = styled(Paper)(({ theme }) => ({
   right: 0,
   borderTop: `1px solid ${theme.palette.divider}`,
 }))
+
+/** Cabeçalho das páginas públicas para quem não entrou (ver `PublicLayout`): nome do app e "Entrar". */
+export const PublicHeader = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: theme.spacing(1.5, 2.5),
+  backgroundColor: theme.palette.background.paper,
+  borderBottom: `1px solid ${theme.palette.divider}`,
+  [theme.breakpoints.up('md')]: {
+    padding: theme.spacing(2, 5),
+  },
+}))

@@ -62,7 +62,7 @@ export function RegisterByIsbnPage() {
     setSubmitError('')
     try {
       await addCopyToExistingEdition(edition.id, copyForm)
-      navigate('/')
+      navigate('/colecao')
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Não deu para salvar. Tenta de novo.')
     } finally {
@@ -79,7 +79,7 @@ export function RegisterByIsbnPage() {
       const coverUrl = coverFile ? await uploadCoverImage(coverFile, isbn13) : ''
       const newEdition: NewEditionInput = { isbn13, coverUrl, ...manualEdition }
       await createEditionAndCopy(newEdition, copyForm)
-      navigate('/')
+      navigate('/colecao')
     } catch (error) {
       if (error instanceof DuplicateIsbnError) {
         setSubmitError('Essa edição acabou de ser cadastrada por outra pessoa — confira os dados abaixo.')

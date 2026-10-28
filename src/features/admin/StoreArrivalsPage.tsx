@@ -1,8 +1,8 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { Alert, Box, Button, IconButton, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { EditionGrid } from '../../components/EditionGrid'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
@@ -19,19 +19,20 @@ import {
   createArrival,
   DuplicateArrivalError,
   fetchRecentArrivals,
-  fetchStore,
+  fetchStores,
   type ArrivalFormInput,
 } from '../store/api'
 import { isAdmin } from './admin'
 import { StoreArrivalCard } from './StoreArrivalCard'
 
 /**
- * Registro das chegadas de uma loja (versão 1 da vitrine: quem cadastra é o admin). Escaneia o ISBN; se a
- * edição não está no catálogo, cria só a edição, sem exemplar na coleção de quem registra. Depois de salvar,
- * o campo volta vazio para o próximo do lote, mantendo a data.
+ * Registro das chegadas nas lojas (por enquanto quem cadastra é o admin, por qualquer loja). A loja escolhida
+ * fica na URL (`?loja=lazarus`). Escaneia o ISBN; se a edição não está no catálogo, cria só a edição, sem
+ * exemplar na coleção de quem registra — e a próxima loja que bipar o mesmo gibi já o encontra pronto.
+ * Depois de salvar, o campo volta vazio para o próximo do lote, mantendo a data e a loja.
  */
 export function StoreArrivalsPage() {
-  const { slug = '' } = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { session } = useAuth()
   const queryClient = useQueryClient()
 
@@ -43,8 +44,10 @@ export function StoreArrivalsPage() {
   const [submitError, setSubmitError] = useState('')
   const [savedTitle, setSavedTitle] = useState('')
 
-  const storeQuery = useQuery({ queryKey: ['store', slug], queryFn: () => fetchStore(slug) })
-  const store = storeQuery.data
+  const storesQuery = useQuery({ queryKey: ['stores'], queryFn: fetchStores })
+  const stores = storesQuery.data
+  // Sem `?loja=` (ou com uma que não existe), a primeira em ordem alfabética.
+  const store = stores?.find((candidate) => candidate.slug === searchParams.get('loja')) ?? stores?.[0]
 
   const arrivalsQuery = useQuery({
     queryKey: ['store-arrivals', store?.id],
@@ -60,7 +63,7 @@ export function StoreArrivalsPage() {
   })
   const edition = editionQuery.data
 
-  if (!isAdmin(session) || storeQuery.data === null) {
+  if (!isAdmin(session)) {
     return <Navigate to="/admin" replace />
   }
 
@@ -89,7 +92,8 @@ export function StoreArrivalsPage() {
       setArrivalForm({ ...arrivalForm, price: '' })
       setEditionForm(EMPTY_EDITION_FORM)
       setCoverFile(null)
-      queryClient.invalidateQueries({ queryKey: ['store-arrivals', store.id] })
+      // Todas as listas de chegadas: a desta loja e a do Início.
+      queryClient.invalidateQueries({ queryKey: ['store-arrivals'] })
       if (!edition) queryClient.invalidateQueries({ queryKey: ['admin-editions'] })
     } catch (error) {
       if (error instanceof DuplicateArrivalError) {
@@ -136,14 +140,30 @@ export function StoreArrivalsPage() {
         <IconButton aria-label="Voltar" component={Link} to="/admin" edge="start" sx={{ display: { md: 'none' } }}>
           <ArrowBackIcon />
         </IconButton>
-        <Typography variant="h2">Chegadas{store ? ` na ${store.name}` : ''}</Typography>
+        <Typography variant="h2">Chegou nas lojas</Typography>
       </Stack>
 
-      {storeQuery.isLoading && <LoadingSpinner size={28} sx={{ py: 4 }} />}
-      {storeQuery.isError && <Alert severity="error">Não deu para carregar a loja agora.</Alert>}
+      {storesQuery.isLoading && <LoadingSpinner size={28} sx={{ py: 4 }} />}
+      {storesQuery.isError && <Alert severity="error">Não deu para carregar as lojas agora.</Alert>}
+      {stores?.length === 0 && <Alert severity="info">Nenhuma loja cadastrada.</Alert>}
 
       {store && (
         <>
+          <TextField
+            select
+            label="Loja"
+            fullWidth
+            value={store.slug}
+            onChange={(event) => setSearchParams({ loja: event.target.value }, { replace: true })}
+            sx={{ mb: 3 }}
+          >
+            {stores?.map((option) => (
+              <MenuItem key={option.id} value={option.slug}>
+                {option.name}
+              </MenuItem>
+            ))}
+          </TextField>
+
           <IsbnField value={isbnInput} onChange={handleIsbnChange} />
 
           {savedTitle && (
@@ -204,7 +224,7 @@ export function StoreArrivalsPage() {
           )}
 
           <Typography variant="h4" sx={{ mt: 5, mb: 0.5 }}>
-            Na vitrine
+            Na vitrine da {store.name}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Chegadas dos últimos {ARRIVAL_WINDOW_DAYS} dias. Depois disso saem sozinhas.

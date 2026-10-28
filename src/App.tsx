@@ -9,24 +9,29 @@ import { LoginPage } from './features/auth/LoginPage'
 import { RegisterByIsbnPage } from './features/register/RegisterByIsbnPage'
 import { SeriesListPage } from './features/series/SeriesListPage'
 import { SeriesPage } from './features/series/SeriesPage'
+import { HomePage } from './features/home/HomePage'
 import { StorePage } from './features/store/StorePage'
 import { AppLayout } from './layout/AppLayout'
+import { PublicLayout } from './layout/PublicLayout'
 
 export function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      {/* Pública: quem chega pelo link da loja pode não ter conta. */}
-      <Route path="/loja/:slug" element={<StorePage />} />
+      {/* Públicas: quem chega pelo link da loja ou conhecendo o app pode não ter conta. */}
+      <Route element={<PublicLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="loja/:slug" element={<StorePage />} />
+      </Route>
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
-          <Route index element={<CollectionPage />} />
+          <Route path="colecao" element={<CollectionPage />} />
           <Route path="eu-tenho" element={<CheckPage />} />
           <Route path="exemplar/:copyId" element={<CopyDetailPage />} />
           <Route path="series" element={<SeriesListPage />} />
           <Route path="serie/:workId" element={<SeriesPage />} />
           <Route path="admin" element={<AdminEditionsPage />} />
-          <Route path="admin/loja/:slug" element={<StoreArrivalsPage />} />
+          <Route path="admin/chegadas" element={<StoreArrivalsPage />} />
         </Route>
         <Route path="cadastro" element={<RegisterByIsbnPage />} />
       </Route>
