@@ -24,7 +24,10 @@ export const CoverPlaceholder = styled(Box)(({ theme }) => ({
   overflow: 'hidden',
 }))
 
-/** Título da edição: uma linha com reticências no celular, até duas linhas em tela larga. */
+/**
+ * Título da edição: uma linha com reticências no celular, até duas linhas em tela larga. Na tela larga reserva
+ * sempre as duas linhas, para os cartões lado a lado terem a mesma altura com título curto ou longo.
+ */
 export const ClampedTitle = styled(Typography)(({ theme }) => ({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -35,6 +38,7 @@ export const ClampedTitle = styled(Typography)(({ theme }) => ({
     whiteSpace: 'normal',
     display: '-webkit-box',
     WebkitLineClamp: 2,
+    minHeight: `calc(2 * ${theme.typography.h4.lineHeight})`,
   },
 }))
 
