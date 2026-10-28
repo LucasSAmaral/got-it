@@ -1,13 +1,16 @@
 import InstagramIcon from '@mui/icons-material/Instagram'
 import WhatsAppIcon from '@mui/icons-material/WhatsApp'
-import { IconButton, Snackbar } from '@mui/material'
+import { Button, Snackbar } from '@mui/material'
 import { useState } from 'react'
 import { instagramUrl, reservationMessage, whatsappUrl } from '../../lib/reservation'
 import type { Store, StoreArrival } from './api'
 
+/** Texto do botão: a vitrine não sabe o que esgotou, então a conversa começa perguntando. */
+const LABEL = 'Perguntar se ainda tem'
+
 /**
- * Botão de reserva pelo canal que a loja tiver; nenhum quando ela ainda não informou contato. Usado na
- * vitrine da loja e na lista de lojas do Início.
+ * Botão de reserva pelo canal que a loja tiver; nenhum quando ela ainda não informou contato. Usado no
+ * diálogo das chegadas (vitrine da loja e Início).
  */
 export function ReserveButton({ store, edition }: { store: Store; edition: StoreArrival['edition'] }) {
   const [copied, setCopied] = useState(false)
@@ -15,35 +18,39 @@ export function ReserveButton({ store, edition }: { store: Store; edition: Store
 
   if (store.whatsapp) {
     return (
-      <IconButton
+      <Button
         component="a"
         href={whatsappUrl(store.whatsapp, message)}
         target="_blank"
         rel="noopener"
-        aria-label={`Reservar "${edition.title}" na ${store.name} pelo WhatsApp`}
-        size="small"
+        aria-label={`${LABEL}, pelo WhatsApp da ${store.name}`}
+        variant="contained"
         color="success"
+        size="small"
+        startIcon={<WhatsAppIcon />}
       >
-        <WhatsAppIcon fontSize="small" />
-      </IconButton>
+        {LABEL}
+      </Button>
     )
   }
 
   if (store.instagram) {
     return (
       <>
-        <IconButton
+        <Button
           component="a"
           href={instagramUrl(store.instagram)}
           target="_blank"
           rel="noopener"
-          aria-label={`Reservar "${edition.title}" na ${store.name} pelo Instagram`}
+          aria-label={`${LABEL}, pelo Instagram da ${store.name}`}
+          variant="contained"
           size="small"
+          startIcon={<InstagramIcon />}
           // O direct não aceita texto pronto: copia antes de abrir, para a pessoa só colar.
           onClick={() => navigator.clipboard?.writeText(message).then(() => setCopied(true), () => {})}
         >
-          <InstagramIcon fontSize="small" />
-        </IconButton>
+          {LABEL}
+        </Button>
         <Snackbar
           open={copied}
           autoHideDuration={4000}

@@ -1,15 +1,16 @@
 import { Alert, Box, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { EditionCard } from '../../components/EditionCard'
 import { EditionGrid } from '../../components/EditionGrid'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { formatArrival } from '../../lib/format'
-import { ARRIVAL_WINDOW_DAYS, fetchRecentArrivals, fetchStore } from './api'
+import type { EditionArrivals } from '../../lib/arrivals'
+import { ARRIVAL_WINDOW_DAYS, fetchRecentArrivals, fetchStore, type ArrivalWithStore } from './api'
+import { ArrivalStoresDialog } from './ArrivalStoresDialog'
 import { OwnershipChip } from './OwnershipChip'
-import { ReserveButton } from './ReserveButton'
-import { CardActions } from './StorePage.styles'
 import { useOwnedEditionIds } from './useOwnedEditionIds'
 
 /**
@@ -19,6 +20,7 @@ import { useOwnedEditionIds } from './useOwnedEditionIds'
 export function StorePage() {
   const { slug = '' } = useParams()
   const { session } = useAuth()
+  const [selected, setSelected] = useState<EditionArrivals<ArrivalWithStore> | null>(null)
 
   const storeQuery = useQuery({ queryKey: ['store', slug], queryFn: () => fetchStore(slug) })
   const store = storeQuery.data
@@ -42,7 +44,9 @@ export function StorePage() {
           <Typography variant="h2">Chegou na {store.name}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, mb: 3 }}>
             Lançamentos dos últimos {ARRIVAL_WINDOW_DAYS} dias.
-            {(store.whatsapp || store.instagram) && ' Para reservar, toque no ícone do cartão.'}
+            {store.whatsapp || store.instagram
+              ? ' Toque no gibi para ver a capa e perguntar à loja se ainda tem.'
+              : ' Toque no gibi para ver a capa maior.'}
             {session && ' Os que faltam na sua coleção aparecem como "Falta esse".'}
           </Typography>
 
@@ -60,15 +64,14 @@ export function StorePage() {
                 key={arrival.id}
                 edition={arrival.edition}
                 detail={formatArrival(arrival.arrived_on, arrival.price)}
-                action={
-                  <CardActions>
-                    {owned && <OwnershipChip has={owned.has(arrival.edition.id)} />}
-                    <ReserveButton store={store} edition={arrival.edition} />
-                  </CardActions>
-                }
+                // O diálogo é o mesmo do Início, aqui com uma loja só.
+                onClick={() => setSelected({ edition: arrival.edition, arrivals: [{ ...arrival, store }] })}
+                action={owned && <OwnershipChip has={owned.has(arrival.edition.id)} />}
               />
             ))}
           </EditionGrid>
+
+          <ArrivalStoresDialog group={selected} onClose={() => setSelected(null)} linkStores={false} />
         </>
       )}
     </Box>

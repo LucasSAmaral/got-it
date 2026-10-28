@@ -4,13 +4,14 @@ import { Alert, Box, IconButton, Link, Stack, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { Fragment, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
+import { LargeCover } from '../../components/LargeCover'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
-import { formatDate, formatPrice, titleInitials } from '../../lib/format'
+import { formatDate, formatPrice } from '../../lib/format'
 import { seriesPosition } from '../../lib/series'
 import { tokens } from '../../theme'
 import { fetchCopyDetail, type CopyDetail } from './api'
 import { NarrationTitle } from '../../components/NarrationTitle'
-import { CoverFrame, DetailList, SectionCard } from './CopyDetailPage.styles'
+import { DetailList, SectionCard } from './CopyDetailPage.styles'
 import { EditCopyDialog } from './EditCopyDialog'
 
 /** `to`: o valor vira link (ex.: a série abre a página dela). */
@@ -54,7 +55,6 @@ function seriesLabel(edition: CopyDetail['edition']): string | null {
 export function CopyDetailPage() {
   const { copyId } = useParams<{ copyId: string }>()
   const navigate = useNavigate()
-  const [coverFailed, setCoverFailed] = useState(false)
   const [editing, setEditing] = useState(false)
 
   const offline = !navigator.onLine
@@ -84,21 +84,7 @@ export function CopyDetailPage() {
 
       {data && (
         <>
-          <CoverFrame>
-            {data.edition.cover_url && !coverFailed ? (
-              <Box
-                component="img"
-                src={data.edition.cover_url}
-                alt={`Capa de ${data.edition.title}`}
-                onError={() => setCoverFailed(true)}
-                sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            ) : (
-              <Typography variant="h1" color="text.secondary">
-                {titleInitials(data.edition.title)}
-              </Typography>
-            )}
-          </CoverFrame>
+          <LargeCover coverUrl={data.edition.cover_url} title={data.edition.title} />
 
           <Stack spacing={0.5} sx={{ mt: 3 }}>
             <Typography variant="h2">{data.edition.title}</Typography>

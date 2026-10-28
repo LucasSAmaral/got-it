@@ -13,7 +13,7 @@ import { arrivalsSummary, groupArrivalsByEdition, type EditionArrivals } from '.
 import { ARRIVAL_WINDOW_DAYS, fetchRecentArrivalsAllStores, type ArrivalWithStore } from '../store/api'
 import { OwnershipChip } from '../store/OwnershipChip'
 import { useOwnedEditionIds } from '../store/useOwnedEditionIds'
-import { ArrivalStoresDialog } from './ArrivalStoresDialog'
+import { ArrivalStoresDialog } from '../store/ArrivalStoresDialog'
 import { Hero, Purpose, PurposeGrid } from './HomePage.styles'
 
 /** Os dois propósitos do app, explicados para quem chega sem conta. */
