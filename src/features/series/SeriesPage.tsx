@@ -1,9 +1,11 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CloudOffOutlinedIcon from '@mui/icons-material/CloudOffOutlined'
-import { Alert, Box, Chip, IconButton, Typography } from '@mui/material'
+import { Alert, Box, IconButton, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { EditionCard } from '../../components/EditionCard'
+import { NarrationTitle } from '../../components/NarrationTitle'
+import { SpeechBalloon } from '../../components/SpeechBalloon'
 import { EditionGrid } from '../../components/EditionGrid'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { groupSeries, seriesProgress, titleWithinSeries, type SeriesStatus } from '../../lib/series'
@@ -11,12 +13,12 @@ import type { CollectionItem } from '../../types/catalog'
 import { NetworkError } from '../collection/api'
 import { useCollection } from '../collection/useCollection'
 import { fetchSeries, type Series } from './api'
-import { SlotGrid, SlotTitle } from './SeriesPage.styles'
+import { SlotGrid } from './SeriesPage.styles'
 
-const STATUS_CHIP: Record<SeriesStatus, { label: string; color: 'success' | 'default' | 'warning' }> = {
-  owned: { label: 'Tenho', color: 'success' },
-  other_edition: { label: 'Outra edição', color: 'default' },
-  missing: { label: 'Não tenho', color: 'warning' },
+const STATUS_CHIP: Record<SeriesStatus, { label: string; tone: 'success' | 'neutral' | 'warning' }> = {
+  owned: { label: 'Tenho', tone: 'success' },
+  other_edition: { label: 'Outra edição', tone: 'neutral' },
+  missing: { label: 'Não tenho', tone: 'warning' },
 }
 
 /** Sem sinal: só os seus exemplares desta série, a partir da lista completa (que cai para a cópia do aparelho). */
@@ -98,7 +100,9 @@ export function SeriesPage() {
           <SlotGrid>
             {slots.map((slot) => (
               <section key={slot.position ?? 'sem-numero'}>
-                <SlotTitle variant="overline">{slot.position === null ? 'Sem número' : `Nº ${slot.position}`}</SlotTitle>
+                <NarrationTitle component="h3" sx={{ mt: 3, mb: 1.5 }}>
+                  {slot.position === null ? 'Sem número' : `Nº ${slot.position}`}
+                </NarrationTitle>
                 <EditionGrid>
                   {slot.items.map(({ edition, status }) => (
                     <EditionCard
@@ -106,13 +110,7 @@ export function SeriesPage() {
                       edition={{ ...edition, title: titleWithinSeries(edition.title, series.title) }}
                       to={edition.myCopyId ? `/exemplar/${edition.myCopyId}` : undefined}
                       action={
-                        <Chip
-                          size="small"
-                          label={STATUS_CHIP[status].label}
-                          color={STATUS_CHIP[status].color}
-                          variant={status === 'owned' ? 'filled' : 'outlined'}
-                          sx={{ alignSelf: 'flex-start' }}
-                        />
+                        <SpeechBalloon tone={STATUS_CHIP[status].tone}>{STATUS_CHIP[status].label}</SpeechBalloon>
                       }
                     />
                   ))}

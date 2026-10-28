@@ -1,4 +1,4 @@
-import { Box, Card, styled, Typography } from '@mui/material'
+import { Box, Card, styled } from '@mui/material'
 import type { ElementType } from 'react'
 import { tokens } from '../../theme'
 
@@ -8,8 +8,9 @@ export const CoverFrame = styled(Box)(({ theme }) => ({
   maxWidth: 280,
   aspectRatio: '2 / 3',
   margin: '0 auto',
-  borderRadius: `${tokens.radius.md}px`,
-  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: `${tokens.radius.sm}px`,
+  border: tokens.panel.border,
+  boxShadow: tokens.panel.shadow,
   backgroundColor: theme.palette.background.paper,
   overflow: 'hidden',
   display: 'flex',
@@ -20,7 +21,6 @@ export const CoverFrame = styled(Box)(({ theme }) => ({
 /** Bloco de dados ("Edição", "Seu exemplar") com o mesmo fundo e borda do cartão da coleção. */
 export const SectionCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing(2),
-  borderColor: theme.palette.divider,
 }))
 
 /** Lista rótulo → valor dos dados (editora, volume, ISBN…). Coluna do rótulo fixa para as duas listas ficarem alinhadas. */
@@ -33,9 +33,3 @@ export const DetailList = styled(Box)<{ component?: ElementType }>(({ theme }) =
   '& dd': { margin: 0 },
 }))
 
-/** Título de cada bloco ("Edição", "Seu exemplar"). O `overline` do MUI é um `<span>`: sem `block`, a margem vertical some. */
-export const SectionTitle = styled(Typography)(({ theme }) => ({
-  display: 'block',
-  marginBottom: theme.spacing(1.5),
-  color: theme.palette.text.secondary,
-}))

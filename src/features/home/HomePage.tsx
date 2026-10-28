@@ -1,6 +1,5 @@
-import QrCodeScannerOutlinedIcon from '@mui/icons-material/QrCodeScannerOutlined'
+import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined'
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined'
-import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined'
 import { Alert, Box, Button, Stack, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -9,17 +8,24 @@ import { useAuth } from '../../auth/useAuth'
 import { EditionCard } from '../../components/EditionCard'
 import { EditionGrid } from '../../components/EditionGrid'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
+import { NarrationTitle } from '../../components/NarrationTitle'
 import { arrivalsSummary, groupArrivalsByEdition, type EditionArrivals } from '../../lib/arrivals'
 import { ARRIVAL_WINDOW_DAYS, fetchRecentArrivalsAllStores, type ArrivalWithStore } from '../store/api'
 import { OwnershipChip } from '../store/OwnershipChip'
 import { useOwnedEditionIds } from '../store/useOwnedEditionIds'
 import { ArrivalStoresDialog } from './ArrivalStoresDialog'
-import { Feature, FeatureList, Hero } from './HomePage.styles'
+import { Hero, Purpose, PurposeGrid } from './HomePage.styles'
 
-const FEATURES = [
-  { icon: <QrCodeScannerOutlinedIcon />, text: 'Cadastre pelo código de barras: aponte a câmera e a edição vem preenchida.' },
-  { icon: <SearchOutlinedIcon />, text: 'Pergunte "Eu tenho?" antes de pagar, mesmo sem sinal dentro da loja.' },
-  { icon: <StorefrontOutlinedIcon />, text: 'Veja o que chegou nas lojas e reserve direto com elas.' },
+/** Os dois propósitos do app, explicados para quem chega sem conta. */
+const PURPOSES = [
+  {
+    title: 'Sua coleção',
+    text: 'Cadastre seus gibis pelo código de barras e tenha a coleção inteira no bolso. Na loja, o "Eu tenho?" responde em segundos se você já tem aquele número, mesmo sem sinal.',
+  },
+  {
+    title: 'Novidades nas lojas',
+    text: 'As lojas de quadrinhos registram aqui o que acabou de chegar. Veja os lançamentos, em que loja tem cada um e reserve direto com ela.',
+  },
 ]
 
 /**
@@ -44,30 +50,34 @@ export function HomePage() {
       {loggedIn ? (
         <Stack spacing={2} sx={{ mb: 5, alignItems: 'flex-start' }}>
           <Typography variant="h2">Vai comprar?</Typography>
-          <Button component={Link} to="/eu-tenho" variant="contained" size="large" startIcon={<SearchOutlinedIcon />}>
-            Eu tenho?
-          </Button>
+          <Typography variant="body2" color="text.secondary">
+            Confira se já tem antes de pagar, ou veja abaixo o que chegou nas lojas.
+          </Typography>
+          <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1.5 }}>
+            <Button component={Link} to="/eu-tenho" variant="contained" size="large" startIcon={<SearchOutlinedIcon />}>
+              Eu tenho?
+            </Button>
+            <Button component={Link} to="/colecao" variant="outlined" color="inherit" size="large" startIcon={<GridViewOutlinedIcon />}>
+              Sua coleção
+            </Button>
+          </Stack>
         </Stack>
       ) : (
         <Hero>
-          <Typography variant="h2">Já tem esse gibi?</Typography>
-          <Typography variant="body1" color="text.secondary">
-            O Tem esse? guarda a sua coleção de quadrinhos e, na hora da compra, responde em segundos se você já
-            tem aquele número. Nasceu de uma compra repetida.
-          </Typography>
-          <FeatureList>
-            {FEATURES.map((feature) => (
-              <Feature key={feature.text}>
-                {feature.icon}
-                <Typography variant="body2">{feature.text}</Typography>
-              </Feature>
+          <Typography variant="h2">Controle sua coleção de quadrinhos e acompanhe o que chega nas lojas.</Typography>
+          <PurposeGrid>
+            {PURPOSES.map((purpose) => (
+              <Purpose key={purpose.title}>
+                <NarrationTitle component="h3">{purpose.title}</NarrationTitle>
+                <Typography variant="body1">{purpose.text}</Typography>
+              </Purpose>
             ))}
-          </FeatureList>
+          </PurposeGrid>
         </Hero>
       )}
 
-      <Typography variant="h3">Chegou nas lojas</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, mb: 3 }}>
+      <NarrationTitle>Chegou nas lojas</NarrationTitle>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, mb: 3 }}>
         Lançamentos dos últimos {ARRIVAL_WINDOW_DAYS} dias. Toque no gibi para ver onde chegou e reservar.
       </Typography>
 

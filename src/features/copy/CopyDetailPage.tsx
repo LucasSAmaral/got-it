@@ -9,7 +9,8 @@ import { formatDate, formatPrice, titleInitials } from '../../lib/format'
 import { seriesPosition } from '../../lib/series'
 import { tokens } from '../../theme'
 import { fetchCopyDetail, type CopyDetail } from './api'
-import { CoverFrame, DetailList, SectionCard, SectionTitle } from './CopyDetailPage.styles'
+import { NarrationTitle } from '../../components/NarrationTitle'
+import { CoverFrame, DetailList, SectionCard } from './CopyDetailPage.styles'
 import { EditCopyDialog } from './EditCopyDialog'
 
 /** `to`: o valor vira link (ex.: a série abre a página dela). */
@@ -108,7 +109,7 @@ export function CopyDetailPage() {
 
           <Stack spacing={2} sx={{ mt: 3 }}>
             <SectionCard variant="outlined">
-              <SectionTitle variant="overline">Edição</SectionTitle>
+              <NarrationTitle sx={{ mb: 1.5 }}>Edição</NarrationTitle>
               <Details
                 items={[
                   {
@@ -126,7 +127,7 @@ export function CopyDetailPage() {
             </SectionCard>
             <SectionCard variant="outlined">
               <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <SectionTitle variant="overline">Seu exemplar</SectionTitle>
+                <NarrationTitle sx={{ mb: 1.5 }}>Seu exemplar</NarrationTitle>
                 <IconButton
                   aria-label="Editar exemplar"
                   size="small"

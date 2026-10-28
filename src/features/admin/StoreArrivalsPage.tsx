@@ -5,6 +5,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { EditionGrid } from '../../components/EditionGrid'
+import { NarrationTitle } from '../../components/NarrationTitle'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { formatDate, isPriceInputValid, toIsoDate } from '../../lib/format'
 import { isbn13FromInput } from '../../lib/isbn'
@@ -223,9 +224,7 @@ export function StoreArrivalsPage() {
             </Box>
           )}
 
-          <Typography variant="h4" sx={{ mt: 5, mb: 0.5 }}>
-            Na vitrine da {store.name}
-          </Typography>
+          <NarrationTitle sx={{ mt: 5, mb: 1 }}>Na vitrine da {store.name}</NarrationTitle>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Chegadas dos últimos {ARRIVAL_WINDOW_DAYS} dias. Depois disso saem sozinhas.
           </Typography>

@@ -8,7 +8,6 @@ export const CardFrame = styled(Card)(({ theme }) => ({
   gap: theme.spacing(1.5),
   alignItems: 'center',
   padding: theme.spacing(1.5),
-  borderColor: theme.palette.divider,
 }))
 
 /** Espaço reservado da capa: mostra a imagem quando existe, senão as iniciais do título. */
@@ -18,7 +17,7 @@ export const CoverPlaceholder = styled(Box)(({ theme }) => ({
   flexShrink: 0,
   borderRadius: `${tokens.radius.sm}px`,
   backgroundColor: theme.palette.background.default,
-  border: `1px solid ${theme.palette.divider}`,
+  border: `1.5px solid ${tokens.color.ink}`,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

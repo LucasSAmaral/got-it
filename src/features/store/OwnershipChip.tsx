@@ -1,13 +1,6 @@
-import { Chip } from '@mui/material'
+import { SpeechBalloon } from '../../components/SpeechBalloon'
 
-/** "Tenho" / "Falta esse" nos cartões das chegadas (vitrine e Início). */
+/** "Tenho" / "Falta esse" nos cartões das chegadas (vitrine e Início), em balão de fala. */
 export function OwnershipChip({ has }: { has: boolean }) {
-  return (
-    <Chip
-      size="small"
-      label={has ? 'Tenho' : 'Falta esse'}
-      color={has ? 'success' : 'warning'}
-      variant={has ? 'filled' : 'outlined'}
-    />
-  )
+  return <SpeechBalloon tone={has ? 'success' : 'warning'}>{has ? 'Tenho' : 'Falta esse'}</SpeechBalloon>
 }

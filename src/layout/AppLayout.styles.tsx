@@ -1,5 +1,6 @@
 import { Box, Paper, styled } from '@mui/material'
 import type { ElementType } from 'react'
+import { tokens } from '../theme'
 
 /** Barra lateral de navegação (tela larga, a partir de `md`); escondida no celular. */
 export const SidebarNav = styled(Box)<{ component?: ElementType }>(({ theme }) => ({
@@ -13,7 +14,7 @@ export const SidebarNav = styled(Box)<{ component?: ElementType }>(({ theme }) =
   flexShrink: 0,
   padding: theme.spacing(2.5),
   backgroundColor: theme.palette.background.paper,
-  borderRight: `1px solid ${theme.palette.divider}`,
+  borderRight: tokens.panel.border,
 }))
 
 /** Navegação fixa embaixo (celular); escondida a partir de `md`, onde entra a `SidebarNav`. */
@@ -26,7 +27,9 @@ export const BottomNavBar = styled(Paper)(({ theme }) => ({
   bottom: 0,
   left: 0,
   right: 0,
-  borderTop: `1px solid ${theme.palette.divider}`,
+  // Sem o arredondamento padrão do Paper, senão a linha de cima fica com as pontas curvas.
+  borderRadius: 0,
+  borderTop: tokens.panel.border,
 }))
 
 /** Cabeçalho das páginas públicas para quem não entrou (ver `PublicLayout`): nome do app e "Entrar". */
@@ -36,7 +39,7 @@ export const PublicHeader = styled(Box)(({ theme }) => ({
   justifyContent: 'space-between',
   padding: theme.spacing(1.5, 2.5),
   backgroundColor: theme.palette.background.paper,
-  borderBottom: `1px solid ${theme.palette.divider}`,
+  borderBottom: tokens.panel.border,
   [theme.breakpoints.up('md')]: {
     padding: theme.spacing(2, 5),
   },

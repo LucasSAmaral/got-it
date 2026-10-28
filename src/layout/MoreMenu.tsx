@@ -3,6 +3,7 @@ import { Divider, Drawer, List, ListItemButton, ListItemIcon, ListItemText } fro
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LogoutDialog } from '../features/auth/LogoutDialog'
+import { tokens } from '../theme'
 import type { NavItem } from './navItems'
 
 type MoreMenuProps = {
@@ -23,7 +24,7 @@ export function MoreMenu({ open, onClose, items, active }: MoreMenuProps) {
 
   return (
     <>
-      <Drawer anchor="bottom" open={open} onClose={onClose}>
+      <Drawer anchor="bottom" open={open} onClose={onClose} slotProps={{ paper: { sx: { borderTop: tokens.panel.border } } }}>
         <List sx={{ pb: 2 }}>
           {items.map((item) => (
             <ListItemButton

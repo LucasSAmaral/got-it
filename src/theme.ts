@@ -3,6 +3,7 @@ import { createTheme } from '@mui/material/styles'
 /**
  * Valores extraídos do design system "Got it?" (tema claro).
  * https://claude.ai/artifact/QkwZirgKCYBsuAFgTzuwQU
+ * Depois dele, o app ganhou o visual de quadro de HQ (`panel`, `caption`), que o artifact não tem.
  */
 export const tokens = {
   color: {
@@ -16,6 +17,8 @@ export const tokens = {
     line: '#dad2c0',
     success: '#2f7d5f',
     danger: '#a3341f',
+    /** Fundo da caixa de narração (títulos de seção) e do balão "Falta esse". */
+    caption: '#f5cd3c',
   },
   font: {
     display: "'Bricolage Grotesque', system-ui, sans-serif",
@@ -29,6 +32,12 @@ export const tokens = {
     pill: 999,
   },
   space: (n: number) => `${n * 4}px`,
+  /** Visual de quadro de HQ: contorno de nanquim e sombra dura deslocada, sem desfoque. */
+  panel: {
+    border: '2px solid #201c16',
+    shadow: '4px 4px 0 #201c16',
+    shadowSmall: '2px 2px 0 #201c16',
+  },
 }
 
 export const theme = createTheme({
@@ -73,7 +82,23 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: { borderRadius: tokens.radius.pill },
-        contained: { boxShadow: 'none' },
+        // Botão principal com cara de quadro; ao tocar, "afunda" no lugar da sombra.
+        contained: {
+          border: tokens.panel.border,
+          boxShadow: tokens.panel.shadowSmall,
+          '&:hover': { boxShadow: tokens.panel.shadowSmall },
+          '&:active': { boxShadow: 'none', transform: 'translate(2px, 2px)' },
+        },
+        outlined: { borderWidth: 2, '&:hover': { borderWidth: 2 } },
+      },
+    },
+    MuiFab: {
+      styleOverrides: {
+        root: {
+          border: tokens.panel.border,
+          boxShadow: tokens.panel.shadowSmall,
+          '&:active': { boxShadow: 'none', transform: 'translate(2px, 2px)' },
+        },
       },
     },
     MuiTextField: {
@@ -84,9 +109,15 @@ export const theme = createTheme({
         root: { borderRadius: tokens.radius.sm },
       },
     },
+    // Cartões são quadros de HQ: cantos quase retos, contorno grosso e sombra dura.
     MuiCard: {
       styleOverrides: {
-        root: { borderRadius: tokens.radius.md },
+        root: { borderRadius: tokens.radius.sm, border: tokens.panel.border, boxShadow: tokens.panel.shadow },
+      },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: { borderRadius: tokens.radius.sm, border: tokens.panel.border, boxShadow: '6px 6px 0 #201c16' },
       },
     },
     MuiPaper: {
