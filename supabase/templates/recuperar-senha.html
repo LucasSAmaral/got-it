@@ -1,5 +1,59 @@
-<!-- Supabase → Authentication → Emails → "Reset Password". Assunto: Seu código para trocar a senha do Tem esse? -->
-<h2>Trocar a senha</h2>
-<p>Digite este código no app para escolher uma senha nova:</p>
-<p style="font-size: 32px; font-weight: bold; letter-spacing: 6px; font-family: monospace;">{{ .Token }}</p>
-<p>O código vale por 1 hora. Se não foi você quem pediu, pode ignorar este e-mail: sua senha continua a mesma.</p>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <!-- Supabase → Authentication → Emails → "Reset Password". Assunto: Seu código para trocar a senha do Tem esse? -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="supported-color-schemes" content="light" />
+    <title>Seu código para trocar a senha do Tem esse?</title>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #efeae0;">
+    <!-- Prévia na caixa de entrada (não aparece no corpo). -->
+    <div style="display: none; max-height: 0; overflow: hidden; opacity: 0;">Digite o código no app para escolher uma senha nova.</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #efeae0;">
+      <tr>
+        <td align="center" style="padding: 32px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 480px;">
+            <tr>
+              <td style="padding: 0 0 16px 0; font-family: 'Bricolage Grotesque', 'Arial Black', Arial, sans-serif; font-size: 30px; font-weight: 800; line-height: 36px; color: #201c16;">
+                Tem esse?
+              </td>
+            </tr>
+            <tr>
+              <!-- Quadro de HQ: contorno de nanquim e "sombra" dura feita com borda mais grossa à direita e embaixo
+                   (box-shadow não funciona em boa parte dos clientes de e-mail). -->
+              <td style="background-color: #ffffff; border: 2px solid #201c16; border-right-width: 6px; border-bottom-width: 6px; border-radius: 6px; padding: 24px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="background-color: #f5cd3c; border: 2px solid #201c16; padding: 2px 10px; font-family: 'Bricolage Grotesque', 'Arial Black', Arial, sans-serif; font-size: 14px; font-weight: 800; line-height: 20px; letter-spacing: 0.04em; text-transform: uppercase; color: #201c16;">
+                      Senha nova
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin: 20px 0 16px 0; font-family: 'Public Sans', Arial, sans-serif; font-size: 16px; line-height: 24px; color: #201c16;">
+                  Digite este código no app para escolher uma senha nova:
+                </p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td align="center" style="background-color: #efeae0; border: 2px solid #201c16; border-radius: 6px; padding: 16px 8px 16px 16px; font-family: 'IBM Plex Mono', 'Courier New', monospace; font-size: 34px; font-weight: 700; line-height: 40px; letter-spacing: 8px; color: #c1421a;">
+                      {{ .Token }}
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin: 16px 0 0 0; font-family: 'Public Sans', Arial, sans-serif; font-size: 14px; line-height: 20px; color: #6b6357;">
+                  O código vale por 1 hora. Se não foi você quem pediu, pode ignorar este e-mail. Sua senha continua a mesma.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 16px 0 0 0; font-family: 'Public Sans', Arial, sans-serif; font-size: 12px; line-height: 18px; color: #6b6357;">
+                Tem esse? · sua coleção de HQs, sempre à mão
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
