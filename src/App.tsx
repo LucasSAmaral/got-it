@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { RequireAuth } from './auth/RequireAuth'
+import { PrivacyPage } from './features/account/PrivacyPage'
 import { AdminEditionsPage } from './features/admin/AdminEditionsPage'
 import { StoreArrivalsPage } from './features/admin/StoreArrivalsPage'
 import { CheckPage } from './features/check/CheckPage'
@@ -22,10 +23,11 @@ export function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/criar-conta" element={<SignUpPage />} />
       <Route path="/recuperar-senha" element={<ResetPasswordPage />} />
-      {/* Públicas: quem chega pelo link da loja ou conhecendo o app pode não ter conta. */}
+      {/* Públicas: quem chega pelo link da loja ou conhecendo o app pode não ter conta; a privacidade se lê antes de criar. */}
       <Route element={<PublicLayout />}>
         <Route index element={<HomePage />} />
         <Route path="loja/:slug" element={<StorePage />} />
+        <Route path="privacidade" element={<PrivacyPage />} />
       </Route>
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
