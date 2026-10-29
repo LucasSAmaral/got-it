@@ -13,6 +13,8 @@ interface VerifyCodeFormProps {
   onResend: () => Promise<{ error: AuthError | null }>
   /** Volta para trocar o e-mail digitado. */
   onBack: () => void
+  /** Chamado quando o código confere (a sessão já existe nesse momento). */
+  onVerified?: () => void
 }
 
 /**
@@ -21,7 +23,7 @@ interface VerifyCodeFormProps {
  * app. Acertar o código já cria a sessão (o `AuthProvider` recebe o `SIGNED_IN`); quem usa este
  * formulário decide o que mostrar depois.
  */
-export function VerifyCodeForm({ email, type, onResend, onBack }: VerifyCodeFormProps) {
+export function VerifyCodeForm({ email, type, onResend, onBack, onVerified }: VerifyCodeFormProps) {
   const [code, setCode] = useState('')
   const [status, setStatus] = useState<'idle' | 'verifying' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
@@ -39,6 +41,7 @@ export function VerifyCodeForm({ email, type, onResend, onBack }: VerifyCodeForm
       return
     }
     setStatus('idle')
+    onVerified?.()
   }
 
   async function handleResend() {

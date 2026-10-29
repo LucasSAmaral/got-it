@@ -20,7 +20,7 @@ export function LoginPage() {
   const [searchParams] = useSearchParams()
   const back = searchParams.get('voltar')
   const next = safeNextPath(back)
-  const signUpPath = back ? `/criar-conta?voltar=${encodeURIComponent(back)}` : '/criar-conta'
+  const query = back ? `?voltar=${encodeURIComponent(back)}` : ''
 
   if (!loading && session) {
     return <Navigate to={next} replace />
@@ -101,10 +101,21 @@ export function LoginPage() {
                 ? 'Enviando…'
                 : 'Enviar link de acesso'}
           </Button>
+          {mode === 'senha' && (
+            <Button
+              component={RouterLink}
+              to={`/recuperar-senha${query}`}
+              state={{ email }}
+              size="small"
+              color="inherit"
+            >
+              Esqueci a senha
+            </Button>
+          )}
           <Button type="button" size="small" color="inherit" onClick={switchMode}>
             {mode === 'senha' ? 'Prefiro receber um link por e-mail' : 'Entrar com senha'}
           </Button>
-          <Button component={RouterLink} to={signUpPath} size="small" color="inherit">
+          <Button component={RouterLink} to={`/criar-conta${query}`} size="small" color="inherit">
             Não tem conta? Criar conta
           </Button>
         </Stack>

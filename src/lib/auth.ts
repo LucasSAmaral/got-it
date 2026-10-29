@@ -10,6 +10,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   over_email_send_rate_limit: 'Muitos e-mails enviados por enquanto. Espere um pouco e tente de novo.',
   over_request_rate_limit: 'Muitas tentativas seguidas. Espere um pouco e tente de novo.',
   otp_expired: 'Código incorreto ou vencido. Confira o último e-mail ou peça outro código.',
+  same_password: 'A senha nova precisa ser diferente da antiga.',
   weak_password: `Senha fraca. Use pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`,
   user_already_exists: 'Esse e-mail já tem conta. Entre com a senha.',
   email_exists: 'Esse e-mail já tem conta. Entre com a senha.',

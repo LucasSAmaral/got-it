@@ -6,6 +6,7 @@ import { authErrorMessage, MIN_PASSWORD_LENGTH, safeNextPath } from '../../lib/a
 import { supabase } from '../../lib/supabase'
 import { AuthPage } from './AuthPage'
 import { AuthFormCard } from './AuthPage.styles'
+import { NewPasswordField } from './NewPasswordField'
 import { VerifyCodeForm } from './VerifyCodeForm'
 
 /**
@@ -51,8 +52,6 @@ export function SignUpPage() {
     setStep('code')
   }
 
-  const passwordTooShort = password.length > 0 && password.length < MIN_PASSWORD_LENGTH
-
   return (
     <AuthPage>
       {step === 'code' ? (
@@ -76,18 +75,11 @@ export function SignUpPage() {
               onChange={(event) => setEmail(event.target.value)}
               disabled={status === 'sending'}
             />
-            <TextField
-              id="password"
+            <NewPasswordField
               label="Senha"
-              type="password"
-              autoComplete="new-password"
-              required
-              fullWidth
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={setPassword}
               disabled={status === 'sending'}
-              error={passwordTooShort}
-              helperText={`Pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`}
             />
             {status === 'error' && <Alert severity="error">{errorMessage}</Alert>}
             <Button
