@@ -15,6 +15,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   user_already_exists: 'Esse e-mail já tem conta. Entre com a senha.',
   email_exists: 'Esse e-mail já tem conta. Entre com a senha.',
   email_address_invalid: 'E-mail inválido.',
+  // signInWithOtp com `shouldCreateUser: false` para e-mail sem conta.
+  otp_disabled: 'Esse e-mail não tem conta. Crie uma conta primeiro.',
   signup_disabled: 'Cadastros fechados no momento.',
 }
 

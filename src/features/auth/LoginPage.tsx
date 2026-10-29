@@ -6,15 +6,17 @@ import { authErrorMessage, safeNextPath } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
 import { AuthPage } from './AuthPage'
 import { AuthFormCard } from './AuthPage.styles'
+import { VerifyCodeForm } from './VerifyCodeForm'
 
-type Mode = 'senha' | 'link'
+type Mode = 'senha' | 'codigo'
 
 export function LoginPage() {
   const { session, loading } = useAuth()
   const [mode, setMode] = useState<Mode>('senha')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [status, setStatus] = useState<'idle' | 'sending' | 'error'>('idle')
+  const [codeSent, setCodeSent] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   // Volta para onde a pessoa estava (ex.: a vitrine da loja).
   const [searchParams] = useSearchParams()
@@ -26,6 +28,10 @@ export function LoginPage() {
     return <Navigate to={next} replace />
   }
 
+  // Sem senha: código por e-mail (ver `VerifyCodeForm`). `shouldCreateUser: false` porque conta nova
+  // só nasce pelo "Criar conta", com senha; senão qualquer e-mail digitado aqui virava conta.
+  const sendCode = () => supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } })
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setStatus('sending')
@@ -34,7 +40,7 @@ export function LoginPage() {
     const { error } =
       mode === 'senha'
         ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } })
+        : await sendCode()
 
     if (error) {
       setStatus('error')
@@ -42,13 +48,22 @@ export function LoginPage() {
       return
     }
 
-    setStatus(mode === 'link' ? 'sent' : 'idle')
+    setStatus('idle')
+    setCodeSent(mode === 'codigo')
   }
 
   function switchMode() {
-    setMode(mode === 'senha' ? 'link' : 'senha')
+    setMode(mode === 'senha' ? 'codigo' : 'senha')
     setStatus('idle')
     setErrorMessage('')
+  }
+
+  if (codeSent) {
+    return (
+      <AuthPage>
+        <VerifyCodeForm email={email} type="email" onResend={sendCode} onBack={() => setCodeSent(false)} />
+      </AuthPage>
+    )
   }
 
   return (
@@ -64,7 +79,7 @@ export function LoginPage() {
             fullWidth
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            disabled={status === 'sending' || status === 'sent'}
+            disabled={status === 'sending'}
           />
           {mode === 'senha' ? (
             <TextField
@@ -80,26 +95,18 @@ export function LoginPage() {
             />
           ) : (
             <Typography variant="caption" color="text.secondary">
-              Vamos te mandar um link de acesso por e-mail. Sem senha.
+              Vamos te mandar um código de acesso por e-mail. Sem senha.
             </Typography>
           )}
-          {status === 'sent' && (
-            <Alert severity="success">Link enviado. Confira sua caixa de entrada.</Alert>
-          )}
           {status === 'error' && <Alert severity="error">{errorMessage}</Alert>}
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            disabled={status === 'sending' || status === 'sent'}
-          >
+          <Button type="submit" variant="contained" fullWidth disabled={status === 'sending'}>
             {mode === 'senha'
               ? status === 'sending'
                 ? 'Entrando…'
                 : 'Entrar'
               : status === 'sending'
                 ? 'Enviando…'
-                : 'Enviar link de acesso'}
+                : 'Enviar código de acesso'}
           </Button>
           {mode === 'senha' && (
             <Button
@@ -113,7 +120,7 @@ export function LoginPage() {
             </Button>
           )}
           <Button type="button" size="small" color="inherit" onClick={switchMode}>
-            {mode === 'senha' ? 'Prefiro receber um link por e-mail' : 'Entrar com senha'}
+            {mode === 'senha' ? 'Prefiro receber um código por e-mail' : 'Entrar com senha'}
           </Button>
           <Button component={RouterLink} to={`/criar-conta${query}`} size="small" color="inherit">
             Não tem conta? Criar conta
