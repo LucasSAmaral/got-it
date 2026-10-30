@@ -53,6 +53,17 @@ function seriesLabel(edition: CopyDetail['edition']): string | null {
   return position === null ? edition.work.title : `${edition.work.title} · nº ${position}`
 }
 
+/** Aviso embaixo da capa vazia sobre a capa que a pessoa enviou: na fila, ou recusada. */
+function coverReviewNote(submissions: CopyDetail['edition']['cover_submissions']): string | null {
+  if (submissions.some((submission) => submission.status === 'pending')) {
+    return 'Capa enviada, em análise. Aparece aqui depois de revisada.'
+  }
+  if (submissions.some((submission) => submission.status === 'rejected')) {
+    return 'A capa que você enviou não foi aprovada.'
+  }
+  return null
+}
+
 /** Detalhe de um exemplar da coleção: capa grande no topo e, abaixo, os dados da edição e do exemplar. */
 export function CopyDetailPage() {
   const { copyId } = useParams<{ copyId: string }>()
@@ -100,9 +111,9 @@ export function CopyDetailPage() {
       {data && (
         <>
           <LargeCover coverUrl={data.edition.cover_url} title={data.edition.title} />
-          {!data.edition.cover_url && data.edition.cover_submissions.length > 0 && (
+          {!data.edition.cover_url && coverReviewNote(data.edition.cover_submissions) && (
             <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 1 }}>
-              Capa enviada, em análise. Aparece aqui depois de revisada.
+              {coverReviewNote(data.edition.cover_submissions)}
             </Typography>
           )}
 

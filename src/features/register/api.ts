@@ -70,14 +70,18 @@ async function uploadPendingCover(file: File, isbn13: string): Promise<string> {
   return path
 }
 
+/** URL pública do bucket `covers`, terminada em `/` (é o que `getPublicUrl('')` devolve). */
+function coversPublicPrefix(): string {
+  return supabase.storage.from('covers').getPublicUrl('').data.publicUrl
+}
+
 /**
  * Apaga do bucket a capa que deixou de ser usada. Só o admin tem permissão (migração
  * `cover_delete_admin`). Sem permissão o Storage não dá erro, só não apaga nada (como a RLS no
  * PostgREST); por isso confere se voltou o arquivo apagado.
  */
 export async function removeCoverImage(url: string | null): Promise<void> {
-  // `getPublicUrl('')` dá a URL pública do bucket, terminada em `/`.
-  const path = coverPathFromUrl(url, supabase.storage.from('covers').getPublicUrl('').data.publicUrl)
+  const path = coverPathFromUrl(url, coversPublicPrefix())
   if (!path) return
 
   const { data, error } = await supabase.storage.from('covers').remove([path])
@@ -149,8 +153,8 @@ export async function createEdition(edition: NewEditionInput): Promise<string> {
 }
 
 /**
- * Cria a edição com a foto da capa. Quem é de confiança publica a capa junto; os outros criam a edição sem
- * capa e a foto vai para a fila do admin (`cover_submissions`). A foto sobe antes da edição, como antes:
+ * Cria a edição com a foto da capa. Quem é de confiança publica a capa junto (e fica registrado como
+ * `published`); os outros criam a edição sem capa e a foto vai para a fila do admin (`cover_submissions`). A foto sobe antes da edição, como antes:
  * se o envio falhar, nada fica criado pela metade.
  */
 export async function createEditionWithCover(
@@ -159,7 +163,17 @@ export async function createEditionWithCover(
 ): Promise<string> {
   if (!coverFile) return createEdition({ ...edition, coverUrl: '' })
   if (await canPublishCovers()) {
-    return createEdition({ ...edition, coverUrl: await uploadCoverImage(coverFile, edition.isbn13) })
+    const coverUrl = await uploadCoverImage(coverFile, edition.isbn13)
+    const editionId = await createEdition({ ...edition, coverUrl })
+    // Registro para o admin ainda ver o que cada conta de confiança publica (lista de colaboradores).
+    // Falhar aqui não desfaz o cadastro: a edição já está salva com a capa.
+    const { error } = await supabase.from('cover_submissions').insert({
+      edition_id: editionId,
+      path: coverPathFromUrl(coverUrl, coversPublicPrefix()) ?? coverUrl,
+      status: 'published',
+    })
+    if (error) console.warn(error)
+    return editionId
   }
 
   const path = await uploadPendingCover(coverFile, edition.isbn13)

@@ -10,6 +10,7 @@ import { NarrationTitle } from '../../components/NarrationTitle'
 import { formatTimestampDate } from '../../lib/format'
 import {
   REPORT_REASONS,
+  fetchContributors,
   fetchCoverSubmissions,
   fetchEditionReports,
   resolveReport,
@@ -17,6 +18,7 @@ import {
   type EditionReport,
 } from '../moderation/api'
 import { isAdmin } from './admin'
+import { ContributorCard } from './ContributorCard'
 import { EditEditionDialog } from './EditEditionDialog'
 import { PendingCoverDialog } from './PendingCoverDialog'
 import { ReportDialog } from './ReportDialog'
@@ -30,6 +32,7 @@ export function ModerationPage() {
   const queryClient = useQueryClient()
   const covers = useQuery({ queryKey: ['moderation', 'covers'], queryFn: fetchCoverSubmissions })
   const reports = useQuery({ queryKey: ['moderation', 'reports'], queryFn: fetchEditionReports })
+  const contributors = useQuery({ queryKey: ['moderation', 'contributors'], queryFn: fetchContributors })
   const [reviewing, setReviewing] = useState<CoverSubmission | null>(null)
   const [reviewingReport, setReviewingReport] = useState<EditionReport | null>(null)
   const [editingReport, setEditingReport] = useState<EditionReport | null>(null)
@@ -83,7 +86,32 @@ export function ModerationPage() {
         ))}
       </EditionGrid>
 
-      {reviewing && <PendingCoverDialog submission={reviewing} onClose={() => setReviewing(null)} />}
+      <NarrationTitle sx={{ mt: 4, mb: 2 }}>Colaboradores</NarrationTitle>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Quem já enviou capa. Quem só manda capa certa pode virar confiável: as capas passam a entrar direto (e
+        continuam contadas aqui como "diretas"). Para advertir, escreva para o e-mail; para bloquear, use o painel do
+        Supabase (Authentication → Users).
+      </Typography>
+      {contributors.isLoading && <LoadingSpinner size={28} sx={{ py: 4 }} />}
+      {contributors.isError && <Alert severity="error">Não deu para consultar os colaboradores agora.</Alert>}
+      {contributors.data?.length === 0 && (
+        <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+          Ninguém enviou capa ainda.
+        </Typography>
+      )}
+      <EditionGrid>
+        {contributors.data?.map((contributor) => (
+          <ContributorCard key={contributor.user_id} contributor={contributor} />
+        ))}
+      </EditionGrid>
+
+      {reviewing && (
+        <PendingCoverDialog
+          submission={reviewing}
+          contributor={contributors.data?.find((contributor) => contributor.user_id === reviewing.submitted_by)}
+          onClose={() => setReviewing(null)}
+        />
+      )}
       {reviewingReport && (
         <ReportDialog
           report={reviewingReport}

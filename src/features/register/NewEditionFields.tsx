@@ -4,6 +4,8 @@ import { Button, MenuItem, Stack, TextField, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../auth/useAuth'
+import { SpeechBalloon } from '../../components/SpeechBalloon'
+import { isAdmin } from '../admin/admin'
 import { canPublishCovers } from './api'
 import { FORMATS } from './constants'
 import type { NewEditionForm } from './editionForm'
@@ -26,8 +28,8 @@ export function NewEditionFields({ value, onChange, coverFile, onCoverFileChange
   const [coverPreview, setCoverPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { session } = useAuth()
-  // Só para o aviso; o envio pergunta de novo. Na dúvida (carregando ou erro), não avisa.
-  const { data: trusted = true } = useQuery({
+  // Só para o aviso e o selo; o envio pergunta de novo. Na dúvida (carregando ou erro), nenhum dos dois.
+  const { data: trusted } = useQuery({
     queryKey: ['can-publish-covers', session?.user.id],
     queryFn: canPublishCovers,
     staleTime: Infinity,
@@ -132,10 +134,19 @@ export function NewEditionFields({ value, onChange, coverFile, onCoverFileChange
             Adicionar foto da capa
           </Button>
         )}
-        {!trusted && (
+        {trusted === false && (
           <Typography variant="caption" color="text.secondary">
             A capa aparece para as outras pessoas depois de revisada.
           </Typography>
+        )}
+        {/* O admin também é de confiança, mas o selo é para quem foi promovido pela revisão. */}
+        {trusted && !isAdmin(session) && (
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <SpeechBalloon tone="success">Usuário confiável</SpeechBalloon>
+            <Typography variant="caption" color="text.secondary">
+              Suas capas entram direto no catálogo.
+            </Typography>
+          </Stack>
         )}
       </Stack>
     </>

@@ -1,17 +1,20 @@
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { LargeCover } from '../../components/LargeCover'
+import { contributorStats } from '../../lib/contributors'
 import { formatTimestampDate } from '../../lib/format'
 import { tokens } from '../../theme'
-import { approveCover, rejectCover, type CoverSubmission } from '../moderation/api'
+import { approveCover, rejectCover, type Contributor, type CoverSubmission } from '../moderation/api'
 
 type PendingCoverDialogProps = {
   submission: CoverSubmission
+  /** Quem enviou, com o histórico; vazio se a conta foi apagada (ou a lista ainda não carregou). */
+  contributor?: Contributor
   onClose: () => void
 }
 
 /** Capa da fila em tamanho grande, com aprovar (entra no catálogo) ou recusar (apaga). */
-export function PendingCoverDialog({ submission, onClose }: PendingCoverDialogProps) {
+export function PendingCoverDialog({ submission, contributor, onClose }: PendingCoverDialogProps) {
   const queryClient = useQueryClient()
   const { edition } = submission
 
@@ -42,7 +45,13 @@ export function PendingCoverDialog({ submission, onClose }: PendingCoverDialogPr
             )}
             <Typography variant="body2" color="text.secondary">
               Enviada em {formatTimestampDate(submission.created_at)}
+              {contributor && ` por ${contributor.email ?? 'conta sem e-mail'}`}
             </Typography>
+            {contributor && (
+              <Typography variant="body2" color="text.secondary">
+                Histórico: {contributorStats(contributor)}
+              </Typography>
+            )}
           </Stack>
           {edition.cover_url && <Alert severity="info">A edição já tem capa. Aprovar troca pela nova.</Alert>}
           {decide.isError && (

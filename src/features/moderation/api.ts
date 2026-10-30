@@ -41,6 +41,8 @@ export interface CoverSubmission {
   id: string
   path: string
   created_at: string
+  /** Quem enviou; vazio se a conta foi apagada. */
+  submitted_by: string | null
   /** URL assinada, válida por uma hora: o bucket da fila é privado. */
   previewUrl: string | null
   edition: ModerationEdition
@@ -59,7 +61,8 @@ const PREVIEW_SECONDS = 60 * 60
 export async function fetchCoverSubmissions(): Promise<CoverSubmission[]> {
   const { data, error } = await supabase
     .from('cover_submissions')
-    .select(`id, path, created_at, edition:editions(${EDITION_COLUMNS})`)
+    .select(`id, path, created_at, submitted_by, edition:editions(${EDITION_COLUMNS})`)
+    .eq('status', 'pending')
     .order('created_at')
   if (error) throw error
   const rows = (data ?? []) as unknown as (Omit<CoverSubmission, 'previewUrl' | 'edition'> & { edition: EditionRow })[]
@@ -93,19 +96,27 @@ export async function fetchEditionReports(): Promise<EditionReport[]> {
 
 /** Quantos itens esperam o admin (capas e denúncias), para o botão do painel. */
 export async function fetchModerationCount(): Promise<number> {
-  const counts = await Promise.all(
-    ['cover_submissions', 'edition_reports'].map(async (table) => {
-      const { count, error } = await supabase.from(table).select('id', { count: 'exact', head: true })
-      if (error) throw error
-      return count ?? 0
-    }),
-  )
+  const counts = await Promise.all([
+    supabase.from('cover_submissions').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('edition_reports').select('id', { count: 'exact', head: true }),
+  ].map(async (request) => {
+    const { count, error } = await request
+    if (error) throw error
+    return count ?? 0
+  }))
   return counts.reduce((total, count) => total + count, 0)
 }
 
-/** Apaga a linha da fila. Bloqueado pela RLS, o delete não dá erro (0 linhas); por isso confere o retorno. */
-async function deleteSubmission(id: string): Promise<void> {
-  const { data, error } = await supabase.from('cover_submissions').delete().eq('id', id).select('id')
+/**
+ * Tira a capa da fila guardando a decisão: o histórico conta as aprovadas e recusadas de cada colaborador.
+ * Bloqueado pela RLS, o update não dá erro (0 linhas); por isso confere o retorno.
+ */
+async function decideSubmission(id: string, status: 'approved' | 'rejected'): Promise<void> {
+  const { data, error } = await supabase
+    .from('cover_submissions')
+    .update({ status, reviewed_at: new Date().toISOString() })
+    .eq('id', id)
+    .select('id')
   if (error) throw error
   if (!data?.length) throw new Error('A capa não saiu da fila.')
 }
@@ -131,14 +142,51 @@ export async function approveCover(submission: CoverSubmission): Promise<void> {
 
   // A capa já está na edição: daqui em diante, falhar só deixa arquivo sobrando.
   removeCoverImage(edition.cover_url).catch((err) => console.warn(err))
-  await deleteSubmission(submission.id)
+  await decideSubmission(submission.id, 'approved')
   removePendingFile(submission.path).catch((err) => console.warn(err))
 }
 
-/** Recusa: apaga o arquivo e depois a linha (se o arquivo falhar, a capa continua na fila para tentar de novo). */
+/** Recusa: apaga o arquivo e depois marca a linha (se o arquivo falhar, a capa continua na fila para tentar de novo). */
 export async function rejectCover(submission: CoverSubmission): Promise<void> {
   await removePendingFile(submission.path)
-  await deleteSubmission(submission.id)
+  await decideSubmission(submission.id, 'rejected')
+}
+
+/** Quem já enviou capa (ou é de confiança), com a contagem por situação. Só o admin (a função devolve vazio aos outros). */
+export interface Contributor {
+  user_id: string
+  email: string | null
+  approved: number
+  rejected: number
+  pending: number
+  published: number
+  trusted: boolean
+  last_submission: string | null
+}
+
+export async function fetchContributors(): Promise<Contributor[]> {
+  const { data, error } = await supabase.rpc('cover_contributors')
+  if (error) throw error
+  return (data ?? []) as Contributor[]
+}
+
+/** A partir de quantas capas aprovadas, sem nenhuma recusada, a lista sugere promover a pessoa. */
+export const SUGGEST_TRUST_AFTER = 10
+
+export function suggestTrust(contributor: Contributor): boolean {
+  return !contributor.trusted && contributor.rejected === 0 && contributor.approved >= SUGGEST_TRUST_AFTER
+}
+
+/** Promove a "Usuário confiável" (capas entram direto) ou tira a confiança. */
+export async function setTrusted(userId: string, trusted: boolean): Promise<void> {
+  if (trusted) {
+    const { error } = await supabase.from('trusted_users').insert({ user_id: userId, note: 'promovido pela revisão' })
+    if (error) throw error
+    return
+  }
+  const { data, error } = await supabase.from('trusted_users').delete().eq('user_id', userId).select('user_id')
+  if (error) throw error
+  if (!data?.length) throw new Error('A confiança não foi tirada.')
 }
 
 export async function resolveReport(id: string): Promise<void> {

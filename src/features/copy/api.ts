@@ -5,8 +5,8 @@ import type { Copy, Edition } from '../../types/catalog'
 export type CopyDetail = Pick<Copy, 'id' | 'condition' | 'acquired_at' | 'price_paid' | 'read'> & {
   edition: Pick<Edition, 'id' | 'title' | 'publisher' | 'volume' | 'format' | 'year' | 'isbn13' | 'cover_url' | 'series_position' | 'work_id'> & {
     work: { title: string } | null
-    /** Capas enviadas por esta pessoa esperando revisão (a RLS só mostra as dela). */
-    cover_submissions: { id: string }[]
+    /** Capas que esta pessoa enviou para a edição, com a situação na fila (a RLS só mostra as dela). */
+    cover_submissions: { status: 'pending' | 'approved' | 'rejected' | 'published' }[]
   }
 }
 
@@ -15,7 +15,7 @@ export async function fetchCopyDetail(copyId: string): Promise<CopyDetail | null
   const { data, error } = await supabase
     .from('copies')
     .select(
-      'id, condition, acquired_at, price_paid, read, edition:editions(id, title, publisher, volume, format, year, isbn13, cover_url, series_position, work_id, work:works(title), cover_submissions(id))',
+      'id, condition, acquired_at, price_paid, read, edition:editions(id, title, publisher, volume, format, year, isbn13, cover_url, series_position, work_id, work:works(title), cover_submissions(status))',
     )
     .eq('id', copyId)
     .maybeSingle()
