@@ -2,7 +2,7 @@ import { supabase } from '../../lib/supabase'
 import { copyColumns, type CopyFormInput } from '../register/api'
 import type { Copy, Edition } from '../../types/catalog'
 
-export type CopyDetail = Pick<Copy, 'id' | 'condition' | 'acquired_at' | 'price_paid'> & {
+export type CopyDetail = Pick<Copy, 'id' | 'condition' | 'acquired_at' | 'price_paid' | 'read'> & {
   edition: Pick<Edition, 'id' | 'title' | 'publisher' | 'volume' | 'format' | 'year' | 'isbn13' | 'cover_url' | 'series_position' | 'work_id'> & {
     work: { title: string } | null
     /** Capas enviadas por esta pessoa esperando revisão (a RLS só mostra as dela). */
@@ -15,7 +15,7 @@ export async function fetchCopyDetail(copyId: string): Promise<CopyDetail | null
   const { data, error } = await supabase
     .from('copies')
     .select(
-      'id, condition, acquired_at, price_paid, edition:editions(id, title, publisher, volume, format, year, isbn13, cover_url, series_position, work_id, work:works(title), cover_submissions(id))',
+      'id, condition, acquired_at, price_paid, read, edition:editions(id, title, publisher, volume, format, year, isbn13, cover_url, series_position, work_id, work:works(title), cover_submissions(id))',
     )
     .eq('id', copyId)
     .maybeSingle()
@@ -36,5 +36,10 @@ export function copyFormFromDetail(detail: CopyDetail): CopyFormInput {
 
 export async function updateCopy(copyId: string, form: CopyFormInput): Promise<void> {
   const { error } = await supabase.from('copies').update(copyColumns(form)).eq('id', copyId)
+  if (error) throw error
+}
+
+export async function updateCopyRead(copyId: string, read: boolean): Promise<void> {
+  const { error } = await supabase.from('copies').update({ read }).eq('id', copyId)
   if (error) throw error
 }

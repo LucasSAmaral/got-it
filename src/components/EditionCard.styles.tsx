@@ -42,6 +42,14 @@ export const ClampedTitle = styled(Typography)(({ theme }) => ({
   },
 }))
 
+/** Editora · volume à esquerda e o selo (se houver) à direita, na mesma linha. */
+export const PublisherRow = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: theme.spacing(1),
+}))
+
 const cardBody = { display: 'flex', gap: 12, alignItems: 'center', flex: 1, minWidth: 0 } as const
 
 /** Capa + texto do cartão, quando ele não abre nada. */

@@ -28,6 +28,8 @@ export interface Copy {
   status: CopyStatus
   acquired_at: string | null
   notes: string | null
+  /** Já leu este exemplar; começa como não lido. */
+  read: boolean
   created_at: string
 }
 
@@ -43,6 +45,8 @@ export interface CollectionItem {
   status: CopyStatus
   condition: string | null
   acquired_at: string | null
+  /** Já leu. Cópias offline salvas antes do "Lido" não têm, até o app abrir online de novo. */
+  read?: boolean
   /**
    * Série da edição. Só vem na lista completa (que alimenta a cópia offline e a página da série sem sinal),
    * não nos resultados de busca; cópias salvas antes das séries também não têm.

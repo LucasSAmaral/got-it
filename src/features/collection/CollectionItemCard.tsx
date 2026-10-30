@@ -10,6 +10,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { EditionCard } from '../../components/EditionCard'
+import { SpeechBalloon } from '../../components/SpeechBalloon'
 import type { CollectionItem } from '../../types/catalog'
 import { useDeleteCopy } from './useDeleteCopy'
 
@@ -21,6 +22,11 @@ export function CollectionItemCard({ item, showDelete = false }: { item: Collect
     <EditionCard
       edition={item}
       to={`/exemplar/${item.copy_id}`}
+      badge={
+        item.read !== undefined && (
+          <SpeechBalloon tone={item.read ? 'success' : 'neutral'}>{item.read ? 'Lido' : 'Não lido'}</SpeechBalloon>
+        )
+      }
       action={
         showDelete && (
           <>

@@ -8,6 +8,7 @@ interface RawCopyRow {
   status: CopyStatus
   condition: string | null
   acquired_at: string | null
+  read: boolean
   editions: {
     id: string
     title: string
@@ -55,6 +56,7 @@ async function fetchFromServer(query: string, signal: AbortSignal): Promise<Coll
       status: row.status,
       condition: row.condition,
       acquired_at: row.acquired_at,
+      read: row.read,
       work_id: row.editions!.work_id,
       series_title: row.editions!.work?.title ?? null,
       series_position: row.editions!.series_position,
@@ -69,7 +71,7 @@ async function fetchAllCopyRows(signal: AbortSignal, from = 0): Promise<RawCopyR
   const { data, error, status } = await supabase
     .from('copies')
     .select(
-      'id, status, condition, acquired_at, editions(id, title, publisher, isbn13, volume, cover_url, work_id, series_position, work:works(title))',
+      'id, status, condition, acquired_at, read, editions(id, title, publisher, isbn13, volume, cover_url, work_id, series_position, work:works(title))',
     )
     // `id` desempata exemplares criados no mesmo instante: sem ordem estável, um item poderia
     // aparecer em duas partes e outro em nenhuma.

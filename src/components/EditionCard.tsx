@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { tokens } from '../theme'
 import type { Edition } from '../types/catalog'
 import { CoverThumb } from './CoverThumb'
-import { CardBody, CardFrame, CardLink, ClampedTitle } from './EditionCard.styles'
+import { CardBody, CardFrame, CardLink, ClampedTitle, PublisherRow } from './EditionCard.styles'
 
 type EditionCardProps = {
   edition: Pick<Edition, 'title' | 'publisher' | 'volume' | 'isbn13' | 'cover_url'>
@@ -16,19 +16,25 @@ type EditionCardProps = {
   onClick?: () => void
   /** Linha extra embaixo do ISBN (ex.: "Chegou em 27/10 · R$ 39,90" nas chegadas da loja). */
   detail?: ReactNode
+  /** Selo à direita, na linha da editora (ex.: "Lido" na coleção), sem tirar largura do título. */
+  badge?: ReactNode
 }
 
 /** Cartão de uma edição: capa, título, editora · volume e ISBN. Usado na coleção, no painel de admin e nas chegadas da loja. */
-export function EditionCard({ edition, action, to, onClick, detail }: EditionCardProps) {
+export function EditionCard({ edition, action, to, onClick, detail, badge }: EditionCardProps) {
   const content = (
     <>
       <CoverThumb coverUrl={edition.cover_url} title={edition.title} />
       <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
         {/* Celular: uma linha com reticências. Tela larga: até duas linhas, porque o título é o que identifica a edição. */}
         <ClampedTitle variant="h4">{edition.title}</ClampedTitle>
-        <Typography variant="body2" color="text.secondary" noWrap>
-          {[edition.publisher, edition.volume].filter(Boolean).join(' · ') || 'Editora não informada'}
-        </Typography>
+        <PublisherRow>
+          {/* Com selo, a editora encolhe com reticências e o selo fica inteiro à direita. */}
+          <Typography variant="body2" color="text.secondary" noWrap sx={{ minWidth: 0 }}>
+            {[edition.publisher, edition.volume].filter(Boolean).join(' · ') || 'Editora não informada'}
+          </Typography>
+          {badge}
+        </PublisherRow>
         {edition.isbn13 && (
           <Typography
             variant="caption"

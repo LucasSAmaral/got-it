@@ -1,8 +1,8 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
-import { Alert, Box, Button, IconButton, Link, Stack, Typography } from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
+import { Alert, Box, Button, FormControlLabel, IconButton, Link, Stack, Switch, Typography } from '@mui/material'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Fragment, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 import { LargeCover } from '../../components/LargeCover'
@@ -10,7 +10,7 @@ import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { formatDate, formatPrice } from '../../lib/format'
 import { seriesPosition } from '../../lib/series'
 import { tokens } from '../../theme'
-import { fetchCopyDetail, type CopyDetail } from './api'
+import { fetchCopyDetail, updateCopyRead, type CopyDetail } from './api'
 import { NarrationTitle } from '../../components/NarrationTitle'
 import { DetailList, SectionCard } from './CopyDetailPage.styles'
 import { EditCopyDialog } from './EditCopyDialog'
@@ -59,6 +59,7 @@ export function CopyDetailPage() {
   const navigate = useNavigate()
   const [editing, setEditing] = useState(false)
   const [reporting, setReporting] = useState(false)
+  const queryClient = useQueryClient()
 
   const offline = !navigator.onLine
   const { data, isLoading, isError } = useQuery({
@@ -66,6 +67,17 @@ export function CopyDetailPage() {
     queryFn: () => fetchCopyDetail(copyId!),
     enabled: !offline,
     retry: false,
+  })
+
+  const markRead = useMutation({
+    mutationFn: (read: boolean) => updateCopyRead(copyId!, read),
+    // A lista (e a cópia offline, que vem dela) e o "Eu tenho?" mostram o selo "Lido".
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['copy-detail', copyId] }),
+        queryClient.invalidateQueries({ queryKey: ['collection'] }),
+        queryClient.invalidateQueries({ queryKey: ['check'] }),
+      ]),
   })
 
   return (
@@ -148,6 +160,23 @@ export function CopyDetailPage() {
                   { label: 'Preço pago', value: data.price_paid !== null ? formatPrice(data.price_paid) : null },
                 ]}
               />
+              {/* Salva ao tocar. Enquanto salva, mostra o valor novo (senão o switch voltaria até a resposta). */}
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={markRead.isPending ? markRead.variables : data.read}
+                    disabled={markRead.isPending}
+                    onChange={(event) => markRead.mutate(event.target.checked)}
+                  />
+                }
+                label="Lido"
+                sx={{ mt: 1 }}
+              />
+              {markRead.isError && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  Não deu para salvar agora. Confira a conexão e tente de novo.
+                </Alert>
+              )}
             </SectionCard>
           </Stack>
 
