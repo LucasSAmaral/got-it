@@ -48,3 +48,27 @@ Ideia de 2026-10-30, para **quando a fila de capas crescer além do que dá para
 - **Opções levantadas:** o modelo de moderação da OpenAI aceita imagem e era gratuito (conferir preço e termos na hora); SafeSearch do Google Cloud Vision (pago por imagem, com cota gratuita); um modelo de visão como o Claude, que além de moderar poderia conferir se a foto é mesmo uma capa e se bate com o título digitado (útil contra cadastro errado, não só contra conteúdo impróprio).
 - **Custos e cuidados:** exige chave de API guardada como segredo da Edge Function (nunca no front), um serviço externo recebendo as fotos (citar na página de privacidade, como Supabase, Netlify e Gmail) e o limite de quantas capas por dia o plano gratuito aguenta.
 - **Antes disso, se a fila crescer:** mais contas de confiança (`trusted_users`) já aliviam a fila, sem nada novo.
+
+## Organização do CLAUDE.md e skills
+
+Conversa de 2026-10-30, para **depois do teste com usuários**; nada decidido. O `CLAUDE.md` é carregado inteiro em toda sessão do Claude Code, e "Estado atual" virou um manual de cada tela que a maioria das tarefas não precisa. Antes de mexer, o Claude propõe onde cada trecho vai parar e o Lucas aprova.
+
+- **Extrair para `docs/`:** o detalhe de cada funcionalidade (`docs/funcionalidades.md`, com uma linha por área e link no `CLAUDE.md`) e o modelo de dados detalhado — políticas, funções, migrações (`docs/banco.md`).
+- **Fica no `CLAUDE.md`:** como trabalhar com o Lucas, decisões tomadas, stack, armadilhas e a estrutura de pastas.
+- **Skills (onde está a economia de verdade):** o que mais gasta hoje é remontar do zero, a cada verificação, o ambiente de teste. Candidatas:
+  - **Testar local:** scripts prontos que sobem o Postgres com os stubs de auth e storage, o PostgREST, geram o JWT, fazem a sessão falsa e os mocks do Playwright, e derrubam tudo no fim (hoje descrito em "Como verificar").
+  - **Aplicar migração:** o roteiro pelo plugin do Supabase (arquivo, inspecionar, confirmar com o Lucas, aplicar, conferir), com o erro abaixo.
+- **Ajustes pendentes, para fazer junto:**
+  - Armadilha a registrar: o `apply_migration` do plugin às vezes devolve "Invalid or expired requestState". Conferir por `execute_sql` que nada foi aplicado e repetir.
+  - Trechos desatualizados deste arquivo: "fechar os cadastros no Supabase" e "o app não tem tela de cadastro" (Vitrine da Lazarus) e "antes fechar os cadastros" (Ideias para outros usuários) — os cadastros foram abertos de propósito em 2026-10-29, com criar conta pelo app.
+
+## Domínio próprio
+
+**Registrado em 2026-10-30: `temesse.com.br`** (registro.br, 1 ano; renovação a acompanhar). Escolhido no lugar de `tem-esse.com.br`: igual ao endereço do Netlify, mais curto, e hífen se perde quando o endereço é falado. DNS delegado ao Netlify (Netlify DNS): no registro.br, servidores `dns1` a `dns4.p03.nsone.net`, sem DNSSEC e sem "provedor de serviços". Trocado antes dos testers e da Lazarus instalarem o PWA, porque domínio novo é outra origem: quem instalou no `netlify.app` reinstala e perde sessão e cópia offline.
+
+**Quando o Lucas avisar que o app abre em `https://temesse.com.br`** (esperando a propagação do DNS), o Claude faz:
+1. **Conferir o domínio:** `temesse.com.br` e `www` respondem com https válido e servem o bundle atual; `temesse.netlify.app` redireciona para o domínio novo (no Netlify, o domínio novo como principal). Se o certificado ainda não saiu, esperar em vez de mexer.
+2. **Supabase (Authentication → URL Configuration):** Site URL para `https://temesse.com.br` e o domínio nas Redirect URLs. Com login por código pesa pouco, mas o Site URL aparece nos e-mails (`{{ .SiteURL }}`, se algum modelo de `supabase/templates/` usar). Feito pelo Lucas no painel, ou pelo Claude só com a confirmação dele (é configuração de produção). Manter `temesse.netlify.app` nas Redirect URLs até ninguém mais usar o endereço antigo.
+3. **Textos:** `CLAUDE.md` ("Configuração fora do repositório" → Netlify e Supabase; "Nome do app") e a seção "Nome do app" deste arquivo. O código não cita o endereço (conferido em 2026-10-30); conferir de novo com `grep`, incluindo `supabase/templates/` e a página de privacidade.
+4. **Avisar o Lucas:** reinstalar o PWA no iPhone a partir do domínio novo (o instalado no `netlify.app` continua preso ao endereço antigo) e mandar o link novo para a tester e para a Lazarus.
+5. Rodar build e testes, e commitar só se ele pedir.
