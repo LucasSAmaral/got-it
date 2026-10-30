@@ -1,6 +1,6 @@
 # Tem esse? — planos e ideias
 
-Planos de produto e ideias que saíram do `CLAUDE.md` para ele ficar menor (ele vai inteiro em toda mensagem). O que está aqui não está implementado. Decidido é o que diz "decidido"; o resto é ideia.
+Planos de produto, ideias e pendências que saíram do `CLAUDE.md` para ele ficar menor (ele vai inteiro em toda mensagem). O que está aqui não está implementado. Decidido é o que diz "decidido"; o resto é ideia.
 
 ## Rumo do produto
 
@@ -14,7 +14,7 @@ Decidido pelo Lucas em 2026-10-07; troca feita em 2026-10-10. "Got it?" não fun
 
 **Onde paramos (2026-10-28):** tudo commitado e publicado até `689256f`. Pronto além do que está abaixo: visual de HQ, explicação do app no Início, cartões com altura padrão e o diálogo das chegadas (tocar no gibi, no Início ou na vitrine, abre capa maior, editora, ISBN e, por loja, data, preço e o botão "Perguntar se ainda tem" pelo WhatsApp ou Instagram). Próximo passo concreto: o Lucas trazer o contato da Lazarus (WhatsApp com DDI, só números, e/ou o usuário do Instagram, sem @) e confirmar o `update stores ... where slug = 'lazarus'` em produção; sem isso o botão não aparece. Depois: o resto do "Falta" abaixo. Ideia oferecida e sem resposta: resultado do "Eu tenho?" com o visual novo (um "TENHO!" em balão).
 
-Andamento (2026-10-27): banco (`stores`, `store_arrivals`) aplicado; registro no admin ("Chegou nas lojas", com escolha da loja), vitrine `/loja/<slug>` e o Início público com "Chegou nas lojas" juntando todas as lojas prontos. O Lucas decidiu (2026-10-27) já pensar em várias lojas: o Início junta as chegadas de todas, e o catálogo compartilhado faz a primeira loja que bipa um gibi novo cadastrá-lo pelas outras. Contas de loja (`store_members`) continuam para quando uma segunda loja topar. Falta: contato da Lazarus (preencher `whatsapp` ou `instagram` em `stores`), confirmar com o dono se mostra preço, fechar os cadastros no Supabase, decidir como alguém de fora cria conta (o app não tem tela de cadastro) e testar no iPhone e nos navegadores internos do Instagram/WhatsApp.
+Andamento (2026-10-27): banco (`stores`, `store_arrivals`) aplicado; registro no admin ("Chegou nas lojas", com escolha da loja), vitrine `/loja/<slug>` e o Início público com "Chegou nas lojas" juntando todas as lojas prontos. O Lucas decidiu (2026-10-27) já pensar em várias lojas: o Início junta as chegadas de todas, e o catálogo compartilhado faz a primeira loja que bipa um gibi novo cadastrá-lo pelas outras. Contas de loja (`store_members`) continuam para quando uma segunda loja topar. Falta: contato da Lazarus (preencher `whatsapp` ou `instagram` em `stores`), confirmar com o dono se mostra preço e testar no iPhone e nos navegadores internos do Instagram/WhatsApp.
 
 Decidida em 2026-10-14. A Lazarus é a loja de quadrinhos perto do Lucas e não tem site. Hoje ela fotografa cada lançamento que chega e posta foto por foto no grupo de WhatsApp da loja e depois nos stories do Instagram; os clientes pedem reserva e pagam por Pix. O preço só é informado se alguém pergunta, e esgotado também. O Lucas mostrou o "Eu tenho?" ao dono, que topou divulgar um link do app no Instagram e no grupo no lugar das fotos.
 - **Versão 1 (teste de adoção):** quem cadastra as chegadas é o **Lucas, pelo admin**; a loja só divulga o link. Medir se os clientes usam o link para reservar e quanto tempo leva cadastrar um lote. Perfil de loja (conta própria cadastrando pelo scanner, tabela `store_members` com RLS, substituindo a lógica do `ADMIN_USER_ID`) só se o teste der certo; modelar como "lojas" desde já, mas começar só com a Lazarus. Uma página juntando várias lojas virou o "Chegou nas lojas" do Início (2026-10-27).
@@ -24,7 +24,7 @@ Decidida em 2026-10-14. A Lazarus é a loja de quadrinhos perto do Lucas e não 
 - **Esgotado:** ninguém vai marcar. Escrever "chegou em", nunca "disponível" ou "em estoque"; a chegada sai da página sozinha depois de ~30 dias (filtro na consulta, sem rotina); a mensagem de reserva pergunta "ainda tem?". Estoque completo e **sistema de caixa ficam fora** (obrigação fiscal de NFC-e, exige escrita offline e o Lucas viraria suporte de sistema crítico).
 - **Preço:** opcional na chegada, exibido como "R$ X na Lazarus". Perguntar ao dono se pode mostrar (hoje não divulgam de saída: preço muda, preferem a conversa ou não querem comparação com a Amazon).
 - **Contato (em aberto):** a loja provavelmente não tem número de WhatsApp próprio; o grupo é administrado por algum número (talvez o pessoal do dono). Opções: `https://wa.me/55<número>?text=<encodeURIComponent(mensagem com título, editora, volume, ISBN e "ainda tem?")>` (melhor: um toque, texto pronto — se o dono aceitar pedidos no privado); direct do Instagram (`ig.me/m/<perfil>`, sem texto pronto); link do grupo (`chat.whatsapp.com/...`, sem texto pronto, pedido fica exposto no grupo; comportamento para quem já é membro não testado). Para os canais sem texto pronto, botão "copiar mensagem" (`navigator.clipboard.writeText`). A página mostra o botão do canal que estiver preenchido em `stores`, então dá para trocar sem migração. Perguntar ao dono: "quando alguém quiser reservar pelo link, prefere WhatsApp, direct do Instagram ou o grupo?". **Sem bot** (API do WhatsApp Business exige aprovação da Meta, cobra por conversa e vira suporte).
-- **Armadilhas já vistas:** `src/lib/supabase.ts` recusa pedidos a `/rest` sem sessão (proteção da cópia offline); a página pública precisa de exceção delimitada sem desfazer essa proteção. O fluxo de cadastro (`src/features/register`) cria edição **e** exemplar; a chegada precisa de um caminho que crie a edição quando falta no catálogo sem pôr um exemplar na coleção do Lucas. A prévia do link no WhatsApp/Instagram será a genérica do app (SPA no Netlify não tem meta tags por página); aceitável no começo. Com o link divulgado, o app fica exposto ao público: **fechar os cadastros no Supabase antes** da loja divulgar (senão qualquer um cria conta e grava no catálogo).
+- **Armadilhas já vistas:** `src/lib/supabase.ts` recusa pedidos a `/rest` sem sessão (proteção da cópia offline); a página pública precisa de exceção delimitada sem desfazer essa proteção. O fluxo de cadastro (`src/features/register`) cria edição **e** exemplar; a chegada precisa de um caminho que crie a edição quando falta no catálogo sem pôr um exemplar na coleção do Lucas. A prévia do link no WhatsApp/Instagram será a genérica do app (SPA no Netlify não tem meta tags por página); aceitável no começo. Com o link divulgado, o app fica exposto ao público: os cadastros foram abertos de propósito em 2026-10-29 (criar conta pelo app), com capas pela fila do admin e denúncia para texto (ver "Moderação" em `docs/funcionalidades.md`).
 - **Depois:** na página da série e no "o que falta", "chegou na Lazarus em dd/mm". O que o app pode oferecer à loja é informação de demanda (quem segue a série e não tem o número); possível troca: desconto para usuários do Tem esse? ou quadrinhos como pagamento.
 
 ## Séries
@@ -34,7 +34,7 @@ Decidida em 2026-10-14. A Lazarus é a loja de quadrinhos perto do Lucas e não 
 
 ## Ideias para quando o app tiver outros usuários
 
-Conversa de 2026-10-07; nenhuma decidida. Dependem de abrir o app, ou seja, antes fechar os cadastros, ter um admin de verdade e resolver os limites de 1000:
+Conversa de 2026-10-07; nenhuma decidida. Dependem de mais gente usando o app (cadastro aberto desde 2026-10-29), de um admin de verdade e de resolver os limites de 1000:
 - **Página do catálogo**: todas as edições, com filtro por "novidades" e ordem alfabética. "Novidades" é adicionado ao catálogo recentemente (`created_at`), não lançamento: o banco não tem data de lançamento, só o ano. Precisa paginar no servidor (não tem cópia offline, então pode). Talvez junto com a listagem de séries (abas ou "agrupar por série"). Enquanto só o Lucas usa, o catálogo é quase a coleção dele.
 - **Página inicial com lançamentos** (como no Guia dos Quadrinhos), para saber se saiu número novo de uma série que a pessoa acompanha. Problema de fundo: o catálogo só cresce quando alguém escaneia o que já comprou, então lançamento só aparece depois de alguém comprar. Falta decidir a fonte (cadastro manual pelo admin, ou ler sites das editoras ou do Guia — sem API conhecida, frágil e com questão de termos de uso). Versão possível sem fonte nova: "recém-adicionadas ao catálogo nas suas séries".
 - **Link de associado da Amazon** nos cartões. Livro: `amazon.com.br/dp/<ISBN-10>?tag=...` (978-65 converte para ISBN-10); EAN 977/789 só por link de busca. Os termos do programa proíbem (pelo que se sabe; conferir) comissão das próprias compras, então só rende com outros usuários; o programa também costuma exigir vendas nos primeiros meses e aviso de que o link é de associado. Mostrar só em edições que a pessoa não tem (página da série, futura lista "procuro"): "comprar" em algo que já tem vai contra o propósito do app. Alternativa: campo opcional na edição (ex.: `editions.amazon_url`) preenchido pelo admin com o link gerado pela própria Amazon — cobre gibi sem ISBN-10, ao custo de trabalho manual por edição.
@@ -51,16 +51,12 @@ Ideia de 2026-10-30, para **quando a fila de capas crescer além do que dá para
 
 ## Organização do CLAUDE.md e skills
 
-Conversa de 2026-10-30, para **depois do teste com usuários**; nada decidido. O `CLAUDE.md` é carregado inteiro em toda sessão do Claude Code, e "Estado atual" virou um manual de cada tela que a maioria das tarefas não precisa. Antes de mexer, o Claude propõe onde cada trecho vai parar e o Lucas aprova.
+Conversa de 2026-10-30. O `CLAUDE.md` é carregado inteiro em toda sessão do Claude Code, e "Estado atual" tinha virado um manual de cada tela que a maioria das tarefas não precisa.
 
-- **Extrair para `docs/`:** o detalhe de cada funcionalidade (`docs/funcionalidades.md`, com uma linha por área e link no `CLAUDE.md`) e o modelo de dados detalhado — políticas, funções, migrações (`docs/banco.md`).
-- **Fica no `CLAUDE.md`:** como trabalhar com o Lucas, decisões tomadas, stack, armadilhas e a estrutura de pastas.
-- **Skills (onde está a economia de verdade):** o que mais gasta hoje é remontar do zero, a cada verificação, o ambiente de teste. Candidatas:
-  - **Testar local:** scripts prontos que sobem o Postgres com os stubs de auth e storage, o PostgREST, geram o JWT, fazem a sessão falsa e os mocks do Playwright, e derrubam tudo no fim (hoje descrito em "Como verificar").
-  - **Aplicar migração:** o roteiro pelo plugin do Supabase (arquivo, inspecionar, confirmar com o Lucas, aplicar, conferir), com o erro abaixo.
-- **Ajustes pendentes, para fazer junto:**
-  - Armadilha a registrar: o `apply_migration` do plugin às vezes devolve "Invalid or expired requestState". Conferir por `execute_sql` que nada foi aplicado e repetir.
-  - Trechos desatualizados deste arquivo: "fechar os cadastros no Supabase" e "o app não tem tela de cadastro" (Vitrine da Lazarus) e "antes fechar os cadastros" (Ideias para outros usuários) — os cadastros foram abertos de propósito em 2026-10-29, com criar conta pelo app.
+- **Feito (2026-10-30):** o detalhe de cada funcionalidade foi para `docs/funcionalidades.md`, o banco para `docs/banco.md` e as pendências, o escopo da Fase 1 e o material de apoio para este arquivo; o `CLAUDE.md` ficou com uma linha por área e os links.
+- **Skills (próximas entregas, aprovadas):**
+  - **`aplicar-migracao`:** o roteiro pelo plugin do Supabase (arquivo, inspecionar, confirmar com o Lucas, aplicar, conferir), as regras de ordem em relação ao deploy e o erro "Invalid or expired requestState".
+  - **`testar-local`:** scripts prontos que sobem o Postgres com os stubs de auth e storage, o PostgREST, geram o JWT, fazem a sessão falsa e os mocks do Playwright, e derrubam tudo no fim (hoje descrito em "Como verificar" no `CLAUDE.md`), sem dependência nova no `package.json`.
 
 ## Domínio próprio
 
@@ -72,3 +68,26 @@ Conversa de 2026-10-30, para **depois do teste com usuários**; nada decidido. O
 3. **Textos:** `CLAUDE.md` ("Configuração fora do repositório" → Netlify e Supabase; "Nome do app") e a seção "Nome do app" deste arquivo. O código não cita o endereço (conferido em 2026-10-30); conferir de novo com `grep`, incluindo `supabase/templates/` e a página de privacidade.
 4. **Avisar o Lucas:** reinstalar o PWA no iPhone a partir do domínio novo (o instalado no `netlify.app` continua preso ao endereço antigo) e mandar o link novo para a tester e para a Lazarus.
 5. Rodar build e testes, e commitar só se ele pedir.
+
+## Escopo da Fase 1 (MVP: catálogo pessoal privado)
+
+Concluída, exceto busca por autor. Critério de sucesso: cadastrar 100 gibis da própria estante, a maioria por código de barras, e usar o app em duas compras reais. **É uso, não código: o próximo insumo são os problemas que o Lucas encontrar ao usar.**
+
+Fica fora por enquanto: perfil público, listas de troca e venda, equivalência automática de edições, busca por imagem, pagamento, apps nativos, notificações.
+
+## Em aberto
+
+- Abrir o app para outras pessoas (2026-10-29): cadastro com código, apagar conta e página de privacidade feitos (passos 1 a 5); falta o teste completo no iPhone e nos navegadores internos do Instagram/WhatsApp. Cadastro aberto deixa qualquer conta criar edições no catálogo: capas passam pela fila do admin e texto tem denúncia (ver "Moderação"); se aparecer abuso de contas, CAPTCHA (Turnstile no Supabase). Próximo passo: teste com usuários, incluindo uma conta de tester em `trusted_users`.
+- O admin é um UUID fixo (`ADMIN_USER_ID`), não um papel de verdade — revisitar (tabela/coluna própria) quando houver mais de um editor de confiança no catálogo.
+- PostgREST devolve no máximo 1000 linhas por resposta. A lista da coleção (e a cópia offline) já busca em partes; ainda truncam em 1000 a lista do admin (`search_editions`), os resultados de busca, as sugestões de editora e a listagem de séries (1000 séries).
+- Capas não ficam disponíveis offline (o cartão mostra a inicial do título).
+- Tablets em pé (600 a 899 px) usam o layout de celular; a tela de escanear continua em tela cheia no desktop.
+- Detalhe do exemplar offline: dá para mostrar uma versão parcial a partir da cópia do IndexedDB (sem capa, formato, ano e preço), se fizer falta.
+- Considerar `unaccent` na busca (servidor e cópia local juntos).
+- Séries que ficam sem edição (renomeou ou tirou a série no admin) continuam em `works` e aparecem nas sugestões. Se incomodar: limpar à mão ou sugerir só séries com edição. A listagem de séries deve mostrar só séries com edição.
+- O `README.md` ainda é o do template do Vite.
+- Fases seguintes do plano: listas "procuro" e "troca ou venda", cadastro por foto da capa, edições equivalentes.
+
+## Material de apoio
+
+Existe um script opcional (`checar-isbn.mjs`) que consulta Open Library e Google Books por uma lista de ISBNs e gera um CSV com acertos e falhas por tipo. Serve para medir cobertura de dados; não faz parte do app.
