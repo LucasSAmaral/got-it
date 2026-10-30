@@ -54,9 +54,9 @@ Ideia de 2026-10-30, para **quando a fila de capas crescer além do que dá para
 Conversa de 2026-10-30. O `CLAUDE.md` é carregado inteiro em toda sessão do Claude Code, e "Estado atual" tinha virado um manual de cada tela que a maioria das tarefas não precisa.
 
 - **Feito (2026-10-30):** o detalhe de cada funcionalidade foi para `docs/funcionalidades.md`, o banco para `docs/banco.md` e as pendências, o escopo da Fase 1 e o material de apoio para este arquivo; o `CLAUDE.md` ficou com uma linha por área e os links.
-- **Skills (próximas entregas, aprovadas):**
+- **Skills:**
   - **`aplicar-migracao`:** feita (2026-10-30), em `.claude/skills/aplicar-migracao/`.
-  - **`testar-local`:** scripts prontos que sobem o Postgres com os stubs de auth e storage, o PostgREST, geram o JWT, fazem a sessão falsa e os mocks do Playwright, e derrubam tudo no fim (hoje descrito em "Como verificar" no `CLAUDE.md`), sem dependência nova no `package.json`.
+  - **`testar-local`:** feita (2026-10-30), em `.claude/skills/testar-local/`.
 
 ## Domínio próprio
 

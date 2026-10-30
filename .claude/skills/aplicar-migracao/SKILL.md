@@ -12,7 +12,7 @@ Antes de escrever o SQL, leia `docs/banco.md` (políticas, funções e o porquê
 ## Roteiro
 
 1. **Arquivo primeiro.** Crie `supabase/migrations/<AAAAMMDDhhmmss>_<nome_em_ingles>.sql`, seguindo os nomes que já existem (ex.: `20261030020000_contributors.sql`); a data é a de hoje, com hora depois da última migração do dia. Comente em português o porquê das partes não óbvias, como as migrações anteriores fazem.
-2. **Validar localmente, se a migração tem lógica** (RLS, função, gatilho): Postgres local com os stubs de `auth` (ver "Como verificar" no `CLAUDE.md`). Para coluna nova simples, não precisa.
+2. **Validar localmente, se a migração tem lógica** (RLS, função, gatilho): skill `testar-local` (`up.sh` aplica todas as migrações em ordem, inclusive a nova, e mostra o erro se falhar; teste a política com `set role authenticated` e os claims). Para coluna nova simples, basta o `up.sh` passar.
 3. **Inspecionar o estado atual** com `execute_sql`, só leitura: a tabela/função/política existe? Com qual definição? (`pg_policies`, `pg_proc`, `information_schema.columns`, `storage.buckets`). Assim a migração não colide com algo criado à mão no painel.
 4. **Decidir a ordem em relação ao deploy:**
    - O app novo usa coluna ou função nova → aplique **antes** de publicar o app (ex.: séries).

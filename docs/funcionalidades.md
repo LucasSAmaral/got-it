@@ -60,7 +60,7 @@ Arquivos: `src/lib/mirrorStore.ts`, `src/lib/localSearch.ts`, `src/auth/AuthProv
 
 `fetchCollection` (`src/features/collection/api.ts`) tenta o servidor com prazo (busca 2 s, lista 4 s) e, se não houver resposta, usa a cópia do IndexedDB (`mirrorStore`), filtrada por `localSearch`, que reproduz `search_my_collection`. Só a lista completa (sem termo) grava a cópia, e o `AppLayout` a mantém carregada. Sem rede nenhuma (`navigator.onLine === false`) o app decide na hora. A tela avisa que mostra a cópia e quando ela foi salva. `AuthProvider` expõe `offlineAccess` para abrir o app sem sessão válida quando o aparelho já tem cópia; logout ou sessão revogada (`SIGNED_OUT`) apagam a cópia. A cópia só existe depois de abrir o app online uma vez. A lista completa também traz a série de cada exemplar (para a página da série sem sinal); cópias salvas antes disso não têm, até o app abrir online de novo.
 
-Se `search_my_collection` mudar, refaça os valores de `src/lib/localSearch.test.ts`: eles vêm de um Postgres real (ver "Como verificar" no `CLAUDE.md`).
+Se `search_my_collection` mudar, refaça os valores de `src/lib/localSearch.test.ts`: eles vêm de um Postgres real (skill `testar-local`).
 
 ## Páginas públicas
 
