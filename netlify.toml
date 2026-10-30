@@ -5,6 +5,15 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# Endereço antigo leva ao domínio próprio. O Netlify não redireciona o
+# *.netlify.app sozinho, mesmo com domínio principal definido. Precisa vir
+# antes da regra do SPA (vale a primeira que casar).
+[[redirects]]
+  from = "https://temesse.netlify.app/*"
+  to = "https://temesse.com.br/:splat"
+  status = 301
+  force = true
+
 # React Router: qualquer caminho devolve o index.html. Arquivos que existem
 # (sw.js, manifest, assets) continuam sendo servidos normalmente.
 [[redirects]]
