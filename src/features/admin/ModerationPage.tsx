@@ -8,12 +8,18 @@ import { EditionGrid } from '../../components/EditionGrid'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { NarrationTitle } from '../../components/NarrationTitle'
 import { formatTimestampDate } from '../../lib/format'
-import { fetchCoverSubmissions, fetchEditionReports, type CoverSubmission } from '../moderation/api'
+import {
+  REPORT_REASONS,
+  fetchCoverSubmissions,
+  fetchEditionReports,
+  resolveReport,
+  type CoverSubmission,
+  type EditionReport,
+} from '../moderation/api'
 import { isAdmin } from './admin'
-import type { EditionSummary } from './api'
 import { EditEditionDialog } from './EditEditionDialog'
 import { PendingCoverDialog } from './PendingCoverDialog'
-import { ReportCard } from './ReportCard'
+import { ReportDialog } from './ReportDialog'
 
 /**
  * Revisão do catálogo aberto: capas enviadas por quem não é de confiança (só entram depois de aprovadas) e
@@ -25,7 +31,8 @@ export function ModerationPage() {
   const covers = useQuery({ queryKey: ['moderation', 'covers'], queryFn: fetchCoverSubmissions })
   const reports = useQuery({ queryKey: ['moderation', 'reports'], queryFn: fetchEditionReports })
   const [reviewing, setReviewing] = useState<CoverSubmission | null>(null)
-  const [editing, setEditing] = useState<EditionSummary | null>(null)
+  const [reviewingReport, setReviewingReport] = useState<EditionReport | null>(null)
+  const [editingReport, setEditingReport] = useState<EditionReport | null>(null)
 
   if (!isAdmin(session)) {
     return <Navigate to="/" replace />
@@ -67,16 +74,35 @@ export function ModerationPage() {
       )}
       <EditionGrid>
         {reports.data?.map((report) => (
-          <ReportCard key={report.id} report={report} onEdit={() => setEditing(report.edition)} />
+          <EditionCard
+            key={report.id}
+            edition={report.edition}
+            detail={REPORT_REASONS.find((option) => option.value === report.reason)?.label ?? report.reason}
+            onClick={() => setReviewingReport(report)}
+          />
         ))}
       </EditionGrid>
 
       {reviewing && <PendingCoverDialog submission={reviewing} onClose={() => setReviewing(null)} />}
+      {reviewingReport && (
+        <ReportDialog
+          report={reviewingReport}
+          onClose={() => setReviewingReport(null)}
+          onEdit={() => {
+            setEditingReport(reviewingReport)
+            setReviewingReport(null)
+          }}
+        />
+      )}
       <EditEditionDialog
-        edition={editing}
-        onClose={() => {
-          setEditing(null)
-          queryClient.invalidateQueries({ queryKey: ['moderation'] })
+        edition={editingReport?.edition ?? null}
+        onClose={() => setEditingReport(null)}
+        // Corrigiu os dados: a denúncia está resolvida. Se falhar, ela só continua na lista.
+        onSaved={() => {
+          if (!editingReport) return
+          resolveReport(editingReport.id)
+            .catch((err) => console.warn(err))
+            .finally(() => queryClient.invalidateQueries({ queryKey: ['moderation'] }))
         }}
       />
     </Box>

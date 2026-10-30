@@ -49,10 +49,12 @@ type EditEditionDialogProps = {
   /** `null` fecha o diálogo. */
   edition: EditionSummary | null
   onClose: () => void
+  /** Chamado depois de salvar, antes de fechar (ex.: a revisão tira a denúncia da lista). */
+  onSaved?: () => void
 }
 
 /** Edita título, editora, volume, formato, ano e capa de uma edição já existente no catálogo. */
-export function EditEditionDialog({ edition, onClose }: EditEditionDialogProps) {
+export function EditEditionDialog({ edition, onClose, onSaved }: EditEditionDialogProps) {
   const queryClient = useQueryClient()
   const [form, setForm] = useState<EditionFormInput>(EMPTY_FORM)
   const [coverFile, setCoverFile] = useState<File | null>(null)
@@ -98,6 +100,7 @@ export function EditEditionDialog({ edition, onClose }: EditEditionDialogProps) 
         queryClient.invalidateQueries({ queryKey: ['series-titles'] }),
         queryClient.invalidateQueries({ queryKey: ['copy-detail'] }),
       ])
+      onSaved?.()
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Não deu para salvar. Tenta de novo.')
