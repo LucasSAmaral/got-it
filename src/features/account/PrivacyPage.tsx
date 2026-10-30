@@ -2,8 +2,10 @@ import { Alert, Box, Button, Link, Stack, Typography } from '@mui/material'
 import { useState, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
+import { AUTHOR_NAME, AUTHOR_URL } from '../../components/MadeBy'
 import { NarrationTitle } from '../../components/NarrationTitle'
 import { DeleteAccountDialog } from './DeleteAccountDialog'
+import { PrivacyPageStack } from './PrivacyPage.styles'
 
 const CONTACT_EMAIL = 'lucassamaraldev@gmail.com'
 
@@ -29,7 +31,7 @@ export function PrivacyPage() {
   const deleted = (location.state as { deleted?: boolean } | null)?.deleted === true
 
   return (
-    <Stack spacing={4} sx={{ maxWidth: 720 }}>
+    <PrivacyPageStack spacing={4}>
       <Stack spacing={1}>
         <Typography variant="h2">Privacidade</Typography>
         <Typography variant="body2" color="text.secondary">
@@ -40,7 +42,11 @@ export function PrivacyPage() {
       {deleted && <Alert severity="success">Sua conta e sua coleção foram apagadas.</Alert>}
 
       <Typography>
-        O Tem esse? é um projeto independente, mantido por uma pessoa, para catalogar coleções de quadrinhos. Hoje
+        O Tem esse? é um projeto independente, mantido por uma pessoa,{' '}
+        <Link href={AUTHOR_URL} target="_blank" rel="noopener">
+          {AUTHOR_NAME}
+        </Link>
+        , para catalogar coleções de quadrinhos. Hoje
         ele não tem anúncios nem ferramentas de rastreamento ou de análise de uso, e seus dados não são vendidos. Se
         algo disso mudar, esta página muda antes, com a data acima atualizada.
       </Typography>
@@ -108,6 +114,6 @@ export function PrivacyPage() {
           onDeleted={() => navigate('/privacidade', { replace: true, state: { deleted: true } })}
         />
       )}
-    </Stack>
+    </PrivacyPageStack>
   )
 }

@@ -8,7 +8,7 @@ Como cada parte do app funciona hoje, com os nomes de arquivos, funções e as d
 
 ## Privacidade e apagar conta
 
-**Privacidade e apagar conta** (`src/features/account`, rota `/privacidade`, aberta também sem conta; item "Privacidade" do menu, no "Mais" do celular, e link no rodapé do login e do cadastro): o que o app guarda, quem vê, onde ficam os dados (Supabase, Netlify, Gmail, Google Fonts) e o contato (`lucassamaraldev@gmail.com`). O texto evita promessas que podem deixar de valer (nada de "sem fins comerciais"; "hoje" não tem anúncios) e diz que a página muda antes; quando houver Apoia.se ou anúncio, atualize o texto e a data. Logado, "Apagar minha conta" (`DeleteAccountDialog`, exige digitar "apagar", desligado sem conexão) chama a função `delete_my_account` e sai só neste aparelho (`signOut({ scope: 'local' })`), o que limpa a cópia offline.
+**Privacidade e apagar conta** (`src/features/account`, rota `/privacidade`, aberta também sem conta; item "Privacidade" do menu, no "Mais" do celular, e link no rodapé do login e do cadastro): o que o app guarda, quem vê, onde ficam os dados (Supabase, Netlify, Gmail, Google Fonts) e o contato (`lucassamaraldev@gmail.com`). O texto de abertura diz quem mantém o app, com link para o site do Lucas (`AUTHOR_URL` em `src/components/MadeBy.tsx`). O texto evita promessas que podem deixar de valer (nada de "sem fins comerciais"; "hoje" não tem anúncios) e diz que a página muda antes; quando houver Apoia.se ou anúncio, atualize o texto e a data. Logado, "Apagar minha conta" (`DeleteAccountDialog`, exige digitar "apagar", desligado sem conexão) chama a função `delete_my_account` e sai só neste aparelho (`signOut({ scope: 'local' })`), o que limpa a cópia offline.
 
 ## Início
 
@@ -68,7 +68,7 @@ Se `search_my_collection` mudar, refaça os valores de `src/lib/localSearch.test
 
 ## Navegação
 
-**Navegação**: no celular, barra inferior com Início, Coleção, Eu tenho? e "Mais" (`MoreMenu`, gaveta de baixo com Séries, Editar catálogo e Sair); quais itens ficam na barra é o `inBottomBar` de `navItems.tsx`, e um item do "Mais" marca o "Mais". Na tela larga, a barra lateral mostra todos.
+**Navegação**: no celular, barra inferior com Início, Coleção, Eu tenho? e "Mais" (`MoreMenu`, gaveta de baixo com Séries, Editar catálogo e Sair); quais itens ficam na barra é o `inBottomBar` de `navItems.tsx`, e um item do "Mais" marca o "Mais". Na tela larga, a barra lateral mostra todos. "Feito por Lucas Amaral" (`MadeBy`, link para `https://lucasamaral.dev.br/` em outra aba) fica no pé da barra lateral, no fim do "Mais" e no rodapé das páginas públicas sem conta; nunca no "Eu tenho?", na coleção ou no cadastro.
 
 ## Visual de HQ
 

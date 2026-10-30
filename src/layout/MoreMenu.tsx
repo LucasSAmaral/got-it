@@ -2,6 +2,7 @@ import LogoutIcon from '@mui/icons-material/Logout'
 import { Divider, Drawer, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { MadeBy } from '../components/MadeBy'
 import { LogoutDialog } from '../features/auth/LogoutDialog'
 import { tokens } from '../theme'
 import type { NavItem } from './navItems'
@@ -25,7 +26,7 @@ export function MoreMenu({ open, onClose, items, active }: MoreMenuProps) {
   return (
     <>
       <Drawer anchor="bottom" open={open} onClose={onClose} slotProps={{ paper: { sx: { borderTop: tokens.panel.border } } }}>
-        <List sx={{ pb: 2 }}>
+        <List>
           {items.map((item) => (
             <ListItemButton
               key={item.to}
@@ -52,6 +53,7 @@ export function MoreMenu({ open, onClose, items, active }: MoreMenuProps) {
             <ListItemText primary="Sair" slotProps={{ primary: { sx: { fontWeight: 600 } } }} />
           </ListItemButton>
         </List>
+        <MadeBy sx={{ px: 2, pb: 2 }} />
       </Drawer>
       <LogoutDialog open={logoutOpen} onClose={() => setLogoutOpen(false)} />
     </>

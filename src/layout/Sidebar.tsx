@@ -3,6 +3,7 @@ import LogoutIcon from '@mui/icons-material/Logout'
 import { Button, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { MadeBy } from '../components/MadeBy'
 import { LogoutDialog } from '../features/auth/LogoutDialog'
 import { SidebarNav } from './AppLayout.styles'
 import { activeNavItem, useNavItems } from './navItems'
@@ -48,6 +49,7 @@ export function Sidebar() {
         </ListItemIcon>
         <ListItemText primary="Sair" slotProps={{ primary: { sx: { fontWeight: 600 } } }} />
       </ListItemButton>
+      <MadeBy sx={{ px: 2 }} />
       <LogoutDialog open={logoutOpen} onClose={() => setLogoutOpen(false)} />
     </SidebarNav>
   )

@@ -2,6 +2,7 @@ import { Box, Button, Typography } from '@mui/material'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import { LoadingSpinner } from '../components/LoadingSpinner'
+import { MadeBy } from '../components/MadeBy'
 import { AppLayout } from './AppLayout'
 import { PublicHeader } from './AppLayout.styles'
 import { PageContent } from './PageContent'
@@ -35,6 +36,9 @@ export function PublicLayout() {
       </PublicHeader>
       <PageContent>
         <Outlet />
+        <Box component="footer" sx={{ py: 3, textAlign: 'center' }}>
+          <MadeBy />
+        </Box>
       </PageContent>
     </Box>
   )

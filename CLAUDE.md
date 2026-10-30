@@ -74,7 +74,7 @@ Uma linha por área. **Antes de mexer numa área, leia a seção dela em `docs/f
 ```
 src/
   auth/            AuthProvider (sessão + acesso offline), RequireAuth, useAuth
-  components/      componentes compartilhados entre mais de um arquivo: LoadingSpinner, SearchField (pílula com lupa), EditionGrid e EditionCard (capa, título, editora, ISBN e um botão de ação — lixeira na coleção, lápis no admin), CoverThumb (miniatura da capa ou iniciais), LargeCover (capa grande do detalhe e do diálogo das chegadas) e CardFrame (moldura do cartão, em `EditionCard.styles.tsx`), também usados pelo cartão de série; NarrationTitle (caixa de narração) e SpeechBalloon (balão de fala)
+  components/      componentes compartilhados entre mais de um arquivo: LoadingSpinner, SearchField (pílula com lupa), EditionGrid e EditionCard (capa, título, editora, ISBN e um botão de ação — lixeira na coleção, lápis no admin), CoverThumb (miniatura da capa ou iniciais), LargeCover (capa grande do detalhe e do diálogo das chegadas) e CardFrame (moldura do cartão, em `EditionCard.styles.tsx`), também usados pelo cartão de série; NarrationTitle (caixa de narração), SpeechBalloon (balão de fala) e MadeBy ("Feito por Lucas Amaral", link para lucasamaral.dev.br)
   features/
     admin/         painel de edição do catálogo, registro das chegadas nas lojas e revisão (capas e denúncias), só para o Lucas (admin.ts, api.ts)
     account/       privacidade e apagar conta (PrivacyPage, DeleteAccountDialog, api.ts)
