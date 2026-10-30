@@ -5,6 +5,7 @@ import { Alert, Box, Button, IconButton, MenuItem, Stack, TextField, Typography 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { LargeCover } from '../../components/LargeCover'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { PageContent } from '../../layout/PageContent'
 import { Sidebar } from '../../layout/Sidebar'
@@ -116,22 +117,28 @@ export function RegisterByIsbnPage() {
               <Stack spacing={2}>
                 <FoundChip label="Encontrado no catálogo" size="small" />
 
-                <Stack spacing={0.25}>
-                  <Typography variant="h4">{edition.title}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {[edition.publisher, edition.format].filter(Boolean).join(' · ') || 'Sem editora informada'}
-                  </Typography>
+                {/* A capa ao lado: reconhecer o gibi pela capa é mais rápido que ler o título. */}
+                <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start' }}>
+                  <Box sx={{ width: { xs: 96, md: 120 }, flexShrink: 0 }}>
+                    <LargeCover coverUrl={edition.cover_url} title={edition.title} />
+                  </Box>
+                  <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+                    <Typography variant="h4">{edition.title}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {[edition.publisher, edition.volume, edition.format].filter(Boolean).join(' · ') ||
+                        'Sem editora informada'}
+                    </Typography>
+                    <Button
+                      size="small"
+                      color="inherit"
+                      startIcon={<FlagOutlinedIcon fontSize="small" />}
+                      onClick={() => setReporting(true)}
+                      sx={{ alignSelf: 'flex-start', color: 'text.secondary', mt: 1 }}
+                    >
+                      Dados errados? Denunciar
+                    </Button>
+                  </Stack>
                 </Stack>
-
-                <Button
-                  size="small"
-                  color="inherit"
-                  startIcon={<FlagOutlinedIcon fontSize="small" />}
-                  onClick={() => setReporting(true)}
-                  sx={{ alignSelf: 'flex-start', color: 'text.secondary' }}
-                >
-                  Dados errados? Denunciar
-                </Button>
                 {reporting && (
                   <ReportEditionDialog editionId={edition.id} title={edition.title} onClose={() => setReporting(false)} />
                 )}
