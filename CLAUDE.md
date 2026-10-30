@@ -103,7 +103,7 @@ Componente com `sx` extenso tem um `<Componente>.styles.tsx` ao lado (ver regra 
 
 Três níveis: **Obra** (a história, `works`), **Edição** (a versão física publicada, `editions`, chave de busca `isbn13`) e **Exemplar** (a cópia do usuário, `copies`). RLS ligada em tudo; `copies` só do dono. O admin é o UUID fixo `ADMIN_USER_ID` (`src/features/admin/admin.ts`), repetido nas políticas. Detalhe de políticas, funções (`search_my_collection`, `delete_my_account`, moderação), lojas e storage em `docs/banco.md`; a fonte da verdade é `supabase/migrations/`.
 
-- **Migrações no projeto remoto pelo plugin do Supabase (MCP)**, que o Lucas autorizou em 2026-10-16 (projeto `urfmibhdswfdeiiesnar`, o subdomínio de `VITE_SUPABASE_URL`). Não há `supabase/config.toml` nem CLI configurada. Sempre: arquivo em `supabase/migrations/` primeiro, inspecionar o estado atual (`execute_sql`), aplicar (`apply_migration`) e conferir que o objeto foi criado. É o banco de produção: confirme com o Lucas antes de aplicar e antes de qualquer `execute_sql` que altere ou apague dados. Se o plugin pedir login de novo, o Lucas autoriza pelo link do OAuth; o SQL Editor continua como alternativa manual. Algumas migrações têm ordem em relação ao deploy (ver `docs/banco.md`). O `apply_migration` às vezes devolve "Invalid or expired requestState": confira por `execute_sql` que nada foi aplicado e repita.
+- **Migrações e SQL que altera dados no banco de produção:** sempre pela skill `aplicar-migracao` (`.claude/skills/aplicar-migracao/SKILL.md`): arquivo em `supabase/migrations/`, inspecionar, confirmar com o Lucas, aplicar pelo plugin do Supabase e conferir. Projeto `urfmibhdswfdeiiesnar`; não há CLI nem `config.toml`.
 
 ## Configuração fora do repositório
 

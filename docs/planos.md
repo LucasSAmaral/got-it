@@ -55,7 +55,7 @@ Conversa de 2026-10-30. O `CLAUDE.md` é carregado inteiro em toda sessão do Cl
 
 - **Feito (2026-10-30):** o detalhe de cada funcionalidade foi para `docs/funcionalidades.md`, o banco para `docs/banco.md` e as pendências, o escopo da Fase 1 e o material de apoio para este arquivo; o `CLAUDE.md` ficou com uma linha por área e os links.
 - **Skills (próximas entregas, aprovadas):**
-  - **`aplicar-migracao`:** o roteiro pelo plugin do Supabase (arquivo, inspecionar, confirmar com o Lucas, aplicar, conferir), as regras de ordem em relação ao deploy e o erro "Invalid or expired requestState".
+  - **`aplicar-migracao`:** feita (2026-10-30), em `.claude/skills/aplicar-migracao/`.
   - **`testar-local`:** scripts prontos que sobem o Postgres com os stubs de auth e storage, o PostgREST, geram o JWT, fazem a sessão falsa e os mocks do Playwright, e derrubam tudo no fim (hoje descrito em "Como verificar" no `CLAUDE.md`), sem dependência nova no `package.json`.
 
 ## Domínio próprio
