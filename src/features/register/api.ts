@@ -27,7 +27,11 @@ export interface NewEditionInput {
 }
 
 export async function uploadCoverImage(file: File, isbn13: string): Promise<string> {
-  const cover = await shrinkCover(file)
+  return uploadCoverBlob(await shrinkCover(file), isbn13)
+}
+
+/** Envia ao bucket público uma capa já reduzida (ex.: a da fila, ao aprovar) e devolve a URL. */
+export async function uploadCoverBlob(cover: Blob, isbn13: string): Promise<string> {
   const path = `${isbn13}-${Date.now()}.jpg`
 
   const { error } = await supabase.storage.from('covers').upload(path, cover, {
@@ -39,6 +43,31 @@ export async function uploadCoverImage(file: File, isbn13: string): Promise<stri
 
   const { data } = supabase.storage.from('covers').getPublicUrl(path)
   return data.publicUrl
+}
+
+/**
+ * Quem chama publica capa direto no catálogo (admin e contas de `trusted_users`)? Os outros mandam a capa
+ * para a fila de revisão. O banco garante a regra (migração `moderation`); isto só escolhe o caminho.
+ */
+export async function canPublishCovers(): Promise<boolean> {
+  const { data, error } = await supabase.rpc('is_trusted')
+  if (error) throw error
+  return data === true
+}
+
+/** Envia a capa para o bucket privado da fila, na pasta do usuário, e devolve o caminho do arquivo. */
+async function uploadPendingCover(file: File, isbn13: string): Promise<string> {
+  const { data: session } = await supabase.auth.getSession()
+  const userId = session.session?.user.id
+  if (!userId) throw new Error('Sem sessão válida para enviar a capa.')
+  const path = `${userId}/${isbn13}-${Date.now()}.jpg`
+
+  const { error } = await supabase.storage.from('covers-pending').upload(path, await shrinkCover(file), {
+    contentType: 'image/jpeg',
+    upsert: false,
+  })
+  if (error) throw error
+  return path
 }
 
 /**
@@ -119,8 +148,33 @@ export async function createEdition(edition: NewEditionInput): Promise<string> {
   return data.id as string
 }
 
-export async function createEditionAndCopy(edition: NewEditionInput, form: CopyFormInput) {
-  await addCopyToExistingEdition(await createEdition(edition), form)
+/**
+ * Cria a edição com a foto da capa. Quem é de confiança publica a capa junto; os outros criam a edição sem
+ * capa e a foto vai para a fila do admin (`cover_submissions`). A foto sobe antes da edição, como antes:
+ * se o envio falhar, nada fica criado pela metade.
+ */
+export async function createEditionWithCover(
+  edition: Omit<NewEditionInput, 'coverUrl'>,
+  coverFile: File | null,
+): Promise<string> {
+  if (!coverFile) return createEdition({ ...edition, coverUrl: '' })
+  if (await canPublishCovers()) {
+    return createEdition({ ...edition, coverUrl: await uploadCoverImage(coverFile, edition.isbn13) })
+  }
+
+  const path = await uploadPendingCover(coverFile, edition.isbn13)
+  const editionId = await createEdition({ ...edition, coverUrl: '' })
+  const { error } = await supabase.from('cover_submissions').insert({ edition_id: editionId, path })
+  if (error) throw error
+  return editionId
+}
+
+export async function createEditionAndCopy(
+  edition: Omit<NewEditionInput, 'coverUrl'>,
+  coverFile: File | null,
+  form: CopyFormInput,
+) {
+  await addCopyToExistingEdition(await createEditionWithCover(edition, coverFile), form)
 }
 
 /** Editora de cada edição do catálogo (com repetição), para ordenar as sugestões pelo uso. */

@@ -1,6 +1,7 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
-import { Alert, Box, IconButton, Link, Stack, Typography } from '@mui/material'
+import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
+import { Alert, Box, Button, IconButton, Link, Stack, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { Fragment, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
@@ -13,6 +14,7 @@ import { fetchCopyDetail, type CopyDetail } from './api'
 import { NarrationTitle } from '../../components/NarrationTitle'
 import { DetailList, SectionCard } from './CopyDetailPage.styles'
 import { EditCopyDialog } from './EditCopyDialog'
+import { ReportEditionDialog } from '../moderation/ReportEditionDialog'
 
 /** `to`: o valor vira link (ex.: a série abre a página dela). */
 type Detail = { label: string; value: string | null; mono?: boolean; to?: string }
@@ -56,6 +58,7 @@ export function CopyDetailPage() {
   const { copyId } = useParams<{ copyId: string }>()
   const navigate = useNavigate()
   const [editing, setEditing] = useState(false)
+  const [reporting, setReporting] = useState(false)
 
   const offline = !navigator.onLine
   const { data, isLoading, isError } = useQuery({
@@ -85,6 +88,11 @@ export function CopyDetailPage() {
       {data && (
         <>
           <LargeCover coverUrl={data.edition.cover_url} title={data.edition.title} />
+          {!data.edition.cover_url && data.edition.cover_submissions.length > 0 && (
+            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 1 }}>
+              Capa enviada, em análise. Aparece aqui depois de revisada.
+            </Typography>
+          )}
 
           <Stack spacing={0.5} sx={{ mt: 3 }}>
             <Typography variant="h2">{data.edition.title}</Typography>
@@ -110,6 +118,16 @@ export function CopyDetailPage() {
                   { label: 'ISBN', value: data.edition.isbn13, mono: true },
                 ]}
               />
+              {/* O catálogo é compartilhado: capa ou dado errado de outra pessoa vai para a revisão do admin. */}
+              <Button
+                size="small"
+                color="inherit"
+                startIcon={<FlagOutlinedIcon fontSize="small" />}
+                onClick={() => setReporting(true)}
+                sx={{ mt: 1.5, color: 'text.secondary' }}
+              >
+                Denunciar capa ou dado errado
+              </Button>
             </SectionCard>
             <SectionCard variant="outlined">
               <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -134,6 +152,13 @@ export function CopyDetailPage() {
           </Stack>
 
           {editing && <EditCopyDialog copy={data} onClose={() => setEditing(false)} />}
+          {reporting && (
+            <ReportEditionDialog
+              editionId={data.edition.id}
+              title={data.edition.title}
+              onClose={() => setReporting(false)}
+            />
+          )}
         </>
       )}
     </Box>

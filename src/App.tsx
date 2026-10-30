@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import { RequireAuth } from './auth/RequireAuth'
 import { PrivacyPage } from './features/account/PrivacyPage'
 import { AdminEditionsPage } from './features/admin/AdminEditionsPage'
+import { ModerationPage } from './features/admin/ModerationPage'
 import { StoreArrivalsPage } from './features/admin/StoreArrivalsPage'
 import { CheckPage } from './features/check/CheckPage'
 import { CollectionPage } from './features/collection/CollectionPage'
@@ -38,6 +39,7 @@ export function App() {
           <Route path="serie/:workId" element={<SeriesPage />} />
           <Route path="admin" element={<AdminEditionsPage />} />
           <Route path="admin/chegadas" element={<StoreArrivalsPage />} />
+          <Route path="admin/revisao" element={<ModerationPage />} />
         </Route>
         <Route path="cadastro" element={<RegisterByIsbnPage />} />
       </Route>

@@ -1,4 +1,5 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined'
 import { Alert, Box, Button, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -9,6 +10,7 @@ import { PageContent } from '../../layout/PageContent'
 import { Sidebar } from '../../layout/Sidebar'
 import { isPriceInputValid } from '../../lib/format'
 import { isbn13FromInput } from '../../lib/isbn'
+import { ReportEditionDialog } from '../moderation/ReportEditionDialog'
 import { CONDITIONS } from './constants'
 import {
   DuplicateIsbnError,
@@ -16,9 +18,7 @@ import {
   createEditionAndCopy,
   fetchEditionByIsbn,
   fetchMyCopyCount,
-  uploadCoverImage,
   type CopyFormInput,
-  type NewEditionInput,
 } from './api'
 import { IsbnField } from './IsbnField'
 import { EMPTY_EDITION_FORM, isNewEditionFormValid } from './editionForm'
@@ -38,6 +38,7 @@ export function RegisterByIsbnPage() {
   const [copyForm, setCopyForm] = useState<CopyFormInput>({ condition: '', acquiredAt: '', pricePaid: '' })
   const [manualEdition, setManualEdition] = useState(EMPTY_EDITION_FORM)
   const [coverFile, setCoverFile] = useState<File | null>(null)
+  const [reporting, setReporting] = useState(false)
 
   const isbn13 = isbn13FromInput(isbnInput)
 
@@ -76,9 +77,7 @@ export function RegisterByIsbnPage() {
     setSubmitting(true)
     setSubmitError('')
     try {
-      const coverUrl = coverFile ? await uploadCoverImage(coverFile, isbn13) : ''
-      const newEdition: NewEditionInput = { isbn13, coverUrl, ...manualEdition }
-      await createEditionAndCopy(newEdition, copyForm)
+      await createEditionAndCopy({ isbn13, ...manualEdition }, coverFile, copyForm)
       navigate('/colecao')
     } catch (error) {
       if (error instanceof DuplicateIsbnError) {
@@ -123,6 +122,19 @@ export function RegisterByIsbnPage() {
                     {[edition.publisher, edition.format].filter(Boolean).join(' · ') || 'Sem editora informada'}
                   </Typography>
                 </Stack>
+
+                <Button
+                  size="small"
+                  color="inherit"
+                  startIcon={<FlagOutlinedIcon fontSize="small" />}
+                  onClick={() => setReporting(true)}
+                  sx={{ alignSelf: 'flex-start', color: 'text.secondary' }}
+                >
+                  Dados errados? Denunciar
+                </Button>
+                {reporting && (
+                  <ReportEditionDialog editionId={edition.id} title={edition.title} onClose={() => setReporting(false)} />
+                )}
 
                 {duplicateQuery.data !== undefined && duplicateQuery.data > 0 && (
                   <Alert severity="warning" icon={<WarningAmberOutlinedIcon fontSize="small" />}>

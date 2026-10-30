@@ -3,8 +3,10 @@ import { copyColumns, type CopyFormInput } from '../register/api'
 import type { Copy, Edition } from '../../types/catalog'
 
 export type CopyDetail = Pick<Copy, 'id' | 'condition' | 'acquired_at' | 'price_paid'> & {
-  edition: Pick<Edition, 'title' | 'publisher' | 'volume' | 'format' | 'year' | 'isbn13' | 'cover_url' | 'series_position' | 'work_id'> & {
+  edition: Pick<Edition, 'id' | 'title' | 'publisher' | 'volume' | 'format' | 'year' | 'isbn13' | 'cover_url' | 'series_position' | 'work_id'> & {
     work: { title: string } | null
+    /** Capas enviadas por esta pessoa esperando revisão (a RLS só mostra as dela). */
+    cover_submissions: { id: string }[]
   }
 }
 
@@ -13,7 +15,7 @@ export async function fetchCopyDetail(copyId: string): Promise<CopyDetail | null
   const { data, error } = await supabase
     .from('copies')
     .select(
-      'id, condition, acquired_at, price_paid, edition:editions(title, publisher, volume, format, year, isbn13, cover_url, series_position, work_id, work:works(title))',
+      'id, condition, acquired_at, price_paid, edition:editions(id, title, publisher, volume, format, year, isbn13, cover_url, series_position, work_id, work:works(title), cover_submissions(id))',
     )
     .eq('id', copyId)
     .maybeSingle()

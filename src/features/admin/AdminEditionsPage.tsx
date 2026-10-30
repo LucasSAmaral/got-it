@@ -1,6 +1,7 @@
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined'
-import { Alert, Box, Button, IconButton, Typography } from '@mui/material'
+import { Alert, Box, Button, IconButton, Stack, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
@@ -10,6 +11,7 @@ import { EditionGrid } from '../../components/EditionGrid'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { SearchField } from '../../components/SearchField'
 import { useShowMore } from '../../hooks/useShowMore'
+import { fetchModerationCount } from '../moderation/api'
 import { fetchStores } from '../store/api'
 import { isAdmin } from './admin'
 import type { EditionSummary } from './api'
@@ -25,6 +27,7 @@ export function AdminEditionsPage() {
   const { visibleCount, hasMore, sentinelRef } = useShowMore(data?.length ?? 0, query.trim())
   // Se falhar, só o atalho das chegadas some; a edição do catálogo continua.
   const { data: stores } = useQuery({ queryKey: ['stores'], queryFn: fetchStores })
+  const { data: pendingReview } = useQuery({ queryKey: ['moderation', 'count'], queryFn: fetchModerationCount })
 
   if (!isAdmin(session)) {
     return <Navigate to="/" replace />
@@ -36,9 +39,18 @@ export function AdminEditionsPage() {
         Editar catálogo
       </Typography>
 
-      {/* O Box põe o botão numa linha própria: sozinho ele é inline e fica colado na busca. */}
-      {stores && stores.length > 0 && (
-        <Box sx={{ mb: 2.5 }}>
+      {/* O Stack põe os botões numa linha própria: sozinhos eles são inline e ficam colados na busca. */}
+      <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: 'wrap', mb: 2.5 }}>
+        <Button
+          component={Link}
+          to="/admin/revisao"
+          variant="outlined"
+          color="inherit"
+          startIcon={<FlagOutlinedIcon />}
+        >
+          Revisar{pendingReview ? ` (${pendingReview})` : ''}
+        </Button>
+        {stores && stores.length > 0 && (
           <Button
             component={Link}
             to="/admin/chegadas"
@@ -48,8 +60,8 @@ export function AdminEditionsPage() {
           >
             Chegou nas lojas
           </Button>
-        </Box>
-      )}
+        )}
+      </Stack>
 
       <SearchField placeholder="Buscar por título, editora ou ISBN" value={query} onChange={setQuery} />
 

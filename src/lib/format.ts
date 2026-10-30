@@ -27,6 +27,15 @@ export function toIsoDate(date: Date): string {
   return `${date.getFullYear()}-${month}-${day}`
 }
 
+/**
+ * Data e hora do Postgres (`timestamptz`, ex.: `2026-10-30T02:41:36+00:00`) como o dia no fuso do aparelho,
+ * no formato brasileiro. Diferente de `formatDate`: cortar o texto daria o dia em UTC, que depois das 21h
+ * de Brasília já é amanhã.
+ */
+export function formatTimestampDate(timestamp: string): string {
+  return formatDate(toIsoDate(new Date(timestamp)))
+}
+
 /** O dia `days` dias antes de `date`, no formato do Postgres. */
 export function isoDateDaysBefore(date: Date, days: number): string {
   return toIsoDate(new Date(date.getFullYear(), date.getMonth(), date.getDate() - days))

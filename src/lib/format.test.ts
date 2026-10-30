@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   formatArrival,
   formatDate,
+  formatTimestampDate,
   formatPrice,
   isoDateDaysBefore,
   isPriceInputValid,
@@ -28,6 +29,14 @@ describe('formatDate', () => {
   it('converte a data do Postgres para dd/mm/aaaa sem mudar o dia pelo fuso', () => {
     expect(formatDate('2026-03-05')).toBe('05/03/2026')
     expect(formatDate('2026-01-01')).toBe('01/01/2026')
+  })
+})
+
+describe('formatTimestampDate', () => {
+  it('usa o dia do fuso do aparelho, não o de UTC', () => {
+    // 23h40 de 29/10 no fuso do aparelho; em Brasília, o texto em UTC já é dia 30.
+    expect(formatTimestampDate(new Date(2026, 9, 29, 23, 40).toISOString())).toBe('29/10/2026')
+    expect(formatTimestampDate(new Date(2026, 9, 30, 0, 10).toISOString())).toBe('30/10/2026')
   })
 })
 

@@ -9,7 +9,7 @@ import { NarrationTitle } from '../../components/NarrationTitle'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { formatDate, isPriceInputValid, toIsoDate } from '../../lib/format'
 import { isbn13FromInput } from '../../lib/isbn'
-import { createEdition, DuplicateIsbnError, fetchEditionByIsbn, uploadCoverImage } from '../register/api'
+import { createEditionWithCover, DuplicateIsbnError, fetchEditionByIsbn } from '../register/api'
 import { IsbnField } from '../register/IsbnField'
 import { EMPTY_EDITION_FORM, isNewEditionFormValid } from '../register/editionForm'
 import { NewEditionFields } from '../register/NewEditionFields'
@@ -82,11 +82,7 @@ export function StoreArrivalsPage() {
     try {
       const editionId =
         edition?.id ??
-        (await createEdition({
-          isbn13,
-          coverUrl: coverFile ? await uploadCoverImage(coverFile, isbn13) : '',
-          ...editionForm,
-        }))
+        (await createEditionWithCover({ isbn13, ...editionForm }, coverFile))
       await createArrival(store.id, editionId, arrivalForm)
       setSavedTitle(edition?.title ?? editionForm.title)
       setIsbnInput('')

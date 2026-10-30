@@ -1,7 +1,10 @@
 import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined'
 import CloseIcon from '@mui/icons-material/Close'
-import { Button, MenuItem, Stack, TextField } from '@mui/material'
+import { Button, MenuItem, Stack, TextField, Typography } from '@mui/material'
+import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
+import { useAuth } from '../../auth/useAuth'
+import { canPublishCovers } from './api'
 import { FORMATS } from './constants'
 import type { NewEditionForm } from './editionForm'
 import { PublisherField } from './PublisherField'
@@ -22,6 +25,13 @@ type NewEditionFieldsProps = {
 export function NewEditionFields({ value, onChange, coverFile, onCoverFileChange }: NewEditionFieldsProps) {
   const [coverPreview, setCoverPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { session } = useAuth()
+  // Só para o aviso; o envio pergunta de novo. Na dúvida (carregando ou erro), não avisa.
+  const { data: trusted = true } = useQuery({
+    queryKey: ['can-publish-covers', session?.user.id],
+    queryFn: canPublishCovers,
+    staleTime: Infinity,
+  })
 
   useEffect(() => {
     if (!coverFile) {
@@ -121,6 +131,11 @@ export function NewEditionFields({ value, onChange, coverFile, onCoverFileChange
           >
             Adicionar foto da capa
           </Button>
+        )}
+        {!trusted && (
+          <Typography variant="caption" color="text.secondary">
+            A capa aparece para as outras pessoas depois de revisada.
+          </Typography>
         )}
       </Stack>
     </>
