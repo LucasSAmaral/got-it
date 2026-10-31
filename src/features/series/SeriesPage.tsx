@@ -13,7 +13,8 @@ import type { CollectionItem } from '../../types/catalog'
 import { NetworkError } from '../collection/api'
 import { useCollection } from '../collection/useCollection'
 import { fetchSeries, type Series } from './api'
-import { SlotGrid } from './SeriesPage.styles'
+import { AddToCollectionButton } from './AddToCollectionButton'
+import { CardActions, SlotGrid } from './SeriesPage.styles'
 
 const STATUS_CHIP: Record<SeriesStatus, { label: string; tone: 'success' | 'neutral' | 'warning' }> = {
   owned: { label: 'Tenho', tone: 'success' },
@@ -110,7 +111,11 @@ export function SeriesPage() {
                       edition={{ ...edition, title: titleWithinSeries(edition.title, series.title) }}
                       to={edition.myCopyId ? `/exemplar/${edition.myCopyId}` : undefined}
                       action={
-                        <SpeechBalloon tone={STATUS_CHIP[status].tone}>{STATUS_CHIP[status].label}</SpeechBalloon>
+                        <CardActions>
+                          <SpeechBalloon tone={STATUS_CHIP[status].tone}>{STATUS_CHIP[status].label}</SpeechBalloon>
+                          {/* Sem sinal a página só mostra as suas, e adicionar exige internet. */}
+                          {!edition.myCopyId && !fromDevice && <AddToCollectionButton edition={edition} />}
+                        </CardActions>
                       }
                     />
                   ))}
