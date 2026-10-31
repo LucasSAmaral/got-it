@@ -84,7 +84,7 @@ Fica fora por enquanto: perfil público, listas de troca e venda, equivalência 
 - Tablets em pé (600 a 899 px) usam o layout de celular; a tela de escanear continua em tela cheia no desktop.
 - Detalhe do exemplar offline: dá para mostrar uma versão parcial a partir da cópia do IndexedDB (sem capa, formato, ano e preço), se fizer falta.
 - Considerar `unaccent` na busca (servidor e cópia local juntos).
-- Séries que ficam sem edição (renomeou ou tirou a série no admin) continuam em `works` e aparecem nas sugestões. Se incomodar: limpar à mão ou sugerir só séries com edição. A listagem de séries deve mostrar só séries com edição.
+- Séries que ficam sem edição continuam em `works` e aparecem nas sugestões do campo "Série" (`fetchSeriesTitles` em `register/api.ts`). Acontece ao corrigir o nome da série de uma edição: `get_or_create_work` cria a série com o nome novo e a antiga fica vazia. Já incomodou: em 2026-10-30 o Lucas digitou "Abaolute Caçador de Marte", corrigiu, e a errada foi apagada à mão (`delete` em `works` só se nenhuma edição apontar para ela; `editions` é a única tabela que referencia `works`). Com os testers corrigindo nomes, vai se repetir. Saídas: sugerir só séries com pelo menos uma edição (só leitura, nada some) ou o banco apagar a série quando a última edição sair dela (gatilho em `editions`). A listagem de séries deve mostrar só séries com edição.
 - O `README.md` ainda é o do template do Vite.
 - Fases seguintes do plano: listas "procuro" e "troca ou venda", cadastro por foto da capa, edições equivalentes.
 
