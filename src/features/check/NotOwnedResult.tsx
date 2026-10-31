@@ -1,4 +1,4 @@
-import { Button, Stack, Typography } from '@mui/material'
+import { Box, Button, Stack, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { EditionCard } from '../../components/EditionCard'
@@ -41,8 +41,15 @@ export function NotOwnedResult({ term, offline }: NotOwnedResultProps) {
         </Typography>
         {edition ? (
           <>
-            {/* O selo, e não só o rótulo, porque o cartão é igual ao de "Você já tem". */}
-            <EditionCard edition={edition} badge={<SpeechBalloon tone="warning">Não tem</SpeechBalloon>} />
+            {/* O selo, e não só o rótulo, porque o cartão é igual ao de "Você já tem". No alto, como o da página da série. */}
+            <EditionCard
+              edition={edition}
+              action={
+                <Box sx={{ alignSelf: 'flex-start' }}>
+                  <SpeechBalloon tone="warning">Não tem</SpeechBalloon>
+                </Box>
+              }
+            />
             <Button variant="contained" onClick={() => navigate(registerPath)}>
               Adicionar à minha coleção
             </Button>
