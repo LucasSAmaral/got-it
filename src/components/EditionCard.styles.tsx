@@ -4,6 +4,7 @@ import { tokens } from '../theme'
 
 /** Moldura do cartão (edição na coleção/admin/série, série na listagem). */
 export const CardFrame = styled(Card)(({ theme }) => ({
+  position: 'relative',
   display: 'flex',
   gap: theme.spacing(1.5),
   alignItems: 'center',
@@ -42,8 +43,21 @@ export const ClampedTitle = styled(Typography)(({ theme }) => ({
   },
 }))
 
-/** Editora · volume à esquerda e o selo (se houver) à direita, na mesma linha. */
-export const PublisherRow = styled(Box)(({ theme }) => ({
+/**
+ * Ação no canto de cima (ex.: lixeira da coleção), fora do fluxo do cartão: assim ela não vira uma coluna da
+ * altura do cartão, e as linhas de baixo (com o selo) vão até a borda. O título reserva `CORNER_ACTION_SPACE`.
+ */
+export const CornerAction = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  top: theme.spacing(1.5),
+  right: theme.spacing(1.5),
+}))
+
+/** Espaço à direita do título quando há `CornerAction`: o botão pequeno (30 px) mais um respiro. */
+export const CORNER_ACTION_SPACE = 4.5
+
+/** ISBN à esquerda e o selo (se houver) à direita, na mesma linha, no canto de baixo do cartão. */
+export const BadgeRow = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',

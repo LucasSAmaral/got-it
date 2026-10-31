@@ -22,6 +22,7 @@ export function CollectionItemCard({ item, showDelete = false }: { item: Collect
     <EditionCard
       edition={item}
       to={`/exemplar/${item.copy_id}`}
+      actionPlacement="corner"
       badge={
         item.read !== undefined && (
           <SpeechBalloon tone={item.read ? 'success' : 'neutral'}>{item.read ? 'Lido' : 'Não lido'}</SpeechBalloon>
@@ -34,7 +35,7 @@ export function CollectionItemCard({ item, showDelete = false }: { item: Collect
               aria-label="Remover exemplar da coleção"
               size="small"
               onClick={() => setConfirmOpen(true)}
-              sx={{ alignSelf: 'flex-start', color: 'text.secondary' }}
+              sx={{ color: 'text.secondary' }}
             >
               <DeleteOutlineIcon fontSize="small" />
             </IconButton>
