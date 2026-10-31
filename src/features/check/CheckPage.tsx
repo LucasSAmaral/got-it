@@ -1,19 +1,18 @@
 import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined'
 import { Alert, Box, Button, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { CollectionItemCard } from '../collection/CollectionItemCard'
 import { OfflineNotice } from '../collection/OfflineNotice'
 import { LazyScannerDialog } from '../scanner/LazyScannerDialog'
-import { EmptyStateCard, SearchField } from './CheckPage.styles'
+import { SearchField } from './CheckPage.styles'
+import { NotOwnedResult } from './NotOwnedResult'
 import { useCheck } from './useCheck'
 
 export function CheckPage() {
   const [term, setTerm] = useState('')
   const [scannerOpen, setScannerOpen] = useState(false)
   const { data, isFetching, isError, debouncedTerm } = useCheck(term)
-  const navigate = useNavigate()
 
   const hasSearched = debouncedTerm.length > 0
   const found = (data?.items.length ?? 0) > 0
@@ -73,20 +72,7 @@ export function CheckPage() {
       )}
 
       {!isFetching && hasSearched && !isError && !found && (
-        <EmptyStateCard spacing={1.5}>
-          <Typography variant="body2" sx={{ fontWeight: 700 }} color="text.secondary">
-            Ainda não tem
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Não encontramos "{debouncedTerm}" na sua coleção.
-          </Typography>
-          <Button
-            variant="contained"
-            onClick={() => navigate(`/cadastro?isbn=${encodeURIComponent(debouncedTerm)}`)}
-          >
-            Cadastrar esta edição
-          </Button>
-        </EmptyStateCard>
+        <NotOwnedResult term={debouncedTerm} offline={data?.fromMirror ?? false} />
       )}
     </Box>
   )

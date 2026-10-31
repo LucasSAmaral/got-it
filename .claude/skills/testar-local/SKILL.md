@@ -66,6 +66,7 @@ Copie `screenshot.mjs` para o scratchpad e importe `lib.mjs` pelo caminho absolu
 
 - `withBrowser(fn, launchOptions)`: abre o Chromium e fecha no fim.
 - `newContext(browser, { user, rest, serviceWorker, ...opçõesDoPlaywright })`: sessão falsa em `localStorage` (`user: USERS.leitor`; sem `user`, visitante sem conta) e as rotas do Supabase. `rest: (route, path) => ...` troca o banco local por mocks (para simular erro, lentidão ou resposta específica). `serviceWorker: true` liga o SW (bloqueado por padrão).
+- **Mock de uma tabela só** (ex.: simular erro em `editions` com o resto no banco local): deixe `rest: 'local'` e registre `context.route('**/rest/v1/editions*', ...)` depois do `newContext`. Dentro de um handler `rest`, `route.fallback()` não volta ao banco local: o pedido segue para a rede (o Supabase de produção).
 - `goOffline(page)`: carrega online, espera o SW controlar, corta a rede e recarrega, como abrir o PWA sem sinal. Precisa de `serviceWorker: true`.
 - `fakeSession(user)`, `signJwt(payload)`, `USERS`, `APP_URL`, `REST_URL`, `SUPABASE_URL` (o de produção, lido do `.env`, só para montar rotas).
 
