@@ -1,4 +1,6 @@
-import { Box, Button, Stack, Typography } from '@mui/material'
+import FavoriteIcon from '@mui/icons-material/Favorite'
+import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined'
+import { Alert, Box, Button, Stack, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { EditionCard } from '../../components/EditionCard'
@@ -6,6 +8,7 @@ import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { SpeechBalloon } from '../../components/SpeechBalloon'
 import { isbn13FromInput } from '../../lib/isbn'
 import { fetchEditionByIsbn } from '../register/api'
+import { useAddWish, useWishlist } from '../wishlist/useWishlist'
 import { EmptyStateCard } from './CheckPage.styles'
 
 type NotOwnedResultProps = {
@@ -33,6 +36,9 @@ export function NotOwnedResult({ term, offline }: NotOwnedResultProps) {
   const registerPath = isbn13 ? `/cadastro?isbn=${isbn13}` : '/cadastro'
 
   const edition = editionQuery.data
+  const wishlist = useWishlist()
+  const addWish = useAddWish()
+  const wished = !!edition && !!wishlist.data?.items.some((item) => item.edition_id === edition.id)
   if (editionQuery.isLoading || edition) {
     return (
       <Stack spacing={1.5}>
@@ -53,6 +59,25 @@ export function NotOwnedResult({ term, offline }: NotOwnedResultProps) {
             <Button variant="contained" onClick={() => navigate(registerPath)}>
               Adicionar à minha coleção
             </Button>
+            {/* Escaneou na loja e não vai levar agora: guarda com um toque, sem sair do "Eu tenho?". Já guardada,
+                o botão leva à lista (desligado, parecia indisponível). */}
+            {wished ? (
+              <Button variant="outlined" startIcon={<FavoriteIcon />} onClick={() => navigate('/desejos')}>
+                Ver na lista de desejos
+              </Button>
+            ) : (
+              <Button
+                variant="outlined"
+                startIcon={<FavoriteBorderOutlinedIcon />}
+                disabled={addWish.isPending}
+                onClick={() => addWish.mutate(edition.id)}
+              >
+                {addWish.isPending ? 'Adicionando…' : 'Adicionar à lista de desejos'}
+              </Button>
+            )}
+            {addWish.isError && (
+              <Alert severity="error">Não deu para adicionar à lista. Confira a internet e tente de novo.</Alert>
+            )}
           </>
         ) : (
           <LoadingSpinner size={24} sx={{ py: 2 }} />
@@ -74,6 +99,16 @@ export function NotOwnedResult({ term, offline }: NotOwnedResultProps) {
       <Button variant="contained" onClick={() => navigate(registerPath)}>
         Cadastrar esta edição
       </Button>
+      {/* ISBN fora do catálogo: o formulário de edição nova da lista de desejos, sem exemplar. */}
+      {isbn13 && (
+        <Button
+          variant="outlined"
+          startIcon={<FavoriteBorderOutlinedIcon />}
+          onClick={() => navigate(`/desejos/adicionar?isbn=${isbn13}`)}
+        >
+          Adicionar à lista de desejos
+        </Button>
+      )}
     </EmptyStateCard>
   )
 }

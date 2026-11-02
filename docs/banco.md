@@ -14,9 +14,13 @@ Três níveis: **Obra** (a história), **Edição** (a versão física publicada
 
 **Lojas** (`20261027000000_store_arrivals.sql`): `stores` (nome, `slug`, `whatsapp`/`instagram` opcionais; a Lazarus vem na migração) e `store_arrivals` (loja, edição, `arrived_on`, `price` opcional; único por loja + edição + dia). Leitura pública, **inclusive `anon`** (sem login); escrita só do admin (mesmo UUID). Sem login, `editions` e `works` mostram só o que chegou em alguma loja (`editions_select_in_store`, `works_select_in_store`). No Supabase o `anon` tem privilégio de tabela por padrão: o que protege `copies` é a RLS sem política para `anon`, não o grant.
 
+## Lista de desejos
+
+**Lista de desejos** (`20261102000000_wishes.sql`): `wishes` (`user_id`, `edition_id`, `created_at`), única por pessoa e edição (ao contrário de `copies`, a mesma edição duas vezes não faz sentido). RLS como `copies`, só do dono, mas sem política de update: um desejo só entra ou sai. `on delete cascade` para `auth.users` (apagar a conta leva junto) e para `editions`. O gatilho `copies_remove_wish` (função `remove_wish_on_copy`, security invoker) apaga o desejo da mesma edição quando a pessoa insere um exemplar, em qualquer tela. Aplicada antes do app que a usa (o app anterior não toca nela).
+
 ## Apagar conta
 
-**Apagar conta** (`20261029000000_delete_account.sql`): `delete_my_account()` (security definer, só `authenticated`) apaga de `auth.users` a linha de quem chama. Exemplares vão junto (`on delete cascade`); edições, séries e chegadas ficam no catálogo sem autor (`on delete set null`), e edição sem autor só o admin edita. Antes dessa migração as chaves eram NO ACTION e nem o painel conseguia apagar um usuário com dados.
+**Apagar conta** (`20261029000000_delete_account.sql`): `delete_my_account()` (security definer, só `authenticated`) apaga de `auth.users` a linha de quem chama. Exemplares e desejos vão junto (`on delete cascade`); edições, séries e chegadas ficam no catálogo sem autor (`on delete set null`), e edição sem autor só o admin edita. Antes dessa migração as chaves eram NO ACTION e nem o painel conseguia apagar um usuário com dados.
 
 ## Busca
 

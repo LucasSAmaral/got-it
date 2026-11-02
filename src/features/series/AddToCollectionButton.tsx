@@ -15,23 +15,27 @@ import type { SeriesEdition } from './api'
 
 type AddToCollectionButtonProps = {
   edition: Pick<SeriesEdition, 'id' | 'title' | 'publisher' | 'volume'>
+  /** Depois de criar o exemplar, com o id dele (a página da edição abre o exemplar). */
+  onAdded?: (copyId: string) => void
 }
 
 /**
- * "Adicionar" no cartão de uma edição que você não tem, na página da série: confirma e cria o exemplar sem
+ * "Adicionar à coleção" numa edição que você não tem (cartão da página da série e página da edição): confirma e cria o exemplar sem
  * passar pelo cadastro, porque a edição já está no catálogo. Estado, data e preço ficam vazios e se completam
  * depois no detalhe do exemplar. A confirmação existe para um toque sem querer não pôr na coleção um gibi que
  * você não tem (e o "Eu tenho?" passaria a responder "Já tem").
  */
-export function AddToCollectionButton({ edition }: AddToCollectionButtonProps) {
+export function AddToCollectionButton({ edition, onAdded }: AddToCollectionButtonProps) {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
   const addCopy = useMutation({
     mutationFn: () => addCopyToExistingEdition(edition.id, { condition: '', acquiredAt: '', pricePaid: '' }),
-    onSuccess: () => {
+    onSuccess: (copyId) => {
       setOpen(false)
+      onAdded?.(copyId)
       // A página da série troca o selo para "Tenho"; o resto atualiza a coleção (e a cópia offline) e as contagens.
-      for (const key of ['series', 'series-list', 'collection', 'check', 'store-owned']) {
+      // A lista de desejos também: o banco tira dela a edição que virou exemplar (gatilho copies_remove_wish).
+      for (const key of ['series', 'series-list', 'collection', 'check', 'store-owned', 'wishlist', 'edition-detail']) {
         queryClient.invalidateQueries({ queryKey: [key] })
       }
     },
@@ -47,7 +51,7 @@ export function AddToCollectionButton({ edition }: AddToCollectionButtonProps) {
   return (
     <>
       <Button size="small" startIcon={<AddIcon />} onClick={() => setOpen(true)}>
-        Adicionar
+        Adicionar à coleção
       </Button>
 
       <Dialog open={open} onClose={close}>

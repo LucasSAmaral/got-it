@@ -1,7 +1,7 @@
 import { Box, Card, styled } from '@mui/material'
 import type { ElementType } from 'react'
 
-/** Bloco de dados ("Edição", "Seu exemplar") com o mesmo fundo e borda do cartão da coleção. */
+/** Bloco de dados ("Edição", "Seu exemplar", "Na sua coleção"; detalhe do exemplar e da edição) com o mesmo fundo e borda do cartão da coleção. */
 export const SectionCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing(2),
 }))

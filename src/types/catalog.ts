@@ -55,3 +55,14 @@ export interface CollectionItem {
   series_title?: string | null
   series_position?: number | null
 }
+
+/** Um item da lista de desejos do usuário, já combinado com os dados da edição. */
+export interface WishItem {
+  wish_id: string
+  edition_id: string
+  title: string
+  publisher: string | null
+  isbn13: string | null
+  volume: string | null
+  cover_url: string | null
+}

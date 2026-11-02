@@ -3,6 +3,7 @@ import { Box, BottomNavigation, BottomNavigationAction } from '@mui/material'
 import { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useCollection } from '../features/collection/useCollection'
+import { useWishlist } from '../features/wishlist/useWishlist'
 import { BottomNavBar } from './AppLayout.styles'
 import { MoreMenu } from './MoreMenu'
 import { activeNavItem, useNavItems } from './navItems'
@@ -12,7 +13,7 @@ import { Sidebar } from './Sidebar'
 const MORE = 'mais'
 
 /**
- * Celular: navegação embaixo (Início, Coleção, Eu tenho? e "Mais" com o resto). Tela larga (md, 900 px,
+ * Celular: navegação embaixo (Início, Coleção, Eu tenho?, Desejos e "Mais" com o resto). Tela larga (md, 900 px,
  * para cima): barra lateral com tudo e conteúdo com largura limitada.
  */
 export function AppLayout() {
@@ -27,6 +28,8 @@ export function AppLayout() {
 
   // Carrega a lista completa em qualquer aba do app: é ela que atualiza a cópia usada offline.
   useCollection('')
+  // Idem para a lista de desejos: ela precisa abrir sem sinal no balcão da loja, mesmo sem ter sido aberta antes.
+  useWishlist()
 
   return (
     <Box sx={{ display: 'flex', height: '100%' }}>
@@ -45,7 +48,12 @@ export function AppLayout() {
           {navItems
             .filter((item) => item.inBottomBar)
             .map((item) => (
-              <BottomNavigationAction key={item.to} label={item.label} value={item.to} icon={item.icon} />
+              <BottomNavigationAction
+                key={item.to}
+                label={item.shortLabel ?? item.label}
+                value={item.to}
+                icon={item.icon}
+              />
             ))}
           <BottomNavigationAction label="Mais" value={MORE} icon={<MenuIcon />} />
         </BottomNavigation>

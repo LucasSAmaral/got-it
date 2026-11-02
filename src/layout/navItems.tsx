@@ -1,5 +1,6 @@
 import CollectionsBookmarkOutlinedIcon from '@mui/icons-material/CollectionsBookmarkOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined'
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined'
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined'
 import PrivacyTipOutlinedIcon from '@mui/icons-material/PrivacyTipOutlined'
@@ -11,6 +12,8 @@ import { isAdmin } from '../features/admin/admin'
 export interface NavItem {
   to: string
   label: string
+  /** Rótulo da barra inferior, quando o `label` não cabe nos ~75 px de cada item num celular de 375 px. */
+  shortLabel?: string
   icon: ReactNode
   /** Outras rotas em que o item fica marcado (ex.: a página de uma série marca "Séries"). */
   alsoActiveOn?: string[]
@@ -22,13 +25,20 @@ const BASE_NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Início', icon: <HomeOutlinedIcon />, inBottomBar: true },
   { to: '/colecao', label: 'Coleção', icon: <GridViewOutlinedIcon />, alsoActiveOn: ['/exemplar/'], inBottomBar: true },
   { to: '/eu-tenho', label: 'Eu tenho?', icon: <SearchOutlinedIcon />, inBottomBar: true },
+  {
+    to: '/desejos',
+    label: 'Lista de desejos',
+    shortLabel: 'Desejos',
+    icon: <FavoriteBorderOutlinedIcon />,
+    inBottomBar: true,
+  },
   { to: '/series', label: 'Séries', icon: <CollectionsBookmarkOutlinedIcon />, alsoActiveOn: ['/serie/'] },
   { to: '/privacidade', label: 'Privacidade', icon: <PrivacyTipOutlinedIcon /> },
 ]
 
 const ADMIN_NAV_ITEM: NavItem = { to: '/admin', label: 'Editar catálogo', icon: <EditOutlinedIcon /> }
 
-/** Itens de navegação (Início, Coleção, Eu tenho?, Séries, Privacidade, e Editar catálogo só para o admin). Usado pela Sidebar e pelo AppLayout. */
+/** Itens de navegação (Início, Coleção, Eu tenho?, Lista de desejos, Séries, Privacidade, e Editar catálogo só para o admin). Usado pela Sidebar e pelo AppLayout. */
 export function useNavItems() {
   const { session } = useAuth()
   return isAdmin(session) ? [...BASE_NAV_ITEMS, ADMIN_NAV_ITEM] : BASE_NAV_ITEMS

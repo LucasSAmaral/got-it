@@ -30,6 +30,12 @@ export const BottomNavBar = styled(Paper)(({ theme }) => ({
   // Sem o arredondamento padrão do Paper, senão a linha de cima fica com as pontas curvas.
   borderRadius: 0,
   borderTop: tokens.panel.border,
+  // O MUI dá 80 px mínimos a cada item: com 5 itens (400 px) a barra transbordaria num celular de 375 px.
+  '& .MuiBottomNavigationAction-root': {
+    minWidth: 0,
+    paddingLeft: theme.spacing(0.5),
+    paddingRight: theme.spacing(0.5),
+  },
 }))
 
 /** Cabeçalho das páginas públicas para quem não entrou (ver `PublicLayout`): nome do app e "Entrar". */

@@ -1,14 +1,16 @@
-import type { CollectionItem } from '../types/catalog'
+import type { CollectionItem, WishItem } from '../types/catalog'
 
-/** Cópia local da coleção do usuário, para consultar sem sinal. Guardada no IndexedDB. */
-export interface Mirror {
-  items: CollectionItem[]
+/** Cópia local de uma lista do usuário (coleção ou lista de desejos), para consultar sem sinal. Guardada no IndexedDB. */
+export interface Mirror<T = CollectionItem> {
+  items: T[]
   savedAt: string
 }
 
 const DB_NAME = 'got-it'
 const STORE = 'mirror'
 const KEY = 'collection'
+// Mesmo object store, outra chave: não precisa de versão nova do banco (onupgradeneeded).
+const WISHES_KEY = 'wishes'
 
 function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -34,23 +36,29 @@ async function run<T>(mode: IDBTransactionMode, action: (store: IDBObjectStore) 
   }
 }
 
-export async function saveMirror(items: CollectionItem[]): Promise<void> {
-  const mirror: Mirror = { items, savedAt: new Date().toISOString() }
-  await run('readwrite', (store) => store.put(mirror, KEY))
+async function save<T>(key: string, items: T[]): Promise<void> {
+  const mirror: Mirror<T> = { items, savedAt: new Date().toISOString() }
+  await run('readwrite', (store) => store.put(mirror, key))
 }
 
 /** Devolve null se não há cópia ou se o IndexedDB não está disponível (ex.: navegação privada). */
-export async function loadMirror(): Promise<Mirror | null> {
+async function load<T>(key: string): Promise<Mirror<T> | null> {
   try {
-    return ((await run<Mirror | undefined>('readonly', (store) => store.get(KEY))) ?? null) as Mirror | null
+    return ((await run<Mirror<T> | undefined>('readonly', (store) => store.get(key))) ?? null) as Mirror<T> | null
   } catch {
     return null
   }
 }
 
+export const saveMirror = (items: CollectionItem[]) => save(KEY, items)
+export const loadMirror = () => load<CollectionItem>(KEY)
+export const saveWishesMirror = (items: WishItem[]) => save(WISHES_KEY, items)
+export const loadWishesMirror = () => load<WishItem>(WISHES_KEY)
+
+/** Apaga as duas cópias (coleção e lista de desejos). Chamado ao sair ou quando a sessão é revogada. */
 export async function clearMirror(): Promise<void> {
   try {
-    await run('readwrite', (store) => store.delete(KEY))
+    await run('readwrite', (store) => store.clear())
   } catch {
     // sem IndexedDB não há nada para limpar
   }

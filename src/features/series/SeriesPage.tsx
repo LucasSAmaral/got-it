@@ -1,8 +1,9 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import CloudOffOutlinedIcon from '@mui/icons-material/CloudOffOutlined'
-import { Alert, Box, IconButton, Typography } from '@mui/material'
+import { Alert, Box, Button, IconButton, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { EditionCard } from '../../components/EditionCard'
 import { NarrationTitle } from '../../components/NarrationTitle'
 import { SpeechBalloon } from '../../components/SpeechBalloon'
@@ -13,6 +14,7 @@ import type { CollectionItem } from '../../types/catalog'
 import { NetworkError } from '../collection/api'
 import { useCollection } from '../collection/useCollection'
 import { fetchSeries, type Series } from './api'
+import { WishToggleButton } from '../wishlist/WishToggleButton'
 import { AddToCollectionButton } from './AddToCollectionButton'
 import { CardActions, SlotGrid } from './SeriesPage.styles'
 
@@ -109,13 +111,34 @@ export function SeriesPage() {
                     <EditionCard
                       key={edition.id}
                       edition={{ ...edition, title: titleWithinSeries(edition.title, series.title) }}
-                      to={edition.myCopyId ? `/exemplar/${edition.myCopyId}` : undefined}
+                      // Quem tem abre o exemplar; quem não tem, a edição do catálogo. Sem sinal a edição não abre
+                      // (o catálogo não fica no aparelho), mas aí a página só mostra as suas.
+                      to={edition.myCopyId ? `/exemplar/${edition.myCopyId}` : `/edicao/${edition.id}`}
                       action={
                         <CardActions>
                           <SpeechBalloon tone={STATUS_CHIP[status].tone}>{STATUS_CHIP[status].label}</SpeechBalloon>
-                          {/* Sem sinal a página só mostra as suas, e adicionar exige internet. */}
-                          {!edition.myCopyId && !fromDevice && <AddToCollectionButton edition={edition} />}
                         </CardActions>
+                      }
+                      // Embaixo, com texto completo: só ícone ou "Adicionar" ao lado do coração confundia lista de
+                      // desejos com coleção. A edição que você tem ganha "Ver exemplar" para todo cartão ter rodapé
+                      // e a mesma altura. Sem sinal, nenhum tem: adicionar e o detalhe do exemplar exigem internet.
+                      footer={
+                        fromDevice ? undefined : edition.myCopyId ? (
+                          <Button
+                            component={Link}
+                            to={`/exemplar/${edition.myCopyId}`}
+                            size="small"
+                            endIcon={<ArrowForwardIcon />}
+                            sx={{ ml: 'auto' }}
+                          >
+                            Ver exemplar
+                          </Button>
+                        ) : (
+                          <>
+                            <WishToggleButton editionId={edition.id} />
+                            <AddToCollectionButton edition={edition} />
+                          </>
+                        )
                       }
                     />
                   ))}

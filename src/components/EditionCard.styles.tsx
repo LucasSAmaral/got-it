@@ -56,6 +56,20 @@ export const CornerAction = styled(Box)(({ theme }) => ({
 /** Espaço à direita do título quando há `CornerAction`: o botão pequeno (30 px) mais um respiro. */
 export const CORNER_ACTION_SPACE = 4.5
 
+/**
+ * Linha de botões embaixo do cartão, na largura toda (ex.: "Quero esse" e "Adicionar à coleção" na série),
+ * quando os botões têm texto longo demais para a coluna da direita. O cartão quebra a linha (`flexWrap`).
+ */
+export const CardFooter = styled(Box)(({ theme }) => ({
+  flexBasis: '100%',
+  display: 'flex',
+  flexWrap: 'wrap',
+  justifyContent: 'space-between',
+  gap: theme.spacing(1),
+  paddingTop: theme.spacing(1),
+  borderTop: `1px solid ${theme.palette.divider}`,
+}))
+
 /** ISBN à esquerda e o selo (se houver) à direita, na mesma linha, no canto de baixo do cartão. */
 export const BadgeRow = styled(Box)(({ theme }) => ({
   display: 'flex',

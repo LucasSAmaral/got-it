@@ -7,10 +7,7 @@ import { EditionGrid } from '../../components/EditionGrid'
  */
 export const SlotGrid = styled(EditionGrid)({ rowGap: 0 })
 
-/**
- * Coluna da direita do cartão: o selo no alto e, quando você não tem a edição, o "Adicionar" embaixo, na
- * altura do ISBN. Estica até a altura do cartão para os dois ficarem nas pontas.
- */
+/** Coluna da direita do cartão, com o selo no alto. Estica até a altura do cartão. */
 export const CardActions = styled(Stack)({
   alignSelf: 'stretch',
   alignItems: 'flex-end',

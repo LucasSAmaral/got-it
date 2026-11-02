@@ -1,75 +1,22 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
-import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
-import { Alert, Box, Button, FormControlLabel, IconButton, Link, Stack, Switch, Typography } from '@mui/material'
+import { Alert, Box, FormControlLabel, IconButton, Stack, Switch } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Fragment, useState } from 'react'
-import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
-import { LargeCover } from '../../components/LargeCover'
+import { useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
-import { formatDate, formatPrice } from '../../lib/format'
-import { seriesPosition } from '../../lib/series'
-import { tokens } from '../../theme'
-import { fetchCopyDetail, updateCopyRead, type CopyDetail } from './api'
 import { NarrationTitle } from '../../components/NarrationTitle'
-import { DetailList, SectionCard } from './CopyDetailPage.styles'
+import { formatDate, formatPrice } from '../../lib/format'
+import { fetchCopyDetail, updateCopyRead } from './api'
+import { SectionCard } from './DetailPage.styles'
 import { EditCopyDialog } from './EditCopyDialog'
-import { ReportEditionDialog } from '../moderation/ReportEditionDialog'
-
-/** `to`: o valor vira link (ex.: a série abre a página dela). */
-type Detail = { label: string; value: string | null; mono?: boolean; to?: string }
-
-function Details({ items }: { items: Detail[] }) {
-  return (
-    <DetailList component="dl">
-      {items.map((item) => (
-        <Fragment key={item.label}>
-          <Typography component="dt" variant="body2" color="text.secondary">
-            {item.label}
-          </Typography>
-          <Typography
-            component="dd"
-            variant="body2"
-            sx={{ fontWeight: 600, fontFamily: item.mono && item.value ? tokens.font.mono : undefined }}
-          >
-            {item.value && item.to ? (
-              <Link component={RouterLink} to={item.to}>
-                {item.value}
-              </Link>
-            ) : (
-              (item.value ?? '—')
-            )}
-          </Typography>
-        </Fragment>
-      ))}
-    </DetailList>
-  )
-}
-
-/** "Homem-Aranha 2099 · nº 1"; o nº vem do "Nº na série" ou, sem ele, do volume. */
-function seriesLabel(edition: CopyDetail['edition']): string | null {
-  if (!edition.work) return null
-  const position = seriesPosition(edition)
-  return position === null ? edition.work.title : `${edition.work.title} · nº ${position}`
-}
-
-/** Aviso embaixo da capa vazia sobre a capa que a pessoa enviou: na fila, ou recusada. */
-function coverReviewNote(submissions: CopyDetail['edition']['cover_submissions']): string | null {
-  if (submissions.some((submission) => submission.status === 'pending')) {
-    return 'Capa enviada, em análise. Aparece aqui depois de revisada.'
-  }
-  if (submissions.some((submission) => submission.status === 'rejected')) {
-    return 'A capa que você enviou não foi aprovada.'
-  }
-  return null
-}
+import { Details, EditionOverview } from './EditionOverview'
 
 /** Detalhe de um exemplar da coleção: capa grande no topo e, abaixo, os dados da edição e do exemplar. */
 export function CopyDetailPage() {
   const { copyId } = useParams<{ copyId: string }>()
   const navigate = useNavigate()
   const [editing, setEditing] = useState(false)
-  const [reporting, setReporting] = useState(false)
   const queryClient = useQueryClient()
 
   const offline = !navigator.onLine
@@ -110,48 +57,9 @@ export function CopyDetailPage() {
 
       {data && (
         <>
-          <LargeCover coverUrl={data.edition.cover_url} title={data.edition.title} />
-          {!data.edition.cover_url && coverReviewNote(data.edition.cover_submissions) && (
-            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 1 }}>
-              {coverReviewNote(data.edition.cover_submissions)}
-            </Typography>
-          )}
+          <EditionOverview edition={data.edition} />
 
-          <Stack spacing={0.5} sx={{ mt: 3 }}>
-            <Typography variant="h2">{data.edition.title}</Typography>
-            <Typography variant="body1" color="text.secondary">
-              {[data.edition.publisher, data.edition.volume].filter(Boolean).join(' · ') || 'Editora não informada'}
-            </Typography>
-          </Stack>
-
-          <Stack spacing={2} sx={{ mt: 3 }}>
-            <SectionCard variant="outlined">
-              <NarrationTitle sx={{ mb: 1.5 }}>Edição</NarrationTitle>
-              <Details
-                items={[
-                  {
-                    label: 'Série',
-                    value: seriesLabel(data.edition),
-                    to: data.edition.work_id ? `/serie/${data.edition.work_id}` : undefined,
-                  },
-                  { label: 'Editora', value: data.edition.publisher },
-                  { label: 'Volume / nº', value: data.edition.volume },
-                  { label: 'Formato', value: data.edition.format },
-                  { label: 'Ano', value: data.edition.year ? String(data.edition.year) : null },
-                  { label: 'ISBN', value: data.edition.isbn13, mono: true },
-                ]}
-              />
-              {/* O catálogo é compartilhado: capa ou dado errado de outra pessoa vai para a revisão do admin. */}
-              <Button
-                size="small"
-                color="inherit"
-                startIcon={<FlagOutlinedIcon fontSize="small" />}
-                onClick={() => setReporting(true)}
-                sx={{ mt: 1.5, color: 'text.secondary' }}
-              >
-                Denunciar capa ou dado errado
-              </Button>
-            </SectionCard>
+          <Stack spacing={2} sx={{ mt: 2 }}>
             <SectionCard variant="outlined">
               <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <NarrationTitle sx={{ mb: 1.5 }}>Seu exemplar</NarrationTitle>
@@ -192,13 +100,6 @@ export function CopyDetailPage() {
           </Stack>
 
           {editing && <EditCopyDialog copy={data} onClose={() => setEditing(false)} />}
-          {reporting && (
-            <ReportEditionDialog
-              editionId={data.edition.id}
-              title={data.edition.title}
-              onClose={() => setReporting(false)}
-            />
-          )}
         </>
       )}
     </Box>

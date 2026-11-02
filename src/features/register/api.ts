@@ -118,9 +118,11 @@ export async function fetchMyCopyCount(editionId: string): Promise<number> {
   return count ?? 0
 }
 
-export async function addCopyToExistingEdition(editionId: string, form: CopyFormInput) {
-  const { error } = await supabase.from('copies').insert(toCopyRow(editionId, form))
+/** Cria o exemplar e devolve o id dele (a página da edição abre o exemplar recém-criado). */
+export async function addCopyToExistingEdition(editionId: string, form: CopyFormInput): Promise<string> {
+  const { data, error } = await supabase.from('copies').insert(toCopyRow(editionId, form)).select('id').single()
   if (error) throw error
+  return data.id as string
 }
 
 /**
@@ -188,7 +190,7 @@ export async function createEditionAndCopy(
   coverFile: File | null,
   form: CopyFormInput,
 ) {
-  await addCopyToExistingEdition(await createEditionWithCover(edition, coverFile), form)
+  return addCopyToExistingEdition(await createEditionWithCover(edition, coverFile), form)
 }
 
 /** Editora de cada edição do catálogo (com repetição), para ordenar as sugestões pelo uso. */

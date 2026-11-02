@@ -7,6 +7,7 @@ import { StoreArrivalsPage } from './features/admin/StoreArrivalsPage'
 import { CheckPage } from './features/check/CheckPage'
 import { CollectionPage } from './features/collection/CollectionPage'
 import { CopyDetailPage } from './features/copy/CopyDetailPage'
+import { EditionDetailPage } from './features/copy/EditionDetailPage'
 import { LoginPage } from './features/auth/LoginPage'
 import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { SignUpPage } from './features/auth/SignUpPage'
@@ -14,6 +15,8 @@ import { RegisterByIsbnPage } from './features/register/RegisterByIsbnPage'
 import { SeriesListPage } from './features/series/SeriesListPage'
 import { SeriesPage } from './features/series/SeriesPage'
 import { HomePage } from './features/home/HomePage'
+import { AddWishPage } from './features/wishlist/AddWishPage'
+import { WishlistPage } from './features/wishlist/WishlistPage'
 import { StorePage } from './features/store/StorePage'
 import { AppLayout } from './layout/AppLayout'
 import { PublicLayout } from './layout/PublicLayout'
@@ -34,7 +37,9 @@ export function App() {
         <Route element={<AppLayout />}>
           <Route path="colecao" element={<CollectionPage />} />
           <Route path="eu-tenho" element={<CheckPage />} />
+          <Route path="desejos" element={<WishlistPage />} />
           <Route path="exemplar/:copyId" element={<CopyDetailPage />} />
+          <Route path="edicao/:editionId" element={<EditionDetailPage />} />
           <Route path="series" element={<SeriesListPage />} />
           <Route path="serie/:workId" element={<SeriesPage />} />
           <Route path="admin" element={<AdminEditionsPage />} />
@@ -42,6 +47,7 @@ export function App() {
           <Route path="admin/revisao" element={<ModerationPage />} />
         </Route>
         <Route path="cadastro" element={<RegisterByIsbnPage />} />
+        <Route path="desejos/adicionar" element={<AddWishPage />} />
       </Route>
     </Routes>
   )

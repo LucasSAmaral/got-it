@@ -7,6 +7,7 @@ import { CoverThumb } from './CoverThumb'
 import {
   BadgeRow,
   CardBody,
+  CardFooter,
   CardFrame,
   CardLink,
   ClampedTitle,
@@ -31,10 +32,21 @@ type EditionCardProps = {
   detail?: ReactNode
   /** Selo no canto de baixo, na linha do ISBN (ex.: "Lido" na coleção), sem tirar largura do título nem da editora. */
   badge?: ReactNode
+  /** Botões numa linha embaixo do cartão, na largura toda (ex.: "Quero esse" e "Adicionar à coleção" na série). */
+  footer?: ReactNode
 }
 
 /** Cartão de uma edição: capa, título, editora · volume e ISBN. Usado na coleção, no painel de admin e nas chegadas da loja. */
-export function EditionCard({ edition, action, actionPlacement = 'column', to, onClick, detail, badge }: EditionCardProps) {
+export function EditionCard({
+  edition,
+  action,
+  actionPlacement = 'column',
+  to,
+  onClick,
+  detail,
+  badge,
+  footer,
+}: EditionCardProps) {
   const corner = actionPlacement === 'corner' && !!action
   const content = (
     <>
@@ -66,7 +78,7 @@ export function EditionCard({ edition, action, actionPlacement = 'column', to, o
   )
 
   return (
-    <CardFrame variant="outlined">
+    <CardFrame variant="outlined" sx={footer ? { flexWrap: 'wrap' } : undefined}>
       {to ? (
         <CardLink component={Link} to={to}>
           {content}
@@ -78,6 +90,7 @@ export function EditionCard({ edition, action, actionPlacement = 'column', to, o
       )}
 
       {corner ? <CornerAction>{action}</CornerAction> : action}
+      {footer && <CardFooter>{footer}</CardFooter>}
     </CardFrame>
   )
 }

@@ -35,11 +35,11 @@ export function PrivacyPage() {
       <Stack spacing={1}>
         <Typography variant="h2">Privacidade</Typography>
         <Typography variant="body2" color="text.secondary">
-          Atualizada em 29/10/2026
+          Atualizada em 02/11/2026
         </Typography>
       </Stack>
 
-      {deleted && <Alert severity="success">Sua conta e sua coleção foram apagadas.</Alert>}
+      {deleted && <Alert severity="success">Sua conta, sua coleção e sua lista de desejos foram apagadas.</Alert>}
 
       <Typography>
         O Tem esse? é um projeto independente, mantido por uma pessoa,{' '}
@@ -56,6 +56,7 @@ export function PrivacyPage() {
           <li>Seu e-mail, para entrar e receber os códigos de acesso.</li>
           <li>Sua senha, guardada de forma cifrada: nem nós conseguimos lê-la.</li>
           <li>Sua coleção: os exemplares que você cadastra, com condição, data e preço pago, se informados.</li>
+          <li>Sua lista de desejos: as edições que você quer comprar.</li>
           <li>
             O que você acrescenta ao catálogo compartilhado (edições, séries e capas). Isso fica visível para
             todos os usuários, sem o seu nome.
@@ -65,7 +66,7 @@ export function PrivacyPage() {
 
       <Section title="Quem vê">
         <Typography>
-          Sua coleção só aparece para você. O responsável pelo app tem acesso técnico ao banco de dados para
+          Sua coleção e sua lista de desejos só aparecem para você. O responsável pelo app tem acesso técnico ao banco de dados para
           mantê-lo funcionando e não usa os dados para outro fim.
         </Typography>
         <Typography>
@@ -81,8 +82,8 @@ export function PrivacyPage() {
           guardar dados fora do Brasil.
         </Typography>
         <Typography>
-          Neste aparelho, o app guarda sua sessão e uma cópia da coleção para consultar sem internet. As duas são
-          apagadas quando você sai.
+          Neste aparelho, o app guarda sua sessão e uma cópia da coleção e da lista de desejos para consultar sem
+          internet. Tudo isso é apagado quando você sai.
         </Typography>
       </Section>
 
@@ -97,7 +98,7 @@ export function PrivacyPage() {
       {session && (
         <Section title="Apagar sua conta">
           <Typography>
-            Apaga a conta e a coleção, em todos os aparelhos. Não tem volta. O que você acrescentou ao catálogo
+            Apaga a conta, a coleção e a lista de desejos, em todos os aparelhos. Não tem volta. O que você acrescentou ao catálogo
             continua lá, sem o seu nome.
           </Typography>
           <Box>
