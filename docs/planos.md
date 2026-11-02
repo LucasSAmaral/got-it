@@ -51,7 +51,7 @@ Ideia do tester (2026-11-02): avaliar os gibis com estrelas, para alguém **deci
 
 Ideia do Lucas (2026-11-02): sinopse no detalhe da edição e do exemplar, para ajudar o indeciso junto com a nota.
 
-- **Agora, sem custo:** campo `editions.synopsis` com a origem (`manual` ou `ia`), opcional no cadastro, editável no admin, coberto pela denúncia de dado errado.
+- **Agora, sem custo (feito em 2026-11-02, falta subir):** campo `editions.synopsis` com a origem (`manual` ou `ia`), opcional no cadastro, editável no admin, coberto pela denúncia de dado errado. Em aberto: deixar qualquer usuário sugerir sinopse para uma edição existente que não tem (passaria por fila, como as capas).
 - **Depois, com IA (quando as doações cobrirem):** Edge Function do Supabase (a chave da API não pode ir para o front) que, ao salvar uma edição sem sinopse, busca na web (Claude com `web_search`) e escreve um resumo curto em pt-BR, com as próprias palavras (sinopse da editora tem direito autoral), sem spoiler, e "não encontrei" quando as fontes não batem com título e volume (edição brasileira é pouco indexada: risco de inventar ou trocar o volume). Selo "Sinopse gerada por IA" + denúncia; guardar as fontes para o admin conferir; uma vez por edição (catálogo compartilhado) e limite por pessoa por dia. Estimativa: US$ 0,10 a 0,20 por sinopse com Claude Opus 5.5 (Sonnet 5.5 custa metade); medir nas primeiras. Precisa de conta na API da Anthropic com limite de gasto e a Anthropic citada na privacidade. Botão no admin para gerar em lote no catálogo existente.
 
 ## Doações (ideia, não decidido)

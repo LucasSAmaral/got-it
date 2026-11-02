@@ -62,7 +62,7 @@ function coverReviewNote(submissions: EditionInfo['cover_submissions']): string 
 
 /**
  * O que o detalhe do exemplar e o da edição têm em comum: capa grande, título, editora · volume e o quadro
- * "Edição" (com a denúncia) e a "Avaliação". Cada página põe embaixo o próprio quadro ("Seu exemplar" ou "Na sua coleção").
+ * "Sinopse" (se tiver), "Edição" (com a denúncia) e a "Avaliação". Cada página põe embaixo o próprio quadro ("Seu exemplar" ou "Na sua coleção").
  */
 export function EditionOverview({ edition }: { edition: EditionInfo }) {
   const [reporting, setReporting] = useState(false)
@@ -84,7 +84,23 @@ export function EditionOverview({ edition }: { edition: EditionInfo }) {
         </Typography>
       </Stack>
 
-      <SectionCard variant="outlined" sx={{ mt: 3 }}>
+      {/* Logo embaixo do título: junto com a nota, é o que ajuda a decidir. Sem sinopse, o quadro não aparece. */}
+      {edition.synopsis && (
+        <SectionCard variant="outlined" sx={{ mt: 3 }}>
+          <NarrationTitle sx={{ mb: 1.5 }}>Sinopse</NarrationTitle>
+          {/* pre-line: mantém os parágrafos de quem escreveu. */}
+          <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+            {edition.synopsis}
+          </Typography>
+          {edition.synopsis_source === 'ia' && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+              Sinopse gerada por IA; pode conter erros.
+            </Typography>
+          )}
+        </SectionCard>
+      )}
+
+      <SectionCard variant="outlined" sx={{ mt: edition.synopsis ? 2 : 3 }}>
         <NarrationTitle sx={{ mb: 1.5 }}>Edição</NarrationTitle>
         <Details
           items={[

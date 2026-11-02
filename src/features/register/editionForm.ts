@@ -12,6 +12,7 @@ export const EMPTY_EDITION_FORM: NewEditionForm = {
   year: '',
   series: '',
   seriesPosition: '',
+  synopsis: '',
 }
 
 /** O formulário de edição nova deixa salvar: título preenchido e nº na série vazio ou inteiro. */

@@ -18,6 +18,10 @@ Três níveis: **Obra** (a história), **Edição** (a versão física publicada
 
 **Lista de desejos** (`20261102000000_wishes.sql`): `wishes` (`user_id`, `edition_id`, `created_at`), única por pessoa e edição (ao contrário de `copies`, a mesma edição duas vezes não faz sentido). RLS como `copies`, só do dono, mas sem política de update: um desejo só entra ou sai. `on delete cascade` para `auth.users` (apagar a conta leva junto) e para `editions`. O gatilho `copies_remove_wish` (função `remove_wish_on_copy`, security invoker) apaga o desejo da mesma edição quando a pessoa insere um exemplar, em qualquer tela. Aplicada antes do app que a usa (o app anterior não toca nela).
 
+## Sinopse
+
+**Sinopse** (`20261102020000_synopsis.sql`): `editions.synopsis` (1 a 1500 caracteres) e `editions.synopsis_source` (`manual` ou `ia`); o check `editions_synopsis_has_source` obriga as duas a andarem juntas (com sinopse sempre há origem; sem, nenhuma). Nome escolhido para não colidir com `editions_synopsis_source_check`, que o Postgres dá sozinho ao check da coluna. Sem política nova: escreve quem já podia mudar a edição (quem criou enquanto não verificada, e o admin). `search_editions` passa a devolver `synopsis` (drop + create, mesma lógica). Hoje só existe `manual`; `ia` fica para a sinopse por IA (ver `docs/planos.md`). Aplicada antes do app que a usa.
+
 ## Notas por estrela
 
 **Notas** (`20261102010000_ratings.sql`): `ratings` (`user_id`, `edition_id`, `stars` 1 a 5, `created_at`, `updated_at`), chave primária `(user_id, edition_id)`: uma nota por pessoa e edição, mudar é update. RLS só do dono (ver, inserir, atualizar, apagar); `on delete cascade` para `auth.users` e `editions`. O gatilho `ratings_touch_and_mark_read` (security invoker) carimba `updated_at` e marca como lido o exemplar da mesma edição, se houver. As médias vêm de duas funções **security definer** (a RLS esconde as notas dos outros; elas devolvem só agregado, nunca quem deu qual nota), só para `authenticated`: `edition_rating_stats(p_edition_ids uuid[])` (média com uma casa e contagem por edição pedida; edição sem nota não aparece) e `series_rating_stats()` (todas as séries com nota; média de todas as notas das edições da série juntas, não a média das médias). O Supabase lista as duas em "Signed-In Users Can Execute SECURITY DEFINER Function", como `cover_contributors` e `delete_my_account`: é intencional. Aplicada antes do app que a usa.
@@ -28,7 +32,7 @@ Três níveis: **Obra** (a história), **Edição** (a versão física publicada
 
 ## Busca
 
-`search_my_collection(q text)`: busca nos exemplares do usuário por prefixo de ISBN ou `word_similarity > 0.25` (pg_trgm) em título e editora, ISBN exato primeiro. Compara com `>` explícito porque o role do pooler do Supabase não pode alterar `pg_trgm.word_similarity_threshold`. `search_editions(q text)` é a mesma lógica sobre o catálogo inteiro (sem join com `copies` nem filtro por usuário), usada só no painel de admin.
+`search_my_collection(q text)`: busca nos exemplares do usuário por prefixo de ISBN ou `word_similarity > 0.25` (pg_trgm) em título e editora, ISBN exato primeiro. Compara com `>` explícito porque o role do pooler do Supabase não pode alterar `pg_trgm.word_similarity_threshold`. `search_editions(q text)` é a mesma lógica sobre o catálogo inteiro (sem join com `copies` nem filtro por usuário), usada só no painel de admin (devolve também a série e a sinopse, para o diálogo de edição).
 
 ## Moderação
 
@@ -41,4 +45,4 @@ Storage: bucket público `covers` (leitura pública, envio só de quem é de con
 ## Migrações com ordem em relação ao deploy
 
 - Aplique a de limites do bucket (`cover_limits`) só depois de publicar o app que reduz a imagem.
-- A de séries (`20261005000000_series.sql`) é o contrário: aplique **antes** de publicar o app que a usa (o detalhe e o admin pedem colunas e funções que só existem depois dela).
+- A de séries (`20261005000000_series.sql`) é o contrário: aplique **antes** de publicar o app que a usa (o detalhe e o admin pedem colunas e funções que só existem depois dela). O mesmo vale para a de notas (`ratings`) e a de sinopse (`synopsis`): o detalhe pede `synopsis` em toda edição.

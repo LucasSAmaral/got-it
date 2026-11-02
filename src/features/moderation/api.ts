@@ -7,7 +7,7 @@ export type ReportReason = 'capa' | 'dados' | 'outro'
 
 export const REPORT_REASONS: { value: ReportReason; label: string }[] = [
   { value: 'capa', label: 'Capa imprópria ou errada' },
-  { value: 'dados', label: 'Título, editora ou outro dado errado' },
+  { value: 'dados', label: 'Título, editora, sinopse ou outro dado errado' },
   { value: 'outro', label: 'Outro motivo' },
 ]
 

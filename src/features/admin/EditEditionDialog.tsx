@@ -20,6 +20,7 @@ import { removeCoverImage, uploadCoverImage } from '../register/api'
 import { FORMATS } from '../register/constants'
 import { PublisherField } from '../register/PublisherField'
 import { SeriesFields } from '../register/SeriesFields'
+import { SynopsisField } from '../register/SynopsisField'
 import { CoverPreview, FieldRow } from '../register/RegisterByIsbnPage.styles'
 import { updateEdition, type EditionFormInput, type EditionSummary } from './api'
 
@@ -31,6 +32,7 @@ const EMPTY_FORM: EditionFormInput = {
   year: '',
   series: '',
   seriesPosition: '',
+  synopsis: '',
 }
 
 function formFromEdition(edition: EditionSummary): EditionFormInput {
@@ -42,6 +44,7 @@ function formFromEdition(edition: EditionSummary): EditionFormInput {
     year: edition.year ? String(edition.year) : '',
     series: edition.series_title ?? '',
     seriesPosition: edition.series_position ? String(edition.series_position) : '',
+    synopsis: edition.synopsis ?? '',
   }
 }
 
@@ -53,7 +56,7 @@ type EditEditionDialogProps = {
   onSaved?: () => void
 }
 
-/** Edita título, editora, volume, formato, ano e capa de uma edição já existente no catálogo. */
+/** Edita título, editora, volume, formato, ano, sinopse e capa de uma edição já existente no catálogo. */
 export function EditEditionDialog({ edition, onClose, onSaved }: EditEditionDialogProps) {
   const queryClient = useQueryClient()
   const [form, setForm] = useState<EditionFormInput>(EMPTY_FORM)
@@ -88,7 +91,7 @@ export function EditEditionDialog({ edition, onClose, onSaved }: EditEditionDial
     setError('')
     try {
       const coverUrl = coverFile ? await uploadCoverImage(coverFile, edition.isbn13 ?? edition.id) : null
-      await updateEdition(edition.id, form, coverUrl)
+      await updateEdition(edition.id, form, coverUrl, edition.synopsis)
       // Só depois de a edição apontar para a capa nova: se algo falhou antes, a antiga ainda está em uso.
       // Não apagar não impede a edição de ficar salva; o arquivo só fica sobrando no bucket.
       if (coverUrl) {
@@ -97,6 +100,7 @@ export function EditEditionDialog({ edition, onClose, onSaved }: EditEditionDial
       // A série pode ter sido criada agora: as sugestões e o detalhe dos exemplares precisam vê-la.
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-editions'] }),
+        queryClient.invalidateQueries({ queryKey: ['edition-detail'] }),
         queryClient.invalidateQueries({ queryKey: ['series-titles'] }),
         queryClient.invalidateQueries({ queryKey: ['copy-detail'] }),
       ])
@@ -166,6 +170,8 @@ export function EditEditionDialog({ edition, onClose, onSaved }: EditEditionDial
                 onChange={(event) => setForm({ ...form, year: event.target.value })}
               />
             </FieldRow>
+
+            <SynopsisField value={form.synopsis} onChange={(synopsis) => setForm({ ...form, synopsis })} />
 
             <input
               ref={fileInputRef}

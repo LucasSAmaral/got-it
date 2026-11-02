@@ -14,6 +14,9 @@ export interface Edition {
   year: number | null
   /** Posição na série (`work_id`) quando o volume não serve para ordenar; vazio, vale o volume. */
   series_position: number | null
+  /** Sinopse curta (até 1500 caracteres); `synopsis_source` diz se foi escrita à mão ou gerada por IA. */
+  synopsis: string | null
+  synopsis_source: 'manual' | 'ia' | null
   verified: boolean
   created_by: string | null
   created_at: string

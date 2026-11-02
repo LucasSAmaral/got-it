@@ -5,7 +5,18 @@ import type { Copy, Edition } from '../../types/catalog'
 /** Os dados da edição que o detalhe do exemplar e o da edição mostram. */
 export type EditionInfo = Pick<
   Edition,
-  'id' | 'title' | 'publisher' | 'volume' | 'format' | 'year' | 'isbn13' | 'cover_url' | 'series_position' | 'work_id'
+  | 'id'
+  | 'title'
+  | 'publisher'
+  | 'volume'
+  | 'format'
+  | 'year'
+  | 'isbn13'
+  | 'cover_url'
+  | 'series_position'
+  | 'work_id'
+  | 'synopsis'
+  | 'synopsis_source'
 > & {
   work: { title: string } | null
   /** Capas que esta pessoa enviou para a edição, com a situação na fila (a RLS só mostra as dela). */
@@ -13,7 +24,7 @@ export type EditionInfo = Pick<
 }
 
 const EDITION_INFO_COLUMNS =
-  'id, title, publisher, volume, format, year, isbn13, cover_url, series_position, work_id, work:works(title), cover_submissions(status)'
+  'id, title, publisher, volume, format, year, isbn13, cover_url, series_position, work_id, synopsis, synopsis_source, work:works(title), cover_submissions(status)'
 
 export type CopyDetail = Pick<Copy, 'id' | 'condition' | 'acquired_at' | 'price_paid' | 'read'> & {
   edition: EditionInfo

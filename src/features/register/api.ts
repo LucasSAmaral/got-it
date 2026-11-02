@@ -24,6 +24,14 @@ export interface NewEditionInput {
   /** Nome da série; vazio, a edição fica sem série. */
   series: string
   seriesPosition: string
+  /** Sinopse escrita por quem cadastra; vazia, a edição fica sem. */
+  synopsis: string
+}
+
+/** Colunas da sinopse a partir do formulário: com texto, origem `manual`; vazia, as duas ficam nulas. */
+export function synopsisColumns(synopsis: string) {
+  const text = synopsis.trim()
+  return text ? { synopsis: text, synopsis_source: 'manual' as const } : { synopsis: null, synopsis_source: null }
 }
 
 export async function uploadCoverImage(file: File, isbn13: string): Promise<string> {
@@ -140,6 +148,7 @@ export async function createEdition(edition: NewEditionInput): Promise<string> {
       format: edition.format || null,
       year: edition.year ? Number(edition.year) : null,
       cover_url: edition.coverUrl || null,
+      ...synopsisColumns(edition.synopsis),
       ...(await seriesColumns(edition.series, edition.seriesPosition)),
     })
     .select('id')

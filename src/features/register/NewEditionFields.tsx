@@ -12,6 +12,7 @@ import type { NewEditionForm } from './editionForm'
 import { PublisherField } from './PublisherField'
 import { CoverPreview, FieldLabel, FieldRow } from './RegisterByIsbnPage.styles'
 import { SeriesFields } from './SeriesFields'
+import { SynopsisField } from './SynopsisField'
 
 type NewEditionFieldsProps = {
   value: NewEditionForm
@@ -21,7 +22,7 @@ type NewEditionFieldsProps = {
 }
 
 /**
- * Dados de uma edição que ainda não está no catálogo: título, editora, volume, série, formato, ano e foto
+ * Dados de uma edição que ainda não está no catálogo: título, editora, volume, série, formato, ano, sinopse e foto
  * da capa. Usado no cadastro manual e nas chegadas da loja (admin).
  */
 export function NewEditionFields({ value, onChange, coverFile, onCoverFileChange }: NewEditionFieldsProps) {
@@ -96,6 +97,8 @@ export function NewEditionFields({ value, onChange, coverFile, onCoverFileChange
           onChange={(event) => onChange({ ...value, year: event.target.value })}
         />
       </FieldRow>
+
+      <SynopsisField value={value.synopsis} onChange={(synopsis) => onChange({ ...value, synopsis })} />
 
       <Stack spacing={0.75}>
         <FieldLabel variant="caption">Foto da capa (opcional)</FieldLabel>

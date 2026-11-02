@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabase'
-import { seriesColumns } from '../register/api'
+import { seriesColumns, synopsisColumns } from '../register/api'
 import type { Edition } from '../../types/catalog'
 
 export type EditionSummary = Pick<
@@ -16,6 +16,7 @@ export type EditionSummary = Pick<
   | 'created_at'
   | 'work_id'
   | 'series_position'
+  | 'synopsis'
 > & { series_title: string | null }
 
 /** Busca no catálogo inteiro (não só na coleção do usuário). Vazio devolve tudo, mais recente primeiro. */
@@ -33,9 +34,20 @@ export interface EditionFormInput {
   year: string
   series: string
   seriesPosition: string
+  synopsis: string
 }
 
-export async function updateEdition(id: string, form: EditionFormInput, coverUrl: string | null): Promise<void> {
+/**
+ * Salva a edição pelo painel de admin. `currentSynopsis` é a sinopse de antes: só grava a sinopse (e a
+ * origem `manual`) se o texto mudou, para salvar outra coisa (ex.: trocar a capa) não tirar o "gerada por
+ * IA" de uma sinopse que o admin nem mexeu.
+ */
+export async function updateEdition(
+  id: string,
+  form: EditionFormInput,
+  coverUrl: string | null,
+  currentSynopsis: string | null,
+): Promise<void> {
   const { error } = await supabase
     .from('editions')
     .update({
@@ -45,6 +57,7 @@ export async function updateEdition(id: string, form: EditionFormInput, coverUrl
       format: form.format || null,
       year: form.year ? Number(form.year) : null,
       ...(coverUrl ? { cover_url: coverUrl } : {}),
+      ...(form.synopsis.trim() !== (currentSynopsis ?? '') ? synopsisColumns(form.synopsis) : {}),
       ...(await seriesColumns(form.series, form.seriesPosition)),
     })
     .eq('id', id)
