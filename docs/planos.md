@@ -27,7 +27,7 @@ Decidida em 2026-10-14. A Lazarus é a loja de quadrinhos perto do Lucas e não 
 - **Armadilhas já vistas:** `src/lib/supabase.ts` recusa pedidos a `/rest` sem sessão (proteção da cópia offline); a página pública precisa de exceção delimitada sem desfazer essa proteção. O fluxo de cadastro (`src/features/register`) cria edição **e** exemplar; a chegada precisa de um caminho que crie a edição quando falta no catálogo sem pôr um exemplar na coleção do Lucas. A prévia do link no WhatsApp/Instagram será a genérica do app (SPA no Netlify não tem meta tags por página); aceitável no começo. Com o link divulgado, o app fica exposto ao público: os cadastros foram abertos de propósito em 2026-10-29 (criar conta pelo app), com capas pela fila do admin e denúncia para texto (ver "Moderação" em `docs/funcionalidades.md`).
 - **Depois:** na página da série e no "o que falta", "chegou na Lazarus em dd/mm". O que o app pode oferecer à loja é informação de demanda (quem segue a série e não tem o número); possível troca: desconto para usuários do Tem esse? ou quadrinhos como pagamento.
 
-## Lista de desejos (próxima funcionalidade)
+## Lista de desejos (entregue na v1.1.0)
 
 Ideia de um tester (2026-11-02): na loja, mostrar ao atendente (ou mandar pelo canal da loja) a lista dos gibis que a pessoa quer, para perguntar se tem algum no estoque. Decidido com o Lucas:
 
@@ -36,6 +36,42 @@ Ideia de um tester (2026-11-02): na loja, mostrar ao atendente (ou mandar pelo c
 - **Tabela `wishes`** (`user_id`, `edition_id`, `created_at`), única por pessoa e edição, RLS só do dono, apaga junto com a conta. Ao cadastrar o exemplar, o desejo sai sozinho (gatilho em `copies`). Privada; o texto de `/privacidade` cita a lista.
 - **Primeira entrega (feita em 2026-11-02):** tabela, tela `/desejos` (grade com capa, título, editora, volume e ISBN, lixeira, botão "Adicionar" por ISBN digitado ou escaneado; edição fora do catálogo abre o formulário de edição nova sem criar exemplar), leitura offline pela cópia do IndexedDB e o atalho "Adicionar à lista de desejos" no "Ainda não tem" do "Eu tenho?".
 - **Depois:** "Perguntar à loja" com a lista inteira pelo canal da loja (`reservation.ts`); atalho no diálogo das chegadas (o da página da série, "Quero esse", foi feito em 2026-11-02; `WishToggleButton` serve aqui também); destacar no Início quando chegar numa loja algo da lista; talvez um "modo balcão" (tela limpa e letra grande para entregar o celular ao atendente), se a lista normal não bastar.
+
+## Notas por estrela (entregue na v1.2.0)
+
+Ideia do tester (2026-11-02): avaliar os gibis com estrelas, para alguém **decidir se vale começar uma coleção nova**. Por isso o que importa é a **média da comunidade**, não só a nota pessoal (quem vai começar uma série ainda não leu). Decidido com o Lucas:
+
+- **Nota da edição, não do exemplar:** tabela `ratings` (`user_id`, `edition_id`, `stars` 1 a 5, inteiras), uma por pessoa e edição. Dá para avaliar edição que não tem (lida emprestada), pela página da edição.
+- **Avaliar marca como lido** (se tiver o exemplar); marcar "Lido" não pede nota.
+- **Média sempre visível, com a contagem** ("★ 5,0 · 1 avaliação"), mesmo com poucas avaliações; a contagem diz o quanto confiar. A nota individual só o dono vê; os outros recebem média e contagem por função no banco. Privacidade avisa que a nota entra numa média anônima.
+- **Média da série = todas as avaliações das edições dela juntas** (não a média das médias).
+- **Onde:** listagem de séries (média da série em cada cartão: é onde se decide começar uma coleção), página da série (média no topo, média de cada edição no cartão), detalhe do exemplar e da edição ("Sua nota" para tocar e a média da edição). Na coleção não, por enquanto.
+
+## Sinopse
+
+Ideia do Lucas (2026-11-02): sinopse no detalhe da edição e do exemplar, para ajudar o indeciso junto com a nota.
+
+- **Agora, sem custo:** campo `editions.synopsis` com a origem (`manual` ou `ia`), opcional no cadastro, editável no admin, coberto pela denúncia de dado errado.
+- **Depois, com IA (quando as doações cobrirem):** Edge Function do Supabase (a chave da API não pode ir para o front) que, ao salvar uma edição sem sinopse, busca na web (Claude com `web_search`) e escreve um resumo curto em pt-BR, com as próprias palavras (sinopse da editora tem direito autoral), sem spoiler, e "não encontrei" quando as fontes não batem com título e volume (edição brasileira é pouco indexada: risco de inventar ou trocar o volume). Selo "Sinopse gerada por IA" + denúncia; guardar as fontes para o admin conferir; uma vez por edição (catálogo compartilhado) e limite por pessoa por dia. Estimativa: US$ 0,10 a 0,20 por sinopse com Claude Opus 5.5 (Sonnet 5.5 custa metade); medir nas primeiras. Precisa de conta na API da Anthropic com limite de gasto e a Anthropic citada na privacidade. Botão no admin para gerar em lote no catálogo existente.
+
+## Doações (ideia, não decidido)
+
+O Lucas quer evitar gastos por enquanto (2026-11-02); doações pagariam custos concretos, mostrados com transparência. O que cobririam:
+
+- **Domínio** `temesse.com.br` (registro.br): R$ 40 por ano; pagar vários anos de uma vez sai mais barato (2 anos por R$ 76). Pago até 2027-10.
+- **Sinopses por IA** (ver "Sinopse"): por edição nova, centavos de dólar cada.
+- **E-mail transacional** (Resend com domínio próprio) quando o limite do Gmail (~500 por dia) apertar.
+- **Supabase e Netlify** no plano pago, se o uso passar do gratuito.
+
+**Modelo de referência: Guia dos Quadrinhos** (`apoia.se/guiadosquadrinhos`, visto em 2026-11-02): história do site e por que precisa de dinheiro (anúncios deixavam lento e não pagavam); apoio mensal a partir de R$ 6, cancelável; metas que liberam funcionalidades (3ª de 4: R$ 6.000/mês, 82%, 364 apoiadores); recompensas por faixa (nome na página de agradecimento, sorteios, desconto em lojas parceiras, capa aprovada mais rápido em R$ 50); banner, contador e barra de progresso na página inicial do site.
+
+**Proposta para o Tem esse?** (valores a calibrar):
+- **apoia.se** (pagamento recorrente, página e metas sem construir pagamento no app). Pix direto só serve para avulso e expõe nome/CPF de quem recebe.
+- **Metas:** 1) manter no ar (domínio + margem dos planos grátis); 2) sinopses por IA no catálogo; 3) e-mail próprio (Resend); 4) algo grande do plano (ex.: busca pela foto da capa).
+- **Recompensas:** página de apoiadores no app (nome de quem quiser); desconto na Lazarus e em outras lojas parceiras (dá à loja mais um motivo para divulgar o app).
+- **Evitar:** apoio que compra confiança na moderação (no máximo "sua capa revisada primeiro", nunca "sem revisão"); sorteios (sorteio promocional no Brasil exige autorização do governo).
+- **No app:** cartão "Ajude o Tem esse?" no Início e item no "Mais", com a meta e a barra de progresso atualizada à mão pelo admin (o apoia.se não tem API simples). Aviso na privacidade.
+- **Quando:** com base de usuários e algo concreto para mostrar (ex.: sinopse por IA em algumas edições como demonstração); campanha com "3 apoiadores" passa impressão de projeto vazio. Até lá, página do apoia.se pronta e link discreto no "Mais".
 
 ## Séries
 
