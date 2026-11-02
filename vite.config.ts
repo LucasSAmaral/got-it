@@ -1,9 +1,17 @@
 import react from '@vitejs/plugin-react'
+import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// Versão do app (package.json), mostrada no pé da navegação: com o PWA, quem relata um problema pode estar
+// com a versão anterior aberta. A skill publicar-versao é quem muda o número.
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string }
+
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+  },
   server: {
     // Permite abrir o dev server pelo túnel (npm run tunnel) para testar a câmera no celular.
     allowedHosts: ['.trycloudflare.com'],
