@@ -20,6 +20,7 @@ import { WishlistPage } from './features/wishlist/WishlistPage'
 import { StorePage } from './features/store/StorePage'
 import { AppLayout } from './layout/AppLayout'
 import { PublicLayout } from './layout/PublicLayout'
+import { ChangelogPage } from './features/changelog/ChangelogPage'
 
 export function App() {
   return (
@@ -32,6 +33,7 @@ export function App() {
         <Route index element={<HomePage />} />
         <Route path="loja/:slug" element={<StorePage />} />
         <Route path="privacidade" element={<PrivacyPage />} />
+        <Route path="novidades" element={<ChangelogPage />} />
       </Route>
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>

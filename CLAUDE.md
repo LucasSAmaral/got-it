@@ -55,9 +55,9 @@ Uma linha por área. **Antes de mexer numa área, leia a seção dela em `docs/f
 - **Início:** explica o app para quem não entrou e mostra "Chegou nas lojas" (chegadas dos 30 dias de todas as lojas, agrupadas por edição), com `ArrivalStoresDialog` ao tocar.
 - **Coleção e "Eu tenho?":** busca por título, editora e prefixo de ISBN, sem autor. Dados vêm inteiros (em partes de 1000) e a tela pagina (`md`+) ou mostra mais ao rolar (celular); paginar no servidor quebraria o offline.
 - **Lista de desejos:** `/desejos` ("Desejos" na barra inferior), edições que a pessoa quer comprar, para mostrar na loja; abre offline, adiciona por ISBN/scanner ou pelo "Ainda não tem" do "Eu tenho?", e sai sozinho ao cadastrar o exemplar (gatilho no banco).
-- **Cadastro por ISBN:** edição do catálogo preenche tudo; senão formulário manual que cria edição e exemplar. `PublisherField`, `PriceField` (`parsePrice`) e `SeriesFields` são reaproveitados no admin e na edição do exemplar.
+- **Cadastro por ISBN:** edição do catálogo preenche tudo; senão formulário manual que cria edição e exemplar. `PublisherField`, `PriceField` (`parsePrice`), `SeriesFields` e `SynopsisField` são reaproveitados no admin e na edição do exemplar.
 - **Séries:** série é a história (`works`), não a coleção da editora; posição em `editions.series_position` ou o volume. Página da série (`/serie/:workId`) e listagem (`/series`), uma consulta só `works → editions → copies`.
-- **Detalhe do exemplar e da edição:** `/exemplar/:copyId`, só online; edição do exemplar (`EditCopyDialog`) e switch "Lido" (balão na coleção). `/edicao/:editionId` para a edição que você não tem (cartão "Não tenho" da série), com "Quero esse" e "Adicionar à coleção"; se tem, redireciona para o exemplar.
+- **Detalhe do exemplar e da edição:** `/exemplar/:copyId`, só online; edição do exemplar (`EditCopyDialog`) e switch "Lido" (balão na coleção). `/edicao/:editionId` para a edição que você não tem (cartão "Não tenho" da série), com "Quero esse" e "Adicionar à coleção"; se tem, redireciona para o exemplar. Sinopse (`editions.synopsis`, origem `manual`/`ia`) no topo dos dois, escrita à mão no cadastro de edição nova e no admin (`SynopsisField`).
 - **Notas por estrela:** uma nota de 1 a 5 por pessoa e edição (`ratings`), "Sua nota" no quadro "Avaliação" do detalhe; a média da comunidade, sempre com a contagem, aparece no detalhe, na página da série (série e cada edição) e na listagem de séries. Avaliar marca como lido. Só online.
 - **Painel de admin:** "Editar catálogo", só para o Lucas (`isAdmin`); edita qualquer edição.
 - **Moderação:** capa de quem não é de confiança (`is_trusted()`) vai para a fila `covers-pending`/`cover_submissions`; texto tem denúncia (`edition_reports`). Admin revisa em `/admin/revisao`, inclusive "Colaboradores". O banco garante a regra (gatilho e bucket).
@@ -65,12 +65,12 @@ Uma linha por área. **Antes de mexer numa área, leia a seção dela em `docs/f
 - **Scanner:** EAN-13, câmera traseira, aceita só código lido 2 vezes seguidas; carregado sob demanda.
 - **Capas:** reduzidas no navegador (800 px, JPEG); bucket aceita JPEG até 1 MB.
 - **Offline:** leitura pela cópia do IndexedDB (`mirrorStore`, `localSearch`), ver "Offline" em `docs/funcionalidades.md`.
-- **Páginas públicas:** Início, vitrine e privacidade; `PublicLayout` mostra a navegação completa com sessão e só cabeçalho com "Entrar" sem.
+- **Páginas públicas:** Início, vitrine, privacidade e novidades; `PublicLayout` mostra a navegação completa com sessão e só cabeçalho com "Entrar" sem.
 - **Navegação:** celular com barra inferior (Início, Coleção, Eu tenho?, Desejos, "Mais"); tela larga com barra lateral. Quais itens ficam na barra é o `inBottomBar` de `navItems.tsx`.
 - **Visual de HQ:** o tema dá contorno de nanquim e sombra dura a cartões, diálogos e botões principais (cartão novo não precisa de borda própria); `NarrationTitle` para títulos de seção, `SpeechBalloon` para selos.
 - **Layout:** mobile primeiro; a partir de `md` (900 px) barra lateral e grade. O cadastro fica fora do `AppLayout` de propósito; a tela de escanear é sempre tela cheia.
 - **PWA:** manifest, service worker com `autoUpdate`, publicado no Netlify.
-- **Versão:** `package.json` (semver desde a `v1.0.0`, 2026-11-02), mostrada no `MadeBy` ("Feito por Lucas Amaral · v1.1.0") pelo `__APP_VERSION__` do `vite.config.ts`; sobe pela skill `publicar-versao`.
+- **Versão:** `package.json` (semver desde a `v1.0.0`, 2026-11-02), mostrada no `MadeBy` ("Feito por Lucas Amaral · v1.3.0") pelo `__APP_VERSION__` do `vite.config.ts`; a versão é link para `/novidades` (`ChangelogPage`, pública), que lista `CHANGELOG` de `src/lib/changelog.ts`, em linguagem de quem usa o app. Sobe pela skill `publicar-versao`, que escreve a entrada nova; `changelog.test.ts` falha se a versão do `package.json` não estiver no topo.
 
 ## Estrutura do código
 
@@ -81,6 +81,7 @@ src/
   features/
     admin/         painel de edição do catálogo, registro das chegadas nas lojas e revisão (capas e denúncias), só para o Lucas (admin.ts, api.ts)
     account/       privacidade e apagar conta (PrivacyPage, DeleteAccountDialog, api.ts)
+    changelog/     "Novidades" (ChangelogPage, com o texto de src/lib/changelog.ts)
     auth/          LoginPage, SignUpPage, ResetPasswordPage, VerifyCodeForm (código de 6 dígitos), AuthPage (moldura), LogoutDialog
     check/         "Eu tenho?" (CheckPage, useCheck, NotOwnedResult)
     ratings/       notas por estrela (api.ts, useRatings, RatingSection no detalhe, RatingBadge com a média)

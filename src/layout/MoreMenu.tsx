@@ -53,7 +53,7 @@ export function MoreMenu({ open, onClose, items, active }: MoreMenuProps) {
             <ListItemText primary="Sair" slotProps={{ primary: { sx: { fontWeight: 600 } } }} />
           </ListItemButton>
         </List>
-        <MadeBy sx={{ px: 2, pb: 2 }} />
+        <MadeBy sx={{ px: 2, pb: 2 }} onNavigate={onClose} />
       </Drawer>
       <LogoutDialog open={logoutOpen} onClose={() => setLogoutOpen(false)} />
     </>
