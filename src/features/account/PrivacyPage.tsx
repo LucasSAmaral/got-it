@@ -39,7 +39,7 @@ export function PrivacyPage() {
         </Typography>
       </Stack>
 
-      {deleted && <Alert severity="success">Sua conta, sua coleção e sua lista de desejos foram apagadas.</Alert>}
+      {deleted && <Alert severity="success">Sua conta, sua coleção, sua lista de desejos e suas notas foram apagadas.</Alert>}
 
       <Typography>
         O Tem esse? é um projeto independente, mantido por uma pessoa,{' '}
@@ -57,6 +57,7 @@ export function PrivacyPage() {
           <li>Sua senha, guardada de forma cifrada: nem nós conseguimos lê-la.</li>
           <li>Sua coleção: os exemplares que você cadastra, com condição, data e preço pago, se informados.</li>
           <li>Sua lista de desejos: as edições que você quer comprar.</li>
+          <li>Suas notas (de 1 a 5 estrelas) para as edições que você avaliou.</li>
           <li>
             O que você acrescenta ao catálogo compartilhado (edições, séries e capas). Isso fica visível para
             todos os usuários, sem o seu nome.
@@ -68,6 +69,10 @@ export function PrivacyPage() {
         <Typography>
           Sua coleção e sua lista de desejos só aparecem para você. O responsável pelo app tem acesso técnico ao banco de dados para
           mantê-lo funcionando e não usa os dados para outro fim.
+        </Typography>
+        <Typography>
+          Sua nota entra na média de cada edição e série, que todos os usuários veem junto com o número de
+          avaliações. Ninguém vê quem deu qual nota.
         </Typography>
         <Typography>
           Ao tocar em "Perguntar se ainda tem", a conversa abre no WhatsApp ou no Instagram, direto com a loja. A
@@ -98,7 +103,7 @@ export function PrivacyPage() {
       {session && (
         <Section title="Apagar sua conta">
           <Typography>
-            Apaga a conta, a coleção e a lista de desejos, em todos os aparelhos. Não tem volta. O que você acrescentou ao catálogo
+            Apaga a conta, a coleção, a lista de desejos e as suas notas, em todos os aparelhos. Não tem volta. O que você acrescentou ao catálogo
             continua lá, sem o seu nome.
           </Typography>
           <Box>

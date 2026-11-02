@@ -78,3 +78,24 @@ export function parsePrice(text: string): number | null {
 export function isPriceInputValid(text: string): boolean {
   return text.trim() === '' || parsePrice(text) !== null
 }
+
+/** Média e contagem de notas de uma edição ou série (funções `edition_rating_stats` e `series_rating_stats`). */
+export interface RatingStats {
+  average: number
+  ratings: number
+}
+
+/** Média com uma casa e vírgula: 4.33 → "4,3", 5 → "5,0". */
+export function formatRatingAverage(average: number): string {
+  return average.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+}
+
+/** "4,3 · 18 avaliações" (detalhe, topo da série, listagem de séries); a estrela fica com a tela. */
+export function ratingSummary({ average, ratings }: RatingStats): string {
+  return `${formatRatingAverage(average)} · ${ratings} ${ratings === 1 ? 'avaliação' : 'avaliações'}`
+}
+
+/** "4,5 (6)", curto, para o cartão de uma edição na página da série. */
+export function ratingShort({ average, ratings }: RatingStats): string {
+  return `${formatRatingAverage(average)} (${ratings})`
+}

@@ -2,11 +2,14 @@ import { describe, expect, it } from 'vitest'
 import {
   formatArrival,
   formatDate,
+  formatRatingAverage,
   formatTimestampDate,
   formatPrice,
   isoDateDaysBefore,
   isPriceInputValid,
   parsePrice,
+  ratingShort,
+  ratingSummary,
   titleInitials,
   toIsoDate,
 } from './format'
@@ -112,5 +115,29 @@ describe('formatArrival', () => {
   it('mostra dia e mês da chegada, e o preço quando há', () => {
     expect(formatArrival('2026-10-05', null)).toBe('Chegou em 05/10')
     expect(formatArrival('2026-10-05', 39.9)).toMatch(/^Chegou em 05\/10 · R\$\s39,90$/)
+  })
+})
+
+describe('formatRatingAverage', () => {
+  it('usa uma casa e vírgula', () => {
+    expect(formatRatingAverage(4.3)).toBe('4,3')
+    expect(formatRatingAverage(5)).toBe('5,0')
+    expect(formatRatingAverage(3.25)).toBe('3,3')
+  })
+})
+
+describe('ratingSummary', () => {
+  it('singular com uma avaliação', () => {
+    expect(ratingSummary({ average: 5, ratings: 1 })).toBe('5,0 · 1 avaliação')
+  })
+
+  it('plural com mais de uma', () => {
+    expect(ratingSummary({ average: 4.3, ratings: 18 })).toBe('4,3 · 18 avaliações')
+  })
+})
+
+describe('ratingShort', () => {
+  it('média e contagem entre parênteses', () => {
+    expect(ratingShort({ average: 4.5, ratings: 6 })).toBe('4,5 (6)')
   })
 })

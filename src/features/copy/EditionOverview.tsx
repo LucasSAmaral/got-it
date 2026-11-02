@@ -7,6 +7,7 @@ import { NarrationTitle } from '../../components/NarrationTitle'
 import { seriesPosition } from '../../lib/series'
 import { tokens } from '../../theme'
 import { ReportEditionDialog } from '../moderation/ReportEditionDialog'
+import { RatingSection } from '../ratings/RatingSection'
 import type { EditionInfo } from './api'
 import { DetailList, SectionCard } from './DetailPage.styles'
 
@@ -61,7 +62,7 @@ function coverReviewNote(submissions: EditionInfo['cover_submissions']): string 
 
 /**
  * O que o detalhe do exemplar e o da edição têm em comum: capa grande, título, editora · volume e o quadro
- * "Edição" (com a denúncia). Cada página põe embaixo o próprio quadro ("Seu exemplar" ou "Na sua coleção").
+ * "Edição" (com a denúncia) e a "Avaliação". Cada página põe embaixo o próprio quadro ("Seu exemplar" ou "Na sua coleção").
  */
 export function EditionOverview({ edition }: { edition: EditionInfo }) {
   const [reporting, setReporting] = useState(false)
@@ -110,6 +111,8 @@ export function EditionOverview({ edition }: { edition: EditionInfo }) {
           Denunciar capa ou dado errado
         </Button>
       </SectionCard>
+
+      <RatingSection editionId={edition.id} />
 
       {reporting && (
         <ReportEditionDialog editionId={edition.id} title={edition.title} onClose={() => setReporting(false)} />

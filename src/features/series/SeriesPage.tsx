@@ -14,6 +14,8 @@ import type { CollectionItem } from '../../types/catalog'
 import { NetworkError } from '../collection/api'
 import { useCollection } from '../collection/useCollection'
 import { fetchSeries, type Series } from './api'
+import { RatingBadge } from '../ratings/RatingBadge'
+import { useEditionRatingStats, useSeriesRatingStats } from '../ratings/useRatings'
 import { WishToggleButton } from '../wishlist/WishToggleButton'
 import { AddToCollectionButton } from './AddToCollectionButton'
 import { CardActions, SlotGrid } from './SeriesPage.styles'
@@ -67,6 +69,9 @@ export function SeriesPage() {
   const loading = fromDevice ? collection.isLoading : seriesQuery.isLoading
   const slots = series ? groupSeries(series.editions.map((edition) => ({ ...edition, owned: edition.myCopyId !== null }))) : []
   const progress = seriesProgress(slots)
+  // Médias da comunidade (só online): da série no topo, de cada edição no cartão. Falhou, só não aparecem.
+  const seriesStats = useSeriesRatingStats()
+  const editionStats = useEditionRatingStats(fromDevice ? [] : (series?.editions.map((edition) => edition.id) ?? []))
 
   return (
     <Box sx={{ px: { xs: 2.5, md: 5 }, py: { xs: 4, md: 5 } }}>
@@ -87,6 +92,11 @@ export function SeriesPage() {
       {series && (
         <>
           <Typography variant="h2">{series.title}</Typography>
+          {!fromDevice && (
+            <Box sx={{ mt: 0.5 }}>
+              <RatingBadge stats={seriesStats.data?.get(workId!)} />
+            </Box>
+          )}
           {fromDevice ? (
             <Alert severity="info" icon={<CloudOffOutlinedIcon fontSize="small" />} sx={{ mt: 2 }}>
               Sem conexão: mostrando só as edições que você tem. As que faltam aparecem quando a internet voltar.
@@ -114,6 +124,7 @@ export function SeriesPage() {
                       // Quem tem abre o exemplar; quem não tem, a edição do catálogo. Sem sinal a edição não abre
                       // (o catálogo não fica no aparelho), mas aí a página só mostra as suas.
                       to={edition.myCopyId ? `/exemplar/${edition.myCopyId}` : `/edicao/${edition.id}`}
+                      badge={<RatingBadge stats={editionStats.data?.get(edition.id)} short variant="caption" />}
                       action={
                         <CardActions>
                           <SpeechBalloon tone={STATUS_CHIP[status].tone}>{STATUS_CHIP[status].label}</SpeechBalloon>

@@ -18,9 +18,13 @@ Três níveis: **Obra** (a história), **Edição** (a versão física publicada
 
 **Lista de desejos** (`20261102000000_wishes.sql`): `wishes` (`user_id`, `edition_id`, `created_at`), única por pessoa e edição (ao contrário de `copies`, a mesma edição duas vezes não faz sentido). RLS como `copies`, só do dono, mas sem política de update: um desejo só entra ou sai. `on delete cascade` para `auth.users` (apagar a conta leva junto) e para `editions`. O gatilho `copies_remove_wish` (função `remove_wish_on_copy`, security invoker) apaga o desejo da mesma edição quando a pessoa insere um exemplar, em qualquer tela. Aplicada antes do app que a usa (o app anterior não toca nela).
 
+## Notas por estrela
+
+**Notas** (`20261102010000_ratings.sql`): `ratings` (`user_id`, `edition_id`, `stars` 1 a 5, `created_at`, `updated_at`), chave primária `(user_id, edition_id)`: uma nota por pessoa e edição, mudar é update. RLS só do dono (ver, inserir, atualizar, apagar); `on delete cascade` para `auth.users` e `editions`. O gatilho `ratings_touch_and_mark_read` (security invoker) carimba `updated_at` e marca como lido o exemplar da mesma edição, se houver. As médias vêm de duas funções **security definer** (a RLS esconde as notas dos outros; elas devolvem só agregado, nunca quem deu qual nota), só para `authenticated`: `edition_rating_stats(p_edition_ids uuid[])` (média com uma casa e contagem por edição pedida; edição sem nota não aparece) e `series_rating_stats()` (todas as séries com nota; média de todas as notas das edições da série juntas, não a média das médias). O Supabase lista as duas em "Signed-In Users Can Execute SECURITY DEFINER Function", como `cover_contributors` e `delete_my_account`: é intencional. Aplicada antes do app que a usa.
+
 ## Apagar conta
 
-**Apagar conta** (`20261029000000_delete_account.sql`): `delete_my_account()` (security definer, só `authenticated`) apaga de `auth.users` a linha de quem chama. Exemplares e desejos vão junto (`on delete cascade`); edições, séries e chegadas ficam no catálogo sem autor (`on delete set null`), e edição sem autor só o admin edita. Antes dessa migração as chaves eram NO ACTION e nem o painel conseguia apagar um usuário com dados.
+**Apagar conta** (`20261029000000_delete_account.sql`): `delete_my_account()` (security definer, só `authenticated`) apaga de `auth.users` a linha de quem chama. Exemplares, desejos e notas vão junto (`on delete cascade`); edições, séries e chegadas ficam no catálogo sem autor (`on delete set null`), e edição sem autor só o admin edita. Antes dessa migração as chaves eram NO ACTION e nem o painel conseguia apagar um usuário com dados.
 
 ## Busca
 

@@ -58,6 +58,7 @@ Uma linha por área. **Antes de mexer numa área, leia a seção dela em `docs/f
 - **Cadastro por ISBN:** edição do catálogo preenche tudo; senão formulário manual que cria edição e exemplar. `PublisherField`, `PriceField` (`parsePrice`) e `SeriesFields` são reaproveitados no admin e na edição do exemplar.
 - **Séries:** série é a história (`works`), não a coleção da editora; posição em `editions.series_position` ou o volume. Página da série (`/serie/:workId`) e listagem (`/series`), uma consulta só `works → editions → copies`.
 - **Detalhe do exemplar e da edição:** `/exemplar/:copyId`, só online; edição do exemplar (`EditCopyDialog`) e switch "Lido" (balão na coleção). `/edicao/:editionId` para a edição que você não tem (cartão "Não tenho" da série), com "Quero esse" e "Adicionar à coleção"; se tem, redireciona para o exemplar.
+- **Notas por estrela:** uma nota de 1 a 5 por pessoa e edição (`ratings`), "Sua nota" no quadro "Avaliação" do detalhe; a média da comunidade, sempre com a contagem, aparece no detalhe, na página da série (série e cada edição) e na listagem de séries. Avaliar marca como lido. Só online.
 - **Painel de admin:** "Editar catálogo", só para o Lucas (`isAdmin`); edita qualquer edição.
 - **Moderação:** capa de quem não é de confiança (`is_trusted()`) vai para a fila `covers-pending`/`cover_submissions`; texto tem denúncia (`edition_reports`). Admin revisa em `/admin/revisao`, inclusive "Colaboradores". O banco garante a regra (gatilho e bucket).
 - **Chegou nas lojas e vitrine:** o Lucas registra as chegadas por loja em `/admin/chegadas` (edição nova entra sem exemplar); vitrine pública `/loja/:slug` com "Perguntar se ainda tem" (WhatsApp ou Instagram, `src/lib/reservation.ts`).
@@ -82,6 +83,7 @@ src/
     account/       privacidade e apagar conta (PrivacyPage, DeleteAccountDialog, api.ts)
     auth/          LoginPage, SignUpPage, ResetPasswordPage, VerifyCodeForm (código de 6 dígitos), AuthPage (moldura), LogoutDialog
     check/         "Eu tenho?" (CheckPage, useCheck, NotOwnedResult)
+    ratings/       notas por estrela (api.ts, useRatings, RatingSection no detalhe, RatingBadge com a média)
     wishlist/      lista de desejos (WishlistPage, WishCard, AddWishPage, useWishlist, api.ts)
     home/          Início (HomePage)
     copy/          detalhe e edição do exemplar (CopyDetailPage, EditCopyDialog), detalhe da edição que você não tem (EditionDetailPage) e a parte comum (EditionOverview, DetailPage.styles.tsx, api.ts)

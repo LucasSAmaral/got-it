@@ -11,6 +11,9 @@ import { useShowMore } from '../../hooks/useShowMore'
 import { seriesSummariesFromCollection, type SeriesSummary } from '../../lib/series'
 import { NetworkError } from '../collection/api'
 import { useCollection } from '../collection/useCollection'
+import type { RatingStats } from '../../lib/format'
+import { RatingBadge } from '../ratings/RatingBadge'
+import { useSeriesRatingStats } from '../ratings/useRatings'
 import { fetchSeriesList } from './api'
 
 function plural(count: number, singular: string, pluralForm: string) {
@@ -29,7 +32,16 @@ function progressLabel(series: SeriesSummary, fromDevice: boolean) {
     : plural(series.editionCount, 'edição sem número', 'edições sem número')
 }
 
-function SeriesCard({ series, fromDevice }: { series: SeriesSummary; fromDevice: boolean }) {
+/** `rating`: média de todas as notas das edições da série, para decidir se vale começar a coleção. */
+function SeriesCard({
+  series,
+  fromDevice,
+  rating,
+}: {
+  series: SeriesSummary
+  fromDevice: boolean
+  rating: RatingStats | undefined
+}) {
   return (
     <CardFrame variant="outlined">
       <CardLink component={Link} to={`/serie/${series.id}`}>
@@ -39,6 +51,7 @@ function SeriesCard({ series, fromDevice }: { series: SeriesSummary; fromDevice:
           <Typography variant="body2" color="text.secondary" noWrap>
             {progressLabel(series, fromDevice)}
           </Typography>
+          <RatingBadge stats={rating} variant="caption" />
         </Stack>
       </CardLink>
     </CardFrame>
@@ -64,6 +77,7 @@ export function SeriesListPage() {
   )
 
   const fromDevice = offline || listQuery.error instanceof NetworkError
+  const ratings = useSeriesRatingStats()
   const all = fromDevice ? fromCollection : listQuery.data
   const loading = fromDevice ? collection.isLoading : listQuery.isLoading
   const shown = onlyFollowing && !fromDevice ? all?.filter((series) => series.following) : all
@@ -105,7 +119,12 @@ export function SeriesListPage() {
 
       <EditionGrid>
         {shown?.slice(0, visibleCount).map((series) => (
-          <SeriesCard key={series.id} series={series} fromDevice={fromDevice} />
+          <SeriesCard
+            key={series.id}
+            series={series}
+            fromDevice={fromDevice}
+            rating={fromDevice ? undefined : ratings.data?.get(series.id)}
+          />
         ))}
       </EditionGrid>
       {hasMore && <Box ref={sentinelRef} />}
