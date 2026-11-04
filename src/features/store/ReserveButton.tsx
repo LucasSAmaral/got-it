@@ -5,8 +5,12 @@ import { useState } from 'react'
 import { instagramUrl, reservationMessage, whatsappUrl } from '../../lib/reservation'
 import type { Store, StoreArrival } from './api'
 
-/** Texto do botão: a vitrine não sabe o que esgotou, então a conversa começa perguntando. */
+/**
+ * A vitrine não sabe o que esgotou, então a conversa começa perguntando. Texto visível curto para caber ao
+ * lado da loja no diálogo; o leitor de tela ouve a frase completa (`LABEL`, no aria-label).
+ */
 const LABEL = 'Perguntar se ainda tem'
+const SHORT_LABEL = 'Ainda tem?'
 
 /**
  * Botão de reserva pelo canal que a loja tiver; nenhum quando ela ainda não informou contato. Usado no
@@ -29,7 +33,7 @@ export function ReserveButton({ store, edition }: { store: Store; edition: Store
         size="small"
         startIcon={<WhatsAppIcon />}
       >
-        {LABEL}
+        {SHORT_LABEL}
       </Button>
     )
   }
@@ -39,17 +43,17 @@ export function ReserveButton({ store, edition }: { store: Store; edition: Store
       <>
         <Button
           component="a"
-          href={instagramUrl(store.instagram)}
+          href={instagramUrl(store.instagram, message)}
           target="_blank"
           rel="noopener"
           aria-label={`${LABEL}, pelo Instagram da ${store.name}`}
           variant="contained"
           size="small"
           startIcon={<InstagramIcon />}
-          // O direct não aceita texto pronto: copia antes de abrir, para a pessoa só colar.
+          // O ?text= do direct não é oficial: copia antes de abrir, para a pessoa colar se o texto não vier.
           onClick={() => navigator.clipboard?.writeText(message).then(() => setCopied(true), () => {})}
         >
-          {LABEL}
+          {SHORT_LABEL}
         </Button>
         <Snackbar
           open={copied}

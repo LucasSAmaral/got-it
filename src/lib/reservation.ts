@@ -22,7 +22,10 @@ export function whatsappUrl(phone: string, message: string): string {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
 }
 
-/** Direct do Instagram. Não aceita texto pronto: a página copia a mensagem antes de abrir. */
-export function instagramUrl(handle: string): string {
-  return `https://ig.me/m/${handle}`
+/**
+ * Direct do Instagram com a mensagem em `?text=`. O parâmetro não é documentado pela Meta: alguns apps
+ * abrem o direct com o texto digitado, outros ignoram. Por isso o botão também copia a mensagem antes.
+ */
+export function instagramUrl(handle: string, message: string): string {
+  return `https://ig.me/m/${handle}?text=${encodeURIComponent(message)}`
 }

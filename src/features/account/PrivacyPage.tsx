@@ -75,7 +75,7 @@ export function PrivacyPage() {
           avaliações. Ninguém vê quem deu qual nota.
         </Typography>
         <Typography>
-          Ao tocar em "Perguntar se ainda tem", a conversa abre no WhatsApp ou no Instagram, direto com a loja. A
+          Ao tocar em "Ainda tem?", a conversa abre no WhatsApp ou no Instagram, direto com a loja. A
           compra é combinada entre você e a loja, fora do app.
         </Typography>
       </Section>

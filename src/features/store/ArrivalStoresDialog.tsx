@@ -2,9 +2,10 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Link as MuiL
 import { Link } from 'react-router-dom'
 import { LargeCover } from '../../components/LargeCover'
 import type { EditionArrivals } from '../../lib/arrivals'
-import { formatArrival } from '../../lib/format'
+import { formatArrival, formatPrice } from '../../lib/format'
 import { tokens } from '../../theme'
 import type { ArrivalWithStore } from './api'
+import { StoreRow } from './ArrivalStoresDialog.styles'
 import { ReserveButton } from './ReserveButton'
 
 type ArrivalStoresDialogProps = {
@@ -40,7 +41,7 @@ export function ArrivalStoresDialog({ group, onClose, linkStores = true }: Arriv
 
             <Stack spacing={2.5} sx={{ mt: 3 }}>
               {group.arrivals.map((arrival) => (
-                <Stack key={arrival.id} spacing={1} sx={{ alignItems: 'flex-start' }}>
+                <StoreRow key={arrival.id}>
                   <div>
                     {linkStores ? (
                       <MuiLink component={Link} to={`/loja/${arrival.store.slug}`} underline="hover" sx={{ fontWeight: 600 }}>
@@ -49,12 +50,18 @@ export function ArrivalStoresDialog({ group, onClose, linkStores = true }: Arriv
                     ) : (
                       <Typography sx={{ fontWeight: 600 }}>{arrival.store.name}</Typography>
                     )}
+                    {/* Data e preço em linhas separadas: o texto fica estreito e o botão cabe ao lado no celular. */}
                     <Typography variant="body2" color="text.secondary">
-                      {formatArrival(arrival.arrived_on, arrival.price)}
+                      {formatArrival(arrival.arrived_on, null)}
                     </Typography>
+                    {arrival.price !== null && (
+                      <Typography variant="body2" color="text.secondary">
+                        {formatPrice(arrival.price)}
+                      </Typography>
+                    )}
                   </div>
                   <ReserveButton store={arrival.store} edition={group.edition} />
-                </Stack>
+                </StoreRow>
               ))}
             </Stack>
           </DialogContent>

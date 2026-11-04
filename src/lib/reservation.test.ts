@@ -24,7 +24,7 @@ describe('whatsappUrl', () => {
 })
 
 describe('instagramUrl', () => {
-  it('abre o direct do perfil', () => {
-    expect(instagramUrl('lazarus.hq')).toBe('https://ig.me/m/lazarus.hq')
+  it('abre o direct do perfil com a mensagem codificada', () => {
+    expect(instagramUrl('lazarus.hq', 'Ainda tem? R$ 39,90')).toBe('https://ig.me/m/lazarus.hq?text=Ainda%20tem%3F%20R%24%2039%2C90')
   })
 })

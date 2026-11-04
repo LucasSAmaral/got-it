@@ -61,7 +61,7 @@ Uma linha por área. **Antes de mexer numa área, leia a seção dela em `docs/f
 - **Notas por estrela:** uma nota de 1 a 5 por pessoa e edição (`ratings`), "Sua nota" no quadro "Avaliação" do detalhe; a média da comunidade, sempre com a contagem, aparece no detalhe, na página da série (série e cada edição) e na listagem de séries. Avaliar marca como lido. Só online.
 - **Painel de admin:** "Editar catálogo", só para o Lucas (`isAdmin`); edita qualquer edição.
 - **Moderação:** capa de quem não é de confiança (`is_trusted()`) vai para a fila `covers-pending`/`cover_submissions`; texto tem denúncia (`edition_reports`). Admin revisa em `/admin/revisao`, inclusive "Colaboradores". O banco garante a regra (gatilho e bucket).
-- **Chegou nas lojas e vitrine:** o Lucas registra as chegadas por loja em `/admin/chegadas` (edição nova entra sem exemplar); vitrine pública `/loja/:slug` com "Perguntar se ainda tem" (WhatsApp ou Instagram, `src/lib/reservation.ts`).
+- **Chegou nas lojas e vitrine:** o Lucas registra as chegadas por loja em `/admin/chegadas` (edição nova entra sem exemplar); vitrine pública `/loja/:slug` com o botão "Ainda tem?" (WhatsApp ou Instagram, `src/lib/reservation.ts`).
 - **Scanner:** EAN-13, câmera traseira, aceita só código lido 2 vezes seguidas; carregado sob demanda.
 - **Capas:** reduzidas no navegador (800 px, JPEG); bucket aceita JPEG até 1 MB.
 - **Offline:** leitura pela cópia do IndexedDB (`mirrorStore`, `localSearch`), ver "Offline" em `docs/funcionalidades.md`.
