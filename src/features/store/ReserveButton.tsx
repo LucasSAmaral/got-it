@@ -43,14 +43,14 @@ export function ReserveButton({ store, edition }: { store: Store; edition: Store
       <>
         <Button
           component="a"
-          href={instagramUrl(store.instagram, message)}
+          href={instagramUrl(store.instagram)}
           target="_blank"
           rel="noopener"
           aria-label={`${LABEL}, pelo Instagram da ${store.name}`}
           variant="contained"
           size="small"
           startIcon={<InstagramIcon />}
-          // O ?text= do direct não é oficial: copia antes de abrir, para a pessoa colar se o texto não vier.
+          // O direct não aceita texto pronto: copia antes de abrir, para a pessoa só colar.
           onClick={() => navigator.clipboard?.writeText(message).then(() => setCopied(true), () => {})}
         >
           {SHORT_LABEL}
