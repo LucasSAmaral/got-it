@@ -15,6 +15,14 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.0',
+    date: '2026-11-04',
+    items: [
+      'Reservar na Lazarus pelo Instagram: no gibi que chegou na loja, o botão "Ainda tem?" abre o direct da Lazarus com a mensagem já escrita. Se o Instagram não trouxer o texto, ele fica copiado: é só colar e enviar.',
+      'O botão "Ainda tem?" agora fica ao lado do nome da loja, com a data de chegada e o preço.',
+    ],
+  },
+  {
     version: '1.3.0',
     date: '2026-11-02',
     items: [
