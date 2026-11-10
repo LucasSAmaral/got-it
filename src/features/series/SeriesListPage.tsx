@@ -1,13 +1,15 @@
 import CloudOffOutlinedIcon from '@mui/icons-material/CloudOffOutlined'
-import { Alert, Box, Chip, Stack, Typography } from '@mui/material'
+import { Alert, Box, Chip, Stack, Typography, useMediaQuery, type Theme } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CoverThumb } from '../../components/CoverThumb'
 import { CardFrame, CardLink, ClampedTitle } from '../../components/EditionCard.styles'
 import { EditionGrid } from '../../components/EditionGrid'
+import { ListPagination } from '../../components/ListPagination'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { useShowMore } from '../../hooks/useShowMore'
+import { paginate, parsePage } from '../../lib/pagination'
 import { seriesSummariesFromCollection, type SeriesSummary } from '../../lib/series'
 import { NetworkError } from '../collection/api'
 import { useCollection } from '../collection/useCollection'
@@ -62,6 +64,7 @@ function SeriesCard({
  * Todas as séries do catálogo, com "você tem N de M", e o filtro "Que sigo" (séries em que você tem
  * algum exemplar). O filtro fica na URL para continuar escolhido ao voltar da página da série. Sem
  * sinal, mostra só as suas, a partir da lista completa da coleção (que cai para a cópia do aparelho).
+ * Como na coleção: em tela larga, páginas de 12 com a página na URL; no celular, mais ao rolar.
  */
 export function SeriesListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -81,12 +84,22 @@ export function SeriesListPage() {
   const all = fromDevice ? fromCollection : listQuery.data
   const loading = fromDevice ? collection.isLoading : listQuery.isLoading
   const shown = onlyFollowing && !fromDevice ? all?.filter((series) => series.following) : all
+  const isWide = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'), { noSsr: true })
+  const { pageItems, page, pageCount } = paginate(shown ?? [], parsePage(searchParams.get('pagina')))
   const { visibleCount, hasMore, sentinelRef } = useShowMore(shown?.length ?? 0, String(onlyFollowing))
+  const visibleSeries = isWide ? pageItems : (shown ?? []).slice(0, visibleCount)
+  const topRef = useRef<HTMLDivElement>(null)
 
+  // Trocar o filtro limpa a página (volta à primeira).
   const setFilter = (following: boolean) => setSearchParams(following ? { filtro: 'sigo' } : {}, { replace: true })
 
+  const changePage = (newPage: number) => {
+    setSearchParams({ ...(onlyFollowing && { filtro: 'sigo' }), ...(newPage > 1 && { pagina: String(newPage) }) })
+    topRef.current?.scrollIntoView()
+  }
+
   return (
-    <Box sx={{ px: { xs: 2.5, md: 5 }, py: { xs: 4, md: 5 } }}>
+    <Box ref={topRef} sx={{ px: { xs: 2.5, md: 5 }, py: { xs: 4, md: 5 } }}>
       <Stack spacing={0.5} sx={{ mb: 2.5 }}>
         <Typography variant="h2">Séries</Typography>
         <Typography variant="caption" color="text.secondary">
@@ -118,7 +131,7 @@ export function SeriesListPage() {
       )}
 
       <EditionGrid>
-        {shown?.slice(0, visibleCount).map((series) => (
+        {visibleSeries.map((series) => (
           <SeriesCard
             key={series.id}
             series={series}
@@ -127,7 +140,8 @@ export function SeriesListPage() {
           />
         ))}
       </EditionGrid>
-      {hasMore && <Box ref={sentinelRef} />}
+      {!isWide && hasMore && <Box ref={sentinelRef} />}
+      {isWide && pageCount > 1 && <ListPagination count={pageCount} page={page} onChange={changePage} />}
     </Box>
   )
 }

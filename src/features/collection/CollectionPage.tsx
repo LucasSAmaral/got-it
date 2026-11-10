@@ -3,12 +3,13 @@ import { Alert, Box, Stack, Typography, useMediaQuery, type Theme } from '@mui/m
 import { useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { EditionGrid } from '../../components/EditionGrid'
+import { ListPagination } from '../../components/ListPagination'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { SearchField } from '../../components/SearchField'
 import { useShowMore } from '../../hooks/useShowMore'
 import { paginate, parsePage } from '../../lib/pagination'
 import { CollectionItemCard } from './CollectionItemCard'
-import { AddFab, CollectionPagination } from './CollectionPage.styles'
+import { AddFab } from './CollectionPage.styles'
 import { OfflineNotice } from './OfflineNotice'
 import { useCollection } from './useCollection'
 
@@ -18,7 +19,7 @@ export function CollectionPage() {
   const items = data?.items
   const navigate = useNavigate()
   // A lista continua vindo inteira (é ela que alimenta a cópia offline); só o que aparece na tela é parcial.
-  // Tela larga: páginas de 15, com a página na URL para continuar a mesma ao voltar do detalhe do exemplar.
+  // Tela larga: páginas de 12, com a página na URL para continuar a mesma ao voltar do detalhe do exemplar.
   // Celular: mais itens ao rolar, que é o gesto natural ali. `noSsr` lê a largura já no primeiro render,
   // senão o desktop abriria um instante no modo celular.
   const isWide = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'), { noSsr: true })
@@ -69,13 +70,7 @@ export function CollectionPage() {
       </EditionGrid>
       {!isWide && hasMore && <Box ref={sentinelRef} />}
       {isWide && pageCount > 1 && (
-        <CollectionPagination
-          count={pageCount}
-          page={page}
-          onChange={(_event, newPage) => changePage(newPage)}
-          color="primary"
-          siblingCount={0}
-        />
+        <ListPagination count={pageCount} page={page} onChange={changePage} />
       )}
 
       <AddFab color="primary" aria-label="Cadastrar novo exemplar" onClick={() => navigate('/cadastro')}>

@@ -1,5 +1,5 @@
-/** 15 fecha a grade com 1 ou 3 colunas. */
-export const PAGE_SIZE = 15
+/** 12 fecha a grade com 1, 2, 3 ou 4 colunas e cabe na tela sem rolar até a paginação. */
+export const PAGE_SIZE = 12
 
 /** Número da página vindo da URL (`?pagina=2`). Ausente ou inválido vira 1. */
 export function parsePage(value: string | null): number {

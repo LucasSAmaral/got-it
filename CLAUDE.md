@@ -77,7 +77,7 @@ Uma linha por área. **Antes de mexer numa área, leia a seção dela em `docs/f
 ```
 src/
   auth/            AuthProvider (sessão + acesso offline), RequireAuth, useAuth
-  components/      componentes compartilhados entre mais de um arquivo: LoadingSpinner, SearchField (pílula com lupa), EditionGrid e EditionCard (capa, título, editora, ISBN e um botão de ação — lixeira na coleção, lápis no admin), CoverThumb (miniatura da capa ou iniciais), LargeCover (capa grande do detalhe e do diálogo das chegadas) e CardFrame (moldura do cartão, em `EditionCard.styles.tsx`), também usados pelo cartão de série; NarrationTitle (caixa de narração), SpeechBalloon (balão de fala) e MadeBy ("Feito por Lucas Amaral", link para lucasamaral.dev.br)
+  components/      componentes compartilhados entre mais de um arquivo: LoadingSpinner, SearchField (pílula com lupa), ListPagination (paginação da coleção, das séries, da lista de desejos e do admin em tela larga), EditionGrid e EditionCard (capa, título, editora, ISBN e um botão de ação — lixeira na coleção, lápis no admin), CoverThumb (miniatura da capa ou iniciais), LargeCover (capa grande do detalhe e do diálogo das chegadas) e CardFrame (moldura do cartão, em `EditionCard.styles.tsx`), também usados pelo cartão de série; NarrationTitle (caixa de narração), SpeechBalloon (balão de fala) e MadeBy ("Feito por Lucas Amaral", link para lucasamaral.dev.br)
   features/
     admin/         painel de edição do catálogo, registro das chegadas nas lojas e revisão (capas e denúncias), só para o Lucas (admin.ts, api.ts)
     account/       privacidade e apagar conta (PrivacyPage, DeleteAccountDialog, api.ts)
@@ -94,7 +94,7 @@ src/
     scanner/       ScannerDialog, useBarcodeScanner, LazyScannerDialog
     series/        listagem de séries (SeriesListPage) e página da série (SeriesPage, api.ts)
     store/         lojas e chegadas (api.ts), vitrine de uma loja (StorePage) e o que o Início reusa: ArrivalStoresDialog (capa maior e as lojas de um gibi), ReserveButton, OwnershipChip, useOwnedEditionIds; a tela de registro fica no admin
-  hooks/           useShowMore (exibir lista longa em blocos de 30 ao rolar; admin, listagem de séries e a coleção no celular)
+  hooks/           useShowMore (exibir lista longa em blocos de 30 ao rolar; coleção, listagem de séries, lista de desejos e admin no celular)
   layout/          AppLayout (navegação inferior no celular), MoreMenu, PublicLayout (páginas sem conta), Sidebar, PageContent, navItems (Sidebar e PageContent também usados pelo cadastro)
   lib/             isbn, barcode, arrivals (agrupar chegadas por edição), reservation (mensagem e links de reserva), covers, image, localSearch, mirrorStore, pagination, publishers, series, format (datas, preço — exibir e interpretar —, iniciais), supabase (com testes .test.ts ao lado)
   types/catalog.ts
