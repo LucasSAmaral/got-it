@@ -15,6 +15,14 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.5.0',
+    date: '2026-11-10',
+    items: [
+      'No computador, a coleção mostra 12 gibis por página, e a troca de página aparece sem precisar rolar a tela.',
+      'Séries e Lista de desejos também ganharam páginas de 12 no computador; no celular, mais itens aparecem conforme você rola.',
+    ],
+  },
+  {
     version: '1.4.1',
     date: '2026-11-04',
     items: [
