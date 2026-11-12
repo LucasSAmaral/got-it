@@ -1,7 +1,7 @@
 import { coverPathFromUrl } from '../../lib/covers'
 import { parsePrice } from '../../lib/format'
 import { shrinkCover } from '../../lib/image'
-import { parseSeriesPosition } from '../../lib/series'
+import { capitalizeSeriesTitle, parseSeriesPosition } from '../../lib/series'
 import { supabase } from '../../lib/supabase'
 import type { Edition } from '../../types/catalog'
 
@@ -209,21 +209,25 @@ export async function fetchCatalogPublishers(): Promise<string[]> {
   return (data ?? []).map((row) => row.publisher as string)
 }
 
-/** Nomes das séries do catálogo, para as sugestões do campo "Série". */
+/**
+ * Nomes das séries do catálogo, para as sugestões do campo "Série". Só as que têm edição
+ * (`editions!inner`): uma série órfã (ex.: criada num cadastro que falhou depois) não deve ser sugerida.
+ */
 export async function fetchSeriesTitles(): Promise<string[]> {
-  const { data, error } = await supabase.from('works').select('title').order('title')
+  const { data, error } = await supabase.from('works').select('title, editions!inner(id)').order('title')
   if (error) throw error
   return (data ?? []).map((row) => row.title as string)
 }
 
 /**
  * Colunas de série de uma edição a partir do formulário. O nome vira o id da série pela função
- * `get_or_create_work` (acha ignorando maiúsculas ou cria); sem série, o nº na série também fica vazio.
+ * `get_or_create_work` (acha ignorando maiúsculas ou cria; nome novo todo em minúsculas vira título,
+ * `capitalizeSeriesTitle`); sem série, o nº na série também fica vazio.
  * Usado no cadastro manual e na edição pelo painel de admin.
  */
 export async function seriesColumns(series: string, position: string) {
   if (!series.trim()) return { work_id: null, series_position: null }
-  const { data, error } = await supabase.rpc('get_or_create_work', { p_title: series })
+  const { data, error } = await supabase.rpc('get_or_create_work', { p_title: capitalizeSeriesTitle(series) })
   if (error) throw error
   return { work_id: data as string, series_position: parseSeriesPosition(position) }
 }

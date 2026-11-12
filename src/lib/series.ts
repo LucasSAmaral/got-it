@@ -16,6 +16,32 @@ export function isSeriesPositionInputValid(text: string): boolean {
   return text.trim() === '' || parseSeriesPosition(text) !== null
 }
 
+/** Palavras que ficam minúsculas no meio do nome ("Frieren e a Jornada para o Além"). */
+const LOWERCASE_WORDS = new Set([
+  'a', 'à', 'ao', 'aos', 'as', 'às', 'com', 'da', 'das', 'de', 'do', 'dos', 'e', 'em', 'na', 'nas', 'no',
+  'nos', 'o', 'os', 'ou', 'para', 'pela', 'pelas', 'pelo', 'pelos', 'por', 'um', 'uma',
+])
+
+const capitalize = (word: string) => word.charAt(0).toLocaleUpperCase('pt-BR') + word.slice(1)
+
+/**
+ * Nome de série nova como título: "frieren e a jornada para o além" → "Frieren e a Jornada para o Além".
+ * Só mexe quando não há nenhuma maiúscula: quem escreveu "DC de bolso" ou "X-Men" escolheu a grafia, e
+ * não dá para adivinhar sigla. Primeira palavra (e a que vem depois de ":") sempre maiúscula; partes
+ * ligadas por hífen também ("homem-aranha" → "Homem-Aranha").
+ */
+export function capitalizeSeriesTitle(title: string): string {
+  const trimmed = title.trim()
+  if (trimmed !== trimmed.toLocaleLowerCase('pt-BR')) return trimmed
+  return trimmed
+    .split(/\s+/)
+    .map((word, index, words) => {
+      const startsClause = index === 0 || words[index - 1]!.endsWith(':')
+      return !startsClause && LOWERCASE_WORDS.has(word) ? word : word.split('-').map(capitalize).join('-')
+    })
+    .join(' ')
+}
+
 /**
  * Posição da edição na série: o "Nº na série" quando preenchido; senão, o primeiro número do volume
  * ("6" → 6, "Vol. 2" → 2). `null` quando nenhum dos dois diz nada (ex.: volume vazio ou "Especial").

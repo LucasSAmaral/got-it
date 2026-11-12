@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  capitalizeSeriesTitle,
   groupSeries,
   isSeriesPositionInputValid,
   parseSeriesPosition,
@@ -210,5 +211,30 @@ describe('seriesSummariesFromCollection', () => {
       { id: 'w1', title: 'Akira', covered: 1, total: 1, editionCount: 1, following: true },
       { id: 'w2', title: 'Saga', covered: 2, total: 2, editionCount: 2, following: true },
     ])
+  })
+})
+
+describe('capitalizeSeriesTitle', () => {
+  it('capitaliza nome todo em minúsculas, deixando conectivos minúsculos', () => {
+    expect(capitalizeSeriesTitle('frieren e a jornada para o além')).toBe('Frieren e a Jornada para o Além')
+  })
+
+  it('primeira palavra e a que vem depois de dois-pontos ficam maiúsculas mesmo sendo conectivo', () => {
+    expect(capitalizeSeriesTitle('a saga do batman')).toBe('A Saga do Batman')
+    expect(capitalizeSeriesTitle('berserk: o cavaleiro negro')).toBe('Berserk: O Cavaleiro Negro')
+  })
+
+  it('capitaliza cada parte ligada por hífen e letra acentuada no começo', () => {
+    expect(capitalizeSeriesTitle('homem-aranha 2099')).toBe('Homem-Aranha 2099')
+    expect(capitalizeSeriesTitle('épico')).toBe('Épico')
+  })
+
+  it('respeita a grafia de quem usou alguma maiúscula', () => {
+    expect(capitalizeSeriesTitle('DC de bolso')).toBe('DC de bolso')
+    expect(capitalizeSeriesTitle('x-Men')).toBe('x-Men')
+  })
+
+  it('tira espaços sobrando', () => {
+    expect(capitalizeSeriesTitle('  one   piece ')).toBe('One Piece')
   })
 })
