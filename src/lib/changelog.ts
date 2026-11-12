@@ -15,6 +15,14 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.6.0',
+    date: '2026-11-12',
+    items: [
+      'No cadastro, o formato "Mangá" agora aparece com esse nome (antes era "Tankôbon").',
+      'Série nova escrita toda em minúsculas é salva com as iniciais maiúsculas, e as sugestões do campo "Série" não mostram mais séries sem nenhum gibi.',
+    ],
+  },
+  {
     version: '1.5.0',
     date: '2026-11-10',
     items: [
