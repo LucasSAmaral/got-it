@@ -17,15 +17,17 @@ type AddToCollectionButtonProps = {
   edition: Pick<SeriesEdition, 'id' | 'title' | 'publisher' | 'volume'>
   /** Depois de criar o exemplar, com o id dele (a página da edição abre o exemplar). */
   onAdded?: (copyId: string) => void
+  /** Na lista de desejos: a confirmação avisa que o item sai da lista (gatilho copies_remove_wish). */
+  fromWishlist?: boolean
 }
 
 /**
- * "Adicionar à coleção" numa edição que você não tem (cartão da página da série e página da edição): confirma e cria o exemplar sem
+ * "Adicionar à coleção" numa edição que você não tem (cartão da página da série, página da edição e lista de desejos): confirma e cria o exemplar sem
  * passar pelo cadastro, porque a edição já está no catálogo. Estado, data e preço ficam vazios e se completam
  * depois no detalhe do exemplar. A confirmação existe para um toque sem querer não pôr na coleção um gibi que
  * você não tem (e o "Eu tenho?" passaria a responder "Já tem").
  */
-export function AddToCollectionButton({ edition, onAdded }: AddToCollectionButtonProps) {
+export function AddToCollectionButton({ edition, onAdded, fromWishlist = false }: AddToCollectionButtonProps) {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
   const addCopy = useMutation({
@@ -58,7 +60,7 @@ export function AddToCollectionButton({ edition, onAdded }: AddToCollectionButto
         <DialogTitle>Você tem esta edição?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            "{edition.title}"{subtitle && ` (${subtitle})`} vai para a sua coleção. Estado, data e preço você
+            "{edition.title}"{subtitle && ` (${subtitle})`} vai para a sua coleção{fromWishlist && ' e sai da lista de desejos'}. Estado, data e preço você
             completa depois, no detalhe do exemplar.
           </DialogContentText>
           {addCopy.isError && (

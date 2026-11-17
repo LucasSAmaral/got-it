@@ -64,7 +64,7 @@ export function WishlistPage() {
 
       <EditionGrid>
         {visibleItems.map((item) => (
-          <WishCard key={item.wish_id} item={item} showDelete={!data?.fromMirror} />
+          <WishCard key={item.wish_id} item={item} showActions={!data?.fromMirror} />
         ))}
       </EditionGrid>
       {!isWide && hasMore && <Box ref={sentinelRef} />}
