@@ -15,6 +15,14 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.7.0',
+    date: '2026-11-17',
+    items: [
+      'Comprou um gibi da lista de desejos? Toque em "Adicionar à coleção" no cartão: ele entra na sua coleção e sai da lista.',
+      'Tocar num gibi da lista de desejos abre a página dele, com sinopse e notas.',
+    ],
+  },
+  {
     version: '1.6.0',
     date: '2026-11-12',
     items: [
