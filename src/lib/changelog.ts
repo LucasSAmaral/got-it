@@ -15,6 +15,14 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.8.0',
+    date: '2026-11-22',
+    items: [
+      'Séries que já terminaram ganham o selo "Completa", na página da série e na lista de séries.',
+      'Quando se sabe quantos números a série tem, a conta "Você tem N de M" passa a usar o total da série, e não só o que já foi cadastrado.',
+    ],
+  },
+  {
     version: '1.7.0',
     date: '2026-11-17',
     items: [
