@@ -8,6 +8,7 @@ import { CardFrame, CardLink, ClampedTitle } from '../../components/EditionCard.
 import { EditionGrid } from '../../components/EditionGrid'
 import { ListPagination } from '../../components/ListPagination'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
+import { SpeechBalloon } from '../../components/SpeechBalloon'
 import { useShowMore } from '../../hooks/useShowMore'
 import { paginate, parsePage } from '../../lib/pagination'
 import { seriesSummariesFromCollection, type SeriesSummary } from '../../lib/series'
@@ -50,6 +51,7 @@ function SeriesCard({
         <CoverThumb coverUrl={series.coverUrl} title={series.title} />
         <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
           <ClampedTitle variant="h4">{series.title}</ClampedTitle>
+          {series.completed && <SpeechBalloon tone="success">Completa</SpeechBalloon>}
           <Typography variant="body2" color="text.secondary" noWrap>
             {progressLabel(series, fromDevice)}
           </Typography>

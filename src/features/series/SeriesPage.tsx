@@ -1,9 +1,12 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import CloudOffOutlinedIcon from '@mui/icons-material/CloudOffOutlined'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { Alert, Box, Button, IconButton, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useAuth } from '../../auth/useAuth'
 import { EditionCard } from '../../components/EditionCard'
 import { NarrationTitle } from '../../components/NarrationTitle'
 import { SpeechBalloon } from '../../components/SpeechBalloon'
@@ -11,6 +14,7 @@ import { EditionGrid } from '../../components/EditionGrid'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
 import { groupSeries, seriesProgress, titleWithinSeries, type SeriesStatus } from '../../lib/series'
 import type { CollectionItem } from '../../types/catalog'
+import { isAdmin } from '../admin/admin'
 import { NetworkError } from '../collection/api'
 import { useCollection } from '../collection/useCollection'
 import { fetchSeries, type Series } from './api'
@@ -18,7 +22,8 @@ import { RatingBadge } from '../ratings/RatingBadge'
 import { useEditionRatingStats, useSeriesRatingStats } from '../ratings/useRatings'
 import { WishToggleButton } from '../wishlist/WishToggleButton'
 import { AddToCollectionButton } from './AddToCollectionButton'
-import { CardActions, SlotGrid } from './SeriesPage.styles'
+import { EditSeriesDialog } from './EditSeriesDialog'
+import { CardActions, SlotGrid, TitleRow } from './SeriesPage.styles'
 
 const STATUS_CHIP: Record<SeriesStatus, { label: string; tone: 'success' | 'neutral' | 'warning' }> = {
   owned: { label: 'Tenho', tone: 'success' },
@@ -34,6 +39,9 @@ function seriesFromCollection(items: CollectionItem[], workId: string): Series |
   const editions = mine.filter((item, index) => mine.findIndex((other) => other.edition_id === item.edition_id) === index)
   return {
     title: mine[0]!.series_title ?? '',
+    // A cópia do aparelho não traz o total nem se a série terminou.
+    totalVolumes: null,
+    completed: false,
     editions: editions.map((item) => ({
       id: item.edition_id,
       title: item.title,
@@ -54,6 +62,8 @@ function seriesFromCollection(items: CollectionItem[], workId: string): Series |
 export function SeriesPage() {
   const { workId } = useParams<{ workId: string }>()
   const navigate = useNavigate()
+  const { session } = useAuth()
+  const [editing, setEditing] = useState(false)
   const offline = !navigator.onLine
   const seriesQuery = useQuery({
     queryKey: ['series', workId],
@@ -68,7 +78,7 @@ export function SeriesPage() {
   const series = fromDevice ? seriesFromCollection(collection.data?.items ?? [], workId!) : seriesQuery.data
   const loading = fromDevice ? collection.isLoading : seriesQuery.isLoading
   const slots = series ? groupSeries(series.editions.map((edition) => ({ ...edition, owned: edition.myCopyId !== null }))) : []
-  const progress = seriesProgress(slots)
+  const progress = seriesProgress(slots, series?.totalVolumes ?? null)
   // Médias da comunidade (só online): da série no topo, de cada edição no cartão. Falhou, só não aparecem.
   const seriesStats = useSeriesRatingStats()
   const editionStats = useEditionRatingStats(fromDevice ? [] : (series?.editions.map((edition) => edition.id) ?? []))
@@ -91,7 +101,16 @@ export function SeriesPage() {
 
       {series && (
         <>
-          <Typography variant="h2">{series.title}</Typography>
+          <TitleRow>
+            <Typography variant="h2">{series.title}</Typography>
+            {series.completed && <SpeechBalloon tone="success">Completa</SpeechBalloon>}
+            {/* Só o admin, e só online (a cópia do aparelho não traz o total nem se terminou). */}
+            {isAdmin(session) && !fromDevice && (
+              <IconButton aria-label="Editar série" onClick={() => setEditing(true)} size="small">
+                <EditOutlinedIcon fontSize="small" />
+              </IconButton>
+            )}
+          </TitleRow>
           {!fromDevice && (
             <Box sx={{ mt: 0.5 }}>
               <RatingBadge stats={seriesStats.data?.get(workId!)} />
@@ -104,8 +123,9 @@ export function SeriesPage() {
           ) : (
             progress.total > 0 && (
               <Typography variant="caption" color="text.secondary">
-                Você tem {progress.covered} de {progress.total} número{progress.total === 1 ? '' : 's'} cadastrado
-                {progress.total === 1 ? '' : 's'} no catálogo
+                Você tem {progress.covered} de {progress.total} número{progress.total === 1 ? '' : 's'}
+                {/* Sem o total da série, M é só o que alguém já cadastrou. */}
+                {series.totalVolumes === null && ` cadastrado${progress.total === 1 ? '' : 's'} no catálogo`}
               </Typography>
             )
           )}
@@ -157,6 +177,8 @@ export function SeriesPage() {
               </section>
             ))}
           </SlotGrid>
+
+          {editing && <EditSeriesDialog workId={workId!} series={series} onClose={() => setEditing(false)} />}
         </>
       )}
     </Box>

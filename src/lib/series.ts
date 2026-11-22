@@ -90,10 +90,20 @@ export function groupSeries<T extends GroupableEdition>(editions: T[]): SeriesSl
   })
 }
 
-/** "Você tem N de M números": só conta as posições numeradas. */
-export function seriesProgress(slots: SeriesSlot<unknown>[]): { covered: number; total: number } {
+/**
+ * "Você tem N de M números": só conta as posições numeradas. Com o total da série conhecido
+ * (`works.total_volumes`, preenchido pelo admin), M é esse total, e não só o que alguém já cadastrou;
+ * se o catálogo tiver mais posições que o total (dado errado), vale o maior.
+ */
+export function seriesProgress(
+  slots: SeriesSlot<unknown>[],
+  totalVolumes: number | null = null,
+): { covered: number; total: number } {
   const numbered = slots.filter((slot) => slot.position !== null)
-  return { covered: numbered.filter((slot) => slot.covered).length, total: numbered.length }
+  return {
+    covered: numbered.filter((slot) => slot.covered).length,
+    total: Math.max(totalVolumes ?? 0, numbered.length),
+  }
 }
 
 /**
@@ -117,9 +127,11 @@ export interface SeriesSummary {
   title: string
   /** Capa da primeira posição (a sua, se você tem uma), para o cartão. */
   coverUrl: string | null
-  /** Posições numeradas que você cobre, e quantas o catálogo tem (como `seriesProgress`). */
+  /** Posições numeradas que você cobre, e o total (como `seriesProgress`). */
   covered: number
   total: number
+  /** A série terminou: não terá mais lançamentos (marcado pelo admin). */
+  completed: boolean
   editionCount: number
   /** "Sigo" = tenho pelo menos um exemplar da série (derivado, sem tabela própria). */
   following: boolean
@@ -127,13 +139,20 @@ export interface SeriesSummary {
 
 type SummarizableEdition = GroupableEdition & { cover_url: string | null }
 
-export function summarizeSeries(series: { id: string; title: string; editions: SummarizableEdition[] }): SeriesSummary {
+export function summarizeSeries(series: {
+  id: string
+  title: string
+  editions: SummarizableEdition[]
+  total_volumes?: number | null
+  completed?: boolean
+}): SeriesSummary {
   const slots = groupSeries(series.editions)
   return {
     id: series.id,
     title: series.title,
     coverUrl: slots[0]?.items[0]?.edition.cover_url ?? null,
-    ...seriesProgress(slots),
+    ...seriesProgress(slots, series.total_volumes ?? null),
+    completed: series.completed ?? false,
     editionCount: series.editions.length,
     following: series.editions.some((edition) => edition.owned),
   }

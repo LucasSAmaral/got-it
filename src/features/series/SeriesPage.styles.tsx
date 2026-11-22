@@ -14,3 +14,11 @@ export const CardActions = styled(Stack)({
   justifyContent: 'space-between',
   flexShrink: 0,
 })
+
+/** Nome da série com o selo "Completa" e, para o admin, o lápis; quebra a linha no celular se não couber. */
+export const TitleRow = styled(Stack)(({ theme }) => ({
+  flexDirection: 'row',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  columnGap: theme.spacing(1.5),
+}))

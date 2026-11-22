@@ -127,6 +127,26 @@ describe('titleWithinSeries', () => {
   })
 })
 
+describe('seriesProgress com o total da série', () => {
+  const slots = groupSeries([
+    { title: 'X 1', volume: '1', series_position: null, owned: true },
+    { title: 'X 2', volume: '2', series_position: null, owned: false },
+    { title: 'X especial', volume: null, series_position: null, owned: true },
+  ])
+
+  it('sem total, conta só as posições numeradas do catálogo', () => {
+    expect(seriesProgress(slots)).toEqual({ covered: 1, total: 2 })
+  })
+
+  it('com total, M é o total, mesmo sem os outros números cadastrados', () => {
+    expect(seriesProgress(slots, 10)).toEqual({ covered: 1, total: 10 })
+  })
+
+  it('total menor que as posições do catálogo (dado errado): vale o maior', () => {
+    expect(seriesProgress(slots, 1)).toEqual({ covered: 1, total: 2 })
+  })
+})
+
 describe('summarizeSeries', () => {
   const edition = (title: string, volume: string | null, owned: boolean, cover_url: string | null = null) => ({
     title,
@@ -148,9 +168,21 @@ describe('summarizeSeries', () => {
       coverUrl: 'a.jpg',
       covered: 1,
       total: 3,
+      completed: false,
       editionCount: 3,
       following: true,
     })
+  })
+
+  it('com o total da série conhecido, conta sobre ele e traz se está completa', () => {
+    const summary = summarizeSeries({
+      id: 'w1',
+      title: 'Invencível',
+      editions: [edition('Invencível 1', '1', true), edition('Invencível 2', '2', false)],
+      total_volumes: 12,
+      completed: true,
+    })
+    expect(summary).toMatchObject({ covered: 1, total: 12, completed: true })
   })
 
   it('a capa da primeira posição é a sua quando há mais de uma edição nela', () => {

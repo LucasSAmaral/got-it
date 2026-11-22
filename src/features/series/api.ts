@@ -13,11 +13,17 @@ export type SeriesEdition = Pick<
 
 export interface Series {
   title: string
+  /** Quantos números a série tem ao todo; `null` quando não se sabe. Só o admin preenche. */
+  totalVolumes: number | null
+  /** A série terminou: não terá mais lançamentos. Só o admin marca. */
+  completed: boolean
   editions: SeriesEdition[]
 }
 
 interface RawSeries {
   title: string
+  total_volumes: number | null
+  completed: boolean
   editions: (Omit<SeriesEdition, 'myCopyId'> & { copies: { id: string }[] })[]
 }
 
@@ -33,7 +39,7 @@ export async function fetchSeries(workId: string): Promise<Series | null> {
   return withinTimeout(SERIES_TIMEOUT_MS, async (signal) => {
     const { data, error, status } = await supabase
       .from('works')
-      .select('title, editions(id, title, publisher, volume, isbn13, cover_url, series_position, copies(id))')
+      .select('title, total_volumes, completed, editions(id, title, publisher, volume, isbn13, cover_url, series_position, copies(id))')
       .eq('id', workId)
       .abortSignal(signal)
       .retry(false)
@@ -43,6 +49,8 @@ export async function fetchSeries(workId: string): Promise<Series | null> {
     const raw = data as unknown as RawSeries
     return {
       title: raw.title,
+      totalVolumes: raw.total_volumes,
+      completed: raw.completed,
       editions: raw.editions.map(({ copies, ...edition }) => ({ ...edition, myCopyId: copies[0]?.id ?? null })),
     }
   })
@@ -51,6 +59,8 @@ export async function fetchSeries(workId: string): Promise<Series | null> {
 interface RawSeriesListRow {
   id: string
   title: string
+  total_volumes: number | null
+  completed: boolean
   editions: { title: string; volume: string | null; series_position: number | null; cover_url: string | null; copies: { id: string }[] }[]
 }
 
@@ -63,7 +73,7 @@ export async function fetchSeriesList(): Promise<SeriesSummary[]> {
   return withinTimeout(SERIES_TIMEOUT_MS, async (signal) => {
     const { data, error, status } = await supabase
       .from('works')
-      .select('id, title, editions!inner(title, volume, series_position, cover_url, copies(id))')
+      .select('id, title, total_volumes, completed, editions!inner(title, volume, series_position, cover_url, copies(id))')
       .abortSignal(signal)
       .retry(false)
     if (error) throw status === 0 ? new NetworkError(error.message) : error
@@ -77,4 +87,30 @@ export async function fetchSeriesList(): Promise<SeriesSummary[]> {
       ),
     )
   })
+}
+
+export interface SeriesChanges {
+  title: string
+  totalVolumes: number | null
+  completed: boolean
+}
+
+/** Já existe outra série com o nome (o banco compara sem diferenciar maiúsculas e sem espaços nas pontas). */
+export class DuplicateSeriesTitleError extends Error {}
+
+/**
+ * Nome, total de números e "série completa" (só o admin: a RLS de `works` só deixa ele atualizar).
+ * Update bloqueado pela RLS não dá erro no PostgREST, só não afeta linha: por isso o `.select()` e a
+ * conferência de que voltou a série, para nunca dizer "salvo" sem ter salvado.
+ */
+export async function updateSeries(workId: string, changes: SeriesChanges): Promise<void> {
+  const { data, error } = await supabase
+    .from('works')
+    .update({ title: changes.title.trim(), total_volumes: changes.totalVolumes, completed: changes.completed })
+    .eq('id', workId)
+    .select('id')
+  // 23505: violou o índice único do nome (works_title_key).
+  if (error?.code === '23505') throw new DuplicateSeriesTitleError(error.message)
+  if (error) throw error
+  if (!data || data.length === 0) throw new Error('A série não foi atualizada (sem permissão ou não existe).')
 }
