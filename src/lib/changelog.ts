@@ -15,6 +15,15 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.9.0',
+    date: '2026-11-22',
+    items: [
+      'Na coleção, escolha a ordem (mais recentes, A–Z ou por série) e veja só os lidos ou só os não lidos. Funciona também sem internet.',
+      'Na ordem por série, cada série vira um cartão com quantos números você tem e quantos já leu; tocar abre a série.',
+      'O campo de volume no cadastro agora abre o teclado numérico no celular.',
+    ],
+  },
+  {
     version: '1.8.0',
     date: '2026-11-22',
     items: [
