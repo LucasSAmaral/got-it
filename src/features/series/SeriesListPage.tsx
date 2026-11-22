@@ -2,64 +2,22 @@ import CloudOffOutlinedIcon from '@mui/icons-material/CloudOffOutlined'
 import { Alert, Box, Chip, Stack, Typography, useMediaQuery, type Theme } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo, useRef } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { CoverThumb } from '../../components/CoverThumb'
-import { CardFrame, CardLink, ClampedTitle } from '../../components/EditionCard.styles'
+import { useSearchParams } from 'react-router-dom'
 import { EditionGrid } from '../../components/EditionGrid'
 import { ListPagination } from '../../components/ListPagination'
 import { LoadingSpinner } from '../../components/LoadingSpinner'
-import { SpeechBalloon } from '../../components/SpeechBalloon'
+import { SeriesCard } from '../../components/SeriesCard'
 import { useShowMore } from '../../hooks/useShowMore'
 import { paginate, parsePage } from '../../lib/pagination'
-import { seriesSummariesFromCollection, type SeriesSummary } from '../../lib/series'
+import { seriesProgressText, seriesSummariesFromCollection } from '../../lib/series'
 import { NetworkError } from '../collection/api'
 import { useCollection } from '../collection/useCollection'
-import type { RatingStats } from '../../lib/format'
 import { RatingBadge } from '../ratings/RatingBadge'
 import { useSeriesRatingStats } from '../ratings/useRatings'
 import { fetchSeriesList } from './api'
 
 function plural(count: number, singular: string, pluralForm: string) {
   return `${count} ${count === 1 ? singular : pluralForm}`
-}
-
-/** "Você tem N de M" quando a série tem números; sem sinal só dá para contar os seus. */
-function progressLabel(series: SeriesSummary, fromDevice: boolean) {
-  if (fromDevice) {
-    return series.total > 0
-      ? `Você tem ${plural(series.covered, 'número', 'números')}`
-      : `Você tem ${plural(series.editionCount, 'edição', 'edições')}`
-  }
-  return series.total > 0
-    ? `Você tem ${series.covered} de ${plural(series.total, 'número', 'números')}`
-    : plural(series.editionCount, 'edição sem número', 'edições sem número')
-}
-
-/** `rating`: média de todas as notas das edições da série, para decidir se vale começar a coleção. */
-function SeriesCard({
-  series,
-  fromDevice,
-  rating,
-}: {
-  series: SeriesSummary
-  fromDevice: boolean
-  rating: RatingStats | undefined
-}) {
-  return (
-    <CardFrame variant="outlined">
-      <CardLink component={Link} to={`/serie/${series.id}`}>
-        <CoverThumb coverUrl={series.coverUrl} title={series.title} />
-        <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
-          <ClampedTitle variant="h4">{series.title}</ClampedTitle>
-          {series.completed && <SpeechBalloon tone="success">Completa</SpeechBalloon>}
-          <Typography variant="body2" color="text.secondary" noWrap>
-            {progressLabel(series, fromDevice)}
-          </Typography>
-          <RatingBadge stats={rating} variant="caption" />
-        </Stack>
-      </CardLink>
-    </CardFrame>
-  )
 }
 
 /**
@@ -136,10 +94,17 @@ export function SeriesListPage() {
         {visibleSeries.map((series) => (
           <SeriesCard
             key={series.id}
-            series={series}
-            fromDevice={fromDevice}
-            rating={fromDevice ? undefined : ratings.data?.get(series.id)}
-          />
+            workId={series.id}
+            title={series.title}
+            coverUrl={series.coverUrl}
+            completed={series.completed}
+          >
+            <Typography variant="body2" color="text.secondary" noWrap>
+              {seriesProgressText(series, fromDevice)}
+            </Typography>
+            {/* Média de todas as notas das edições da série, para decidir se vale começar a coleção. */}
+            <RatingBadge stats={fromDevice ? undefined : ratings.data?.get(series.id)} variant="caption" />
+          </SeriesCard>
         ))}
       </EditionGrid>
       {!isWide && hasMore && <Box ref={sentinelRef} />}

@@ -6,6 +6,7 @@ import {
   parseSeriesPosition,
   seriesPosition,
   seriesProgress,
+  seriesProgressText,
   seriesSummariesFromCollection,
   sortSeriesByTitle,
   summarizeSeries,
@@ -268,5 +269,19 @@ describe('capitalizeSeriesTitle', () => {
 
   it('tira espaços sobrando', () => {
     expect(capitalizeSeriesTitle('  one   piece ')).toBe('One Piece')
+  })
+})
+
+describe('seriesProgressText', () => {
+  const summary = { id: 'w', title: 'W', coverUrl: null, completed: false, following: true }
+
+  it('com o catálogo: N de M números, ou edições sem número', () => {
+    expect(seriesProgressText({ ...summary, covered: 11, total: 15, editionCount: 12 }, false)).toBe('Você tem 11 de 15 números')
+    expect(seriesProgressText({ ...summary, covered: 0, total: 0, editionCount: 1 }, false)).toBe('1 edição sem número')
+  })
+
+  it('só com os seus: conta números, ou edições quando não há número', () => {
+    expect(seriesProgressText({ ...summary, covered: 1, total: 1, editionCount: 1 }, true)).toBe('Você tem 1 número')
+    expect(seriesProgressText({ ...summary, covered: 0, total: 0, editionCount: 2 }, true)).toBe('Você tem 2 edições')
   })
 })

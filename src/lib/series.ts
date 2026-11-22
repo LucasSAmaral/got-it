@@ -158,6 +158,23 @@ export function summarizeSeries(series: {
   }
 }
 
+const plural = (count: number, singular: string, pluralForm: string) => `${count} ${count === 1 ? singular : pluralForm}`
+
+/**
+ * "Você tem N de M números" quando a série tem números. `fromDevice`: sem o catálogo (sem sinal, ou na
+ * coleção quando a listagem de séries não respondeu), só dá para contar os seus.
+ */
+export function seriesProgressText(series: SeriesSummary, fromDevice: boolean): string {
+  if (fromDevice) {
+    return series.total > 0
+      ? `Você tem ${plural(series.covered, 'número', 'números')}`
+      : `Você tem ${plural(series.editionCount, 'edição', 'edições')}`
+  }
+  return series.total > 0
+    ? `Você tem ${series.covered} de ${plural(series.total, 'número', 'números')}`
+    : plural(series.editionCount, 'edição sem número', 'edições sem número')
+}
+
 /** Ordem alfabética, como se lê em português (acentos e caixa não separam "Ásterix" de "asterix"). */
 export function sortSeriesByTitle<T extends { title: string }>(series: T[]): T[] {
   return [...series].sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }))
