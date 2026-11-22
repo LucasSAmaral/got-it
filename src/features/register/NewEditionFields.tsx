@@ -65,6 +65,9 @@ export function NewEditionFields({ value, onChange, coverFile, onCoverFileChange
           placeholder="Ex.: 1"
           value={value.volume}
           onChange={(event) => onChange({ ...value, volume: event.target.value })}
+          // Teclado numérico no celular, como o "Nº na série": no catálogo todo volume é só número (2026-11-22).
+          // A coluna continua texto e o campo aceita colar texto; só o teclado muda.
+          slotProps={{ htmlInput: { inputMode: 'numeric' } }}
         />
       </FieldRow>
 

@@ -139,6 +139,7 @@ export function EditEditionDialog({ edition, onClose, onSaved }: EditEditionDial
                 fullWidth
                 value={form.volume}
                 onChange={(event) => setForm({ ...form, volume: event.target.value })}
+                slotProps={{ htmlInput: { inputMode: 'numeric' } }}
               />
             </FieldRow>
 
