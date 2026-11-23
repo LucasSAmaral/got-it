@@ -15,6 +15,13 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.10.0',
+    date: '2026-11-22',
+    items: [
+      'Ao cadastrar um gibi que ainda não está no catálogo, título, editora, volume e ano já vêm preenchidos pelo registro do ISBN, quando ele existe. É só conferir com a capa e completar o resto.',
+    ],
+  },
+  {
     version: '1.9.0',
     date: '2026-11-22',
     items: [
