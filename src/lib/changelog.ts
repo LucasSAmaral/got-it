@@ -15,6 +15,13 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.11.0',
+    date: '2026-11-23',
+    items: [
+      'Em Séries, o novo filtro "Não sigo" mostra só as séries em que você ainda não tem nenhum número, para descobrir coleções novas.',
+    ],
+  },
+  {
     version: '1.10.0',
     date: '2026-11-22',
     items: [
