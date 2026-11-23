@@ -16,19 +16,31 @@ import { RatingBadge } from '../ratings/RatingBadge'
 import { useSeriesRatingStats } from '../ratings/useRatings'
 import { fetchSeriesList } from './api'
 
+const FILTER_CHIPS: { value: SeriesFilter; label: string }[] = [
+  { value: 'todas', label: 'Todas' },
+  { value: 'sigo', label: 'Que sigo' },
+  { value: 'nao-sigo', label: 'Não sigo' },
+]
+
 function plural(count: number, singular: string, pluralForm: string) {
   return `${count} ${count === 1 ? singular : pluralForm}`
 }
 
+type SeriesFilter = 'todas' | 'sigo' | 'nao-sigo'
+
+function parseFilter(value: string | null): SeriesFilter {
+  return value === 'sigo' || value === 'nao-sigo' ? value : 'todas'
+}
+
 /**
- * Todas as séries do catálogo, com "você tem N de M", e o filtro "Que sigo" (séries em que você tem
- * algum exemplar). O filtro fica na URL para continuar escolhido ao voltar da página da série. Sem
+ * Todas as séries do catálogo, com "você tem N de M", e os filtros "Que sigo" (séries em que você tem
+ * algum exemplar) e "Não sigo" (nenhum exemplar, para descobrir séries novas). O filtro fica na URL para continuar escolhido ao voltar da página da série. Sem
  * sinal, mostra só as suas, a partir da lista completa da coleção (que cai para a cópia do aparelho).
  * Como na coleção: em tela larga, páginas de 12 com a página na URL; no celular, mais ao rolar.
  */
 export function SeriesListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const onlyFollowing = searchParams.get('filtro') === 'sigo'
+  const filter = parseFilter(searchParams.get('filtro'))
   const offline = !navigator.onLine
   const listQuery = useQuery({ queryKey: ['series-list'], queryFn: fetchSeriesList, enabled: !offline, retry: false })
   // Já carregada pelo AppLayout; aqui só serve quando o servidor não responde.
@@ -43,18 +55,19 @@ export function SeriesListPage() {
   const ratings = useSeriesRatingStats()
   const all = fromDevice ? fromCollection : listQuery.data
   const loading = fromDevice ? collection.isLoading : listQuery.isLoading
-  const shown = onlyFollowing && !fromDevice ? all?.filter((series) => series.following) : all
+  const shown =
+    filter === 'todas' || fromDevice ? all : all?.filter((series) => series.following === (filter === 'sigo'))
   const isWide = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'), { noSsr: true })
   const { pageItems, page, pageCount } = paginate(shown ?? [], parsePage(searchParams.get('pagina')))
-  const { visibleCount, hasMore, sentinelRef } = useShowMore(shown?.length ?? 0, String(onlyFollowing))
+  const { visibleCount, hasMore, sentinelRef } = useShowMore(shown?.length ?? 0, filter)
   const visibleSeries = isWide ? pageItems : (shown ?? []).slice(0, visibleCount)
   const topRef = useRef<HTMLDivElement>(null)
 
   // Trocar o filtro limpa a página (volta à primeira).
-  const setFilter = (following: boolean) => setSearchParams(following ? { filtro: 'sigo' } : {}, { replace: true })
+  const setFilter = (value: SeriesFilter) => setSearchParams(value === 'todas' ? {} : { filtro: value }, { replace: true })
 
   const changePage = (newPage: number) => {
-    setSearchParams({ ...(onlyFollowing && { filtro: 'sigo' }), ...(newPage > 1 && { pagina: String(newPage) }) })
+    setSearchParams({ ...(filter !== 'todas' && { filtro: filter }), ...(newPage > 1 && { pagina: String(newPage) }) })
     topRef.current?.scrollIntoView()
   }
 
@@ -73,8 +86,14 @@ export function SeriesListPage() {
         </Alert>
       ) : (
         <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-          <Chip label="Todas" color={onlyFollowing ? 'default' : 'primary'} onClick={() => setFilter(false)} />
-          <Chip label="Que sigo" color={onlyFollowing ? 'primary' : 'default'} onClick={() => setFilter(true)} />
+          {FILTER_CHIPS.map(({ value, label }) => (
+            <Chip
+              key={value}
+              label={label}
+              color={filter === value ? 'primary' : 'default'}
+              onClick={() => setFilter(value)}
+            />
+          ))}
         </Stack>
       )}
 
@@ -84,9 +103,11 @@ export function SeriesListPage() {
 
       {shown && shown.length === 0 && (
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-          {onlyFollowing || fromDevice
+          {filter === 'sigo' || fromDevice
             ? 'Você ainda não tem exemplar de nenhuma série. A série de uma edição é escolhida no cadastro.'
-            : 'Nenhuma série no catálogo ainda.'}
+            : filter === 'nao-sigo'
+              ? 'Você já tem exemplar de todas as séries do catálogo.'
+              : 'Nenhuma série no catálogo ainda.'}
         </Typography>
       )}
 
