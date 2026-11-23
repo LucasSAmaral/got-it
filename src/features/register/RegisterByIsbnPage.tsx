@@ -23,6 +23,7 @@ import {
 } from './api'
 import { IsbnField } from './IsbnField'
 import { EMPTY_EDITION_FORM, isNewEditionFormValid } from './editionForm'
+import { isPrefilled, useIsbnLookup } from './useIsbnLookup'
 import { NewEditionFields } from './NewEditionFields'
 import { PriceField } from './PriceField'
 import { FieldRow, FoundChip, NotFoundChip } from './RegisterByIsbnPage.styles'
@@ -50,6 +51,8 @@ export function RegisterByIsbnPage() {
   })
 
   const edition = editionQuery.data
+  // Só para o texto de cima; mesma consulta do formulário (nenhum pedido a mais).
+  const prefilled = isPrefilled(useIsbnLookup(edition === null ? isbn13 : null))
 
   const duplicateQuery = useQuery({
     queryKey: ['my-copy-count', edition?.id],
@@ -198,7 +201,8 @@ export function RegisterByIsbnPage() {
               <Stack spacing={2}>
                 <NotFoundChip label="Não encontramos no catálogo" size="small" variant="outlined" />
                 <Typography variant="body2" color="text.secondary">
-                  Preencha os dados da edição — as próximas pessoas que escanearem esse ISBN recebem tudo pronto.
+                  {prefilled ? 'Confira' : 'Preencha'} os dados da edição — as próximas pessoas que escanearem esse ISBN
+                  recebem tudo pronto.
                 </Typography>
 
                 <NewEditionFields
@@ -206,6 +210,7 @@ export function RegisterByIsbnPage() {
                   onChange={setManualEdition}
                   coverFile={coverFile}
                   onCoverFileChange={setCoverFile}
+                  isbn13={isbn13}
                 />
 
                 <Typography variant="h4" sx={{ mt: 1 }}>

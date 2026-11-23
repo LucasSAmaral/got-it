@@ -35,7 +35,7 @@ export function PrivacyPage() {
       <Stack spacing={1}>
         <Typography variant="h2">Privacidade</Typography>
         <Typography variant="body2" color="text.secondary">
-          Atualizada em 02/11/2026
+          Atualizada em 22/11/2026
         </Typography>
       </Stack>
 
@@ -85,6 +85,10 @@ export function PrivacyPage() {
           Os dados ficam no Supabase (banco de dados, login e capas); o site é hospedado pelo Netlify; os e-mails
           com código saem por uma conta do Gmail; as fontes do site vêm do Google Fonts. Esses serviços podem
           guardar dados fora do Brasil.
+        </Typography>
+        <Typography>
+          Ao cadastrar uma edição que ainda não está no catálogo, o app envia o ISBN (só o código, sem nada sobre
+          você) à BrasilAPI, que consulta a Agência Brasileira do ISBN para preencher o formulário.
         </Typography>
         <Typography>
           Neste aparelho, o app guarda sua sessão e uma cópia da coleção e da lista de desejos para consultar sem

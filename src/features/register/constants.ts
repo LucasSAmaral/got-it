@@ -25,3 +25,12 @@ export const COMMON_PUBLISHERS = [
   'Eaglemoss',
   'Salvat',
 ]
+
+/**
+ * De/para do nome que a editora registrou na CBL (campo `publisher` da BrasilAPI) para o nome usado no catálogo,
+ * quando o registro usa a razão social. A chave é o nome inteiro, em minúsculas. Vistos em 2026-11-22.
+ */
+export const PUBLISHER_ALIASES: Record<string, string> = {
+  'editora planeta deagostini do brasil ltda': 'Eaglemoss',
+  'japorama editora e comunicação': 'JBC',
+}

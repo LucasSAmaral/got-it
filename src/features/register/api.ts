@@ -1,6 +1,7 @@
 import { coverPathFromUrl } from '../../lib/covers'
 import { parsePrice } from '../../lib/format'
 import { shrinkCover } from '../../lib/image'
+import { isLookupableIsbn, type IsbnLookupResult } from '../../lib/isbnLookup'
 import { capitalizeSeriesTitle, parseSeriesPosition } from '../../lib/series'
 import { supabase } from '../../lib/supabase'
 import type { Edition } from '../../types/catalog'
@@ -230,4 +231,20 @@ export async function seriesColumns(series: string, position: string) {
   const { data, error } = await supabase.rpc('get_or_create_work', { p_title: capitalizeSeriesTitle(series) })
   if (error) throw error
   return { work_id: data as string, series_position: parseSeriesPosition(position) }
+}
+
+/**
+ * Dados da edição na BrasilAPI (base da CBL), para pré-preencher o formulário de edição nova. Uma consulta só
+ * por código, sem repetir (a BrasilAPI pede para não fazer requisições em laço) e com prazo curto: sem
+ * resposta, o formulário abre vazio como antes. `null` quando não achou ou deu qualquer erro.
+ */
+export async function fetchIsbnLookup(isbn13: string): Promise<IsbnLookupResult | null> {
+  if (!isLookupableIsbn(isbn13)) return null
+  try {
+    const response = await fetch(`https://brasilapi.com.br/api/isbn/v1/${isbn13}`, { signal: AbortSignal.timeout(6000) })
+    if (!response.ok) return null
+    return (await response.json()) as IsbnLookupResult
+  } catch {
+    return null
+  }
 }

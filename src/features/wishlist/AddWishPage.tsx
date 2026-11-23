@@ -11,6 +11,7 @@ import { isbn13FromInput } from '../../lib/isbn'
 import { DuplicateIsbnError, createEditionWithCover, fetchEditionByIsbn, fetchMyCopyCount } from '../register/api'
 import { EMPTY_EDITION_FORM, isNewEditionFormValid } from '../register/editionForm'
 import { IsbnField } from '../register/IsbnField'
+import { isPrefilled, useIsbnLookup } from '../register/useIsbnLookup'
 import { NewEditionFields } from '../register/NewEditionFields'
 import { FoundChip, NotFoundChip } from '../register/RegisterByIsbnPage.styles'
 import { addWish } from './api'
@@ -41,6 +42,8 @@ export function AddWishPage() {
     enabled: isbn13 !== null,
   })
   const edition = editionQuery.data
+  // Só para o texto de cima; mesma consulta do formulário (nenhum pedido a mais).
+  const prefilled = isPrefilled(useIsbnLookup(edition === null ? isbn13 : null))
 
   const copyCountQuery = useQuery({
     queryKey: ['my-copy-count', edition?.id],
@@ -122,7 +125,7 @@ export function AddWishPage() {
               <Stack spacing={2}>
                 <NotFoundChip label="Não encontramos no catálogo" size="small" variant="outlined" />
                 <Typography variant="body2" color="text.secondary">
-                  Preencha os dados da edição — ela entra no catálogo e as próximas pessoas que escanearem esse ISBN
+                  {prefilled ? 'Confira' : 'Preencha'} os dados da edição — ela entra no catálogo e as próximas pessoas que escanearem esse ISBN
                   recebem tudo pronto. Na sua coleção ela não entra.
                 </Typography>
 
@@ -131,6 +134,7 @@ export function AddWishPage() {
                   onChange={setManualEdition}
                   coverFile={coverFile}
                   onCoverFileChange={setCoverFile}
+                  isbn13={isbn13}
                 />
 
                 {submitError && <Alert severity="error">{submitError}</Alert>}

@@ -1,31 +1,35 @@
 import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined'
 import CloseIcon from '@mui/icons-material/Close'
-import { Button, MenuItem, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Button, MenuItem, Stack, TextField, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../auth/useAuth'
 import { SpeechBalloon } from '../../components/SpeechBalloon'
+import { fillEmpty, prefillFromLookup } from '../../lib/isbnLookup'
 import { isAdmin } from '../admin/admin'
 import { canPublishCovers } from './api'
-import { FORMATS } from './constants'
+import { COMMON_PUBLISHERS, FORMATS, PUBLISHER_ALIASES } from './constants'
 import type { NewEditionForm } from './editionForm'
 import { PublisherField } from './PublisherField'
 import { CoverPreview, FieldLabel, FieldRow } from './RegisterByIsbnPage.styles'
 import { SeriesFields } from './SeriesFields'
 import { SynopsisField } from './SynopsisField'
+import { isPrefilled, useIsbnLookup } from './useIsbnLookup'
 
 type NewEditionFieldsProps = {
   value: NewEditionForm
   onChange: (value: NewEditionForm) => void
   coverFile: File | null
   onCoverFileChange: (file: File | null) => void
+  /** ISBN da edição: com ele, os campos vazios vêm preenchidos pela BrasilAPI (base da CBL), quando ela acha. */
+  isbn13?: string | null
 }
 
 /**
  * Dados de uma edição que ainda não está no catálogo: título, editora, volume, série, formato, ano, sinopse e foto
  * da capa. Usado no cadastro manual e nas chegadas da loja (admin).
  */
-export function NewEditionFields({ value, onChange, coverFile, onCoverFileChange }: NewEditionFieldsProps) {
+export function NewEditionFields({ value, onChange, coverFile, onCoverFileChange, isbn13 = null }: NewEditionFieldsProps) {
   const [coverPreview, setCoverPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { session } = useAuth()
@@ -35,6 +39,15 @@ export function NewEditionFields({ value, onChange, coverFile, onCoverFileChange
     queryFn: canPublishCovers,
     staleTime: Infinity,
   })
+  const lookup = useIsbnLookup(isbn13)
+    // Preenche uma vez por código; depois disso, o que a pessoa apagar ou mudar fica como ela deixou.
+  const prefilledIsbnRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!isbn13 || !lookup.data || prefilledIsbnRef.current === isbn13) return
+    prefilledIsbnRef.current = isbn13
+    onChange(fillEmpty(value, prefillFromLookup(lookup.data, COMMON_PUBLISHERS, PUBLISHER_ALIASES)))
+  }, [isbn13, lookup.data, value, onChange])
 
   useEffect(() => {
     if (!coverFile) {
@@ -48,6 +61,18 @@ export function NewEditionFields({ value, onChange, coverFile, onCoverFileChange
 
   return (
     <>
+      {lookup.isFetching && (
+        <Typography variant="caption" color="text.secondary">
+          Procurando os dados deste ISBN…
+        </Typography>
+      )}
+      {isPrefilled(lookup) && (
+        <Alert severity="warning" variant="outlined">
+          Alguns campos vieram do registro do ISBN, que nem sempre bate com o gibi. Vale o que está na capa: se o
+          título preenchido estiver parecido, pode manter; se não, escreva como está impresso.
+        </Alert>
+      )}
+
       <TextField
         label="Título"
         required

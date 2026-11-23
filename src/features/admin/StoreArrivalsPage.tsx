@@ -204,6 +204,7 @@ export function StoreArrivalsPage() {
                   onChange={setEditionForm}
                   coverFile={coverFile}
                   onCoverFileChange={setCoverFile}
+                  isbn13={isbn13}
                 />
                 <Typography variant="h4" sx={{ mt: 1 }}>
                   Chegada
